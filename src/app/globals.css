@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-display: var(--font-anton), "Impact", "Arial Narrow", sans-serif;
+  --font-serif: var(--font-instrument), "Times New Roman", serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", monospace;
+  --font-sans: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+}
+
+@theme {
+  --color-ink: #080808;
+  --color-coal: #0d0d0d;
+  --color-graphite: #161616;
+  --color-bone: #eaeaea;
+  --color-paper: #f2f1ee;
+  --color-ash: #8a8a8a;
+  --color-smoke: #5a5a5a;
+  --color-crimson: #e11d2a;
+  --color-crimson-deep: #a5121c;
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  --tracking-display: -0.045em;
+  --tracking-label: 0.2em;
+
+  --animate-marquee: marquee var(--marquee-duration, 30s) linear infinite;
+  --animate-grain: grain 1.2s steps(6) infinite;
+  --animate-pulse-dot: pulse-dot 1.8s var(--ease-expo) infinite;
+  --animate-travel: travel 3.2s var(--ease-quart) infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  @keyframes grain {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    20% {
+      transform: translate3d(-4%, 3%, 0);
+    }
+    40% {
+      transform: translate3d(3%, -5%, 0);
+    }
+    60% {
+      transform: translate3d(-6%, -2%, 0);
+    }
+    80% {
+      transform: translate3d(5%, 4%, 0);
+    }
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @keyframes pulse-dot {
+    0% {
+      transform: scale(1);
+      opacity: 0.7;
+    }
+    70% {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+  }
+
+  @keyframes travel {
+    0% {
+      transform: translate3d(0, 0, 0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate3d(var(--travel-distance, 100%), 0, 0);
+      opacity: 0;
+    }
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --gutter: clamp(1rem, 2.4vw, 2.5rem);
+  }
+
+  html {
+    background: var(--color-ink);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+    scroll-behavior: auto;
+  }
+
+  body {
+    background: var(--color-ink);
+    color: var(--color-bone);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background: var(--color-crimson);
+    color: var(--color-ink);
+  }
+
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--color-crimson);
+    outline-offset: 4px;
+  }
+
+  img {
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+}
+
+@layer components {
+  .gutter {
+    padding-inline: var(--gutter);
+  }
+
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .display {
+    font-family: var(--font-display);
+    letter-spacing: var(--tracking-display);
+    line-height: 0.82;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+
+  .text-outline {
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(234 234 234 / 0.22);
+  }
+
+  .text-outline-ink {
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(8 8 8 / 0.25);
+  }
+
+  .hairline-dots {
+    background-image: linear-gradient(to right, currentColor 1px, transparent 1px);
+    background-size: 6px 1px;
+    background-repeat: repeat-x;
+    height: 1px;
+    opacity: 0.25;
+  }
+
+  .grid-guides {
+    background-image: linear-gradient(to right, rgb(234 234 234 / 0.04) 1px, transparent 1px);
+    background-size: calc((100% - 2 * var(--gutter)) / 12) 100%;
+    background-position: var(--gutter) 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
