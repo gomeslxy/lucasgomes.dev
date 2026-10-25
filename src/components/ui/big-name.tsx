@@ -1,13 +1,13 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useScroll, useTransform } from "motion/react";
-import { useRef, type PointerEvent } from "react";
-import { useEnhancedMotion } from "@/lib/use-animation-policy";
+import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import { useEffect, useRef, type PointerEvent } from "react";
+import { useSceneProgress } from "@/components/motion/scroll-director";
 import { experienceConfig } from "@/lib/experience-config";
 
 export function BigName() {
-  const enhanced = useEnhancedMotion();
   const ref = useRef<HTMLAnchorElement>(null);
+  const { progress: scrollYProgress, enhanced } = useSceneProgress(ref, { start: .96, end: .5 });
   const bounds = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
 
   // Micro-tilt on hover
@@ -15,12 +15,6 @@ export function BigName() {
   const y = useMotionValue(0);
   const springX = useSpring(x, experienceConfig.spring);
   const springY = useSpring(y, experienceConfig.spring);
-
-  // Scroll driven outline-to-fill reveal
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end end"],
-  });
 
   // Opposing translations reveal a fixed-size layer without layout per frame.
   const revealY = useTransform(scrollYProgress, [0.1, 0.9], ["100%", "0%"]);
@@ -34,7 +28,7 @@ export function BigName() {
 
   function move(event: PointerEvent<HTMLAnchorElement>) {
     const rect = bounds.current;
-    if (!enhanced || event.pointerType !== "mouse" || !rect) return;
+    if (!enhanced || event.pointerType !== "mouse" || !rect || !rect.width || !rect.height) return;
     x.set(Math.max(-1, Math.min(1, ((event.pageX - rect.x) / rect.width) * 2 - 1)) * .6);
     y.set(Math.max(-1, Math.min(1, ((event.pageY - rect.y) / rect.height) * 2 - 1)) * .4);
   }
@@ -45,6 +39,31 @@ export function BigName() {
     y.set(0);
   }
 
+  useEffect(() => {
+    const invalidate = () => {
+      bounds.current = null;
+      x.set(0);
+      y.set(0);
+    };
+    if (!enhanced) {
+      invalidate();
+      return;
+    }
+    window.addEventListener("resize", invalidate, { passive: true });
+    window.addEventListener("scroll", invalidate, { passive: true });
+    window.addEventListener("blur", invalidate);
+    document.addEventListener("visibilitychange", invalidate);
+    const observer = new ResizeObserver(invalidate);
+    if (ref.current) observer.observe(ref.current);
+    return () => {
+      window.removeEventListener("resize", invalidate);
+      window.removeEventListener("scroll", invalidate);
+      window.removeEventListener("blur", invalidate);
+      document.removeEventListener("visibilitychange", invalidate);
+      observer.disconnect();
+    };
+  }, [enhanced, x, y]);
+
   return (
     <motion.a
       ref={ref}
@@ -52,9 +71,6 @@ export function BigName() {
       aria-label="Lucas — voltar ao início do portfólio"
       className="sig relative isolate mt-6 block overflow-hidden rounded-xl py-6 text-center outline-none focus-visible:ring-2 focus-visible:ring-crimson sm:py-10 group"
       initial={false}
-      animate="rest"
-      whileHover={enhanced ? "active" : undefined}
-      whileFocus={enhanced ? "active" : undefined}
       onPointerEnter={enhanced ? enter : undefined}
       onPointerMove={enhanced ? move : undefined}
       onPointerLeave={enhanced ? reset : undefined}
@@ -83,7 +99,7 @@ export function BigName() {
             style={{ y: enhanced ? revealY : 0 }}
           >
             <motion.span
-              className="block text-bone transition-colors duration-500 group-hover:text-[#f1e6e4]"
+              className="block text-bone group-hover:text-[#f1e6e4]"
               style={{ y: enhanced ? contentY : 0 }}
             >
               LUCAS
@@ -92,7 +108,7 @@ export function BigName() {
         </motion.div>
       </div>
 
-      <p className="font-mono text-[0.62rem] uppercase tracking-widest text-ash/70 mt-3 group-hover:text-crimson transition-colors">
+      <p className="font-mono text-[0.62rem] uppercase tracking-widest text-ash/70 mt-3 group-hover:text-crimson">
         ↑ Clique para voltar ao topo
       </p>
     </motion.a>

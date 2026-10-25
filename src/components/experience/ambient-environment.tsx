@@ -1,6 +1,5 @@
 "use client";
 
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { useEffect, useRef, type CSSProperties } from "react";
 import { experienceConfig } from "@/lib/experience-config";
 import styles from "./ambient-environment.module.css";
@@ -18,9 +17,6 @@ const MOTES = Array.from({ length: experienceConfig.atmosphere.particleCount }, 
 /** A peripheral atmosphere: small composited layers, with no pointer tracking. */
 export function AmbientEnvironment() {
   const ref = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
-  const { scrollY } = useScroll();
-  const latticeY = useTransform(() => -Math.tanh(scrollY.get() / 1500) * 22);
 
   useEffect(() => {
     const element = ref.current;
@@ -40,7 +36,7 @@ export function AmbientEnvironment() {
     <div ref={ref} className={styles.environment} data-ambient-environment aria-hidden="true" style={{ "--ambient-cycle": `${experienceConfig.atmosphere.cycleSeconds}s`, "--ambient-strength": experienceConfig.atmosphere.glowOpacity } as CSSProperties}>
       <span className={`${styles.halo} ${styles.haloLeft}`} />
       <span className={`${styles.halo} ${styles.haloRight}`} />
-      <motion.div className={styles.lattice} style={reduced ? undefined : { y: latticeY }}><span /></motion.div>
+      <div className={styles.lattice}><span /></div>
       <div className={styles.motes}>
         {MOTES.map((mote, index) => <i key={index} className={styles.mote} data-mote-index={index} data-mobile-hidden={index >= experienceConfig.atmosphere.mobileParticleCount || undefined} style={{ [mote.side]: `${mote.edge}%`, top: `${mote.top}%`, "--mote-duration": `${mote.duration}s`, "--mote-delay": `${mote.delay}s`, "--mote-drift": `${mote.drift}px` } as CSSProperties} />)}
       </div>

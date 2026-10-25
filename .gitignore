@@ -1,6 +1,8 @@
 node_modules
 .next
 .next-cinematic
+.next-story
+.next-audit
 out
 .env*
 *.tsbuildinfo

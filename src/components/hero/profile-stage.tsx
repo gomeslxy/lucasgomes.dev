@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUpRight, MoveUpRight } from "lucide-react";
 import { motion, useMotionValueEvent, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { type ReactNode, useEffect, useRef, useSyncExternalStore } from "react";
 import { useScrollTo } from "@/lib/use-scroll-to";
+import { useEnhancedMotion } from "@/lib/use-animation-policy";
 import { ProfileDepth } from "./profile-depth";
 import styles from "./hero.module.css";
 
@@ -23,6 +24,7 @@ export function ProfileStage({ children }: { children: ReactNode }) {
   const footerRef = useRef<HTMLDivElement>(null);
   const spatial = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const reduced = useReducedMotion();
+  const enhanced = useEnhancedMotion();
   const scrollTo = useScrollTo();
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -46,15 +48,15 @@ export function ProfileStage({ children }: { children: ReactNode }) {
   const cueOpacity = useTransform(() => 1 - Math.min(1, scrollYProgress.get() / .2));
 
   useMotionValueEvent(scrollYProgress, "change", (value) => {
-    const cardHidden = !reduced && value > .94;
-    const footerHidden = !reduced && value >= .2;
+    const cardHidden = enhanced && !reduced && value > .94;
+    const footerHidden = enhanced && !reduced && value >= .2;
     if (cardRef.current && cardRef.current.inert !== cardHidden) cardRef.current.inert = cardHidden;
     if (footerRef.current && footerRef.current.inert !== footerHidden) footerRef.current.inert = footerHidden;
   });
   useEffect(() => {
-    if (cardRef.current) cardRef.current.inert = !reduced && scrollYProgress.get() > .94;
-    if (footerRef.current) footerRef.current.inert = !reduced && scrollYProgress.get() >= .2;
-  }, [reduced, spatial, scrollYProgress]);
+    if (cardRef.current) cardRef.current.inert = enhanced && !reduced && scrollYProgress.get() > .94;
+    if (footerRef.current) footerRef.current.inert = enhanced && !reduced && scrollYProgress.get() >= .2;
+  }, [enhanced, reduced, spatial, scrollYProgress]);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -78,7 +80,7 @@ export function ProfileStage({ children }: { children: ReactNode }) {
           <span className={styles.sideNote}>DESIGN MINDED. ENGINEERING DRIVEN.</span>
         </div>
         <div className={styles.stageShell}>
-          <motion.div ref={cardRef} data-profile-scroll className={styles.cardPlane} style={reduced ? undefined : { z, y, rotateX, rotateZ, opacity }}>
+          <motion.div ref={cardRef} data-profile-scroll className={styles.cardPlane} style={reduced || !enhanced ? undefined : { z, y, rotateX, rotateZ, opacity }}>
             <ProfileDepth>
               <div className={styles.entranceRig}>
                 <span className={styles.assemblyFrame} aria-hidden="true" />
@@ -92,7 +94,7 @@ export function ProfileStage({ children }: { children: ReactNode }) {
             <p>Veja em <em>prática.</em><MoveUpRight /></p>
           </motion.div>
         </div>
-        <motion.div ref={footerRef} className={styles.stageFooter} style={reduced ? undefined : { opacity: cueOpacity }}>
+        <motion.div ref={footerRef} className={styles.stageFooter} style={reduced || !enhanced ? undefined : { opacity: cueOpacity }}>
           <span className={styles.footerNote}><span className={styles.footerAsterisk}>✳</span> CURIOSIDADE É O MEU ESTADO PADRÃO.</span>
           <a href="#work" onClick={(event) => { event.preventDefault(); scrollTo("#work"); }} className={styles.scrollHint}><span>CONTINUE EXPLORANDO</span><span className={styles.scrollIcon}><ArrowDown size={14} aria-hidden="true" /></span></a>
           <span className={styles.footerIndex}><span>PORTFÓLIO PESSOAL</span><ArrowUpRight size={12} aria-hidden="true" />2026</span>

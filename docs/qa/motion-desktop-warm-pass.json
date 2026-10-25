@@ -1,0 +1,47 @@
+{
+  "status": "completed",
+  "method": "Scroll programático instantâneo em iframe da prévia de produção; sem wheel/touch sintéticos.",
+  "requestedViewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "actualViewport": {
+    "width": 1263,
+    "height": 719,
+    "devicePixelRatio": 1.5
+  },
+  "iframeClippedByHost": true,
+  "warmupMs": 1016.3,
+  "traversalDurationMs": 16016,
+  "totalWarmupAndTraversalMs": 17032.3,
+  "maxScrollPx": 8786,
+  "finalScrollY": 0,
+  "cadence": {
+    "samples": 959,
+    "medianIntervalMs": 16.6,
+    "p95IntervalMs": 17,
+    "maxIntervalMs": 33.7,
+    "estimatedRafCadenceHz": 60.241,
+    "intervalsOver16_67Ms": 477,
+    "intervalsOver33_34Ms": 1
+  },
+  "layoutShifts": {
+    "supported": true,
+    "observedClsDuringTraversal": 0,
+    "excludesRecentInput": true
+  },
+  "longTasks": {
+    "supported": true,
+    "count": 0,
+    "totalMs": 0,
+    "maxMs": 0
+  },
+  "documentVisibility": [
+    "parent:visible;iframe:visible"
+  ],
+  "horizontalOverflow": {
+    "present": false,
+    "pixels": 0
+  },
+  "disclaimer": "Cadência rAF não mede composição/rasterização GPU nem frames efetivamente exibidos. Os limiares são contagens de intervalos, não dropped frames. A passagem não comprova 120 FPS, CLS de campo ou comportamento de inputs físicos. Instrumentação, iframe, recorte do host, visibilidade e carga do dispositivo alteram os resultados."
+}

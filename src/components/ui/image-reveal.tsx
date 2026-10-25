@@ -24,7 +24,7 @@ export function ImageReveal({
   quality = 85,
 }: ImageRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-10%" });
+  const inView = useInView(ref, { once: false, margin: "-10%" });
   const enhancedMotion = useEnhancedMotion();
 
   return (

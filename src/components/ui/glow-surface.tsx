@@ -12,6 +12,37 @@ type GlowSurfaceProps = {
   className?: string;
 };
 
+// All live materials share event delivery and a ResizeObserver. Pointer movement
+// consumes cached geometry; scroll invalidation never reads the DOM.
+const surfaces = new Map<Element, () => void>();
+let surfaceObserver: ResizeObserver | undefined;
+const invalidateSurfaces = () => surfaces.forEach((invalidate) => invalidate());
+
+function registerSurface(element: Element, invalidate: () => void) {
+  if (!surfaces.size) {
+    window.addEventListener("scroll", invalidateSurfaces, { passive: true });
+    window.addEventListener("resize", invalidateSurfaces, { passive: true });
+    window.addEventListener("blur", invalidateSurfaces);
+    document.addEventListener("toggle", invalidateSurfaces, true);
+    document.addEventListener("visibilitychange", invalidateSurfaces);
+    surfaceObserver = new ResizeObserver((entries) => entries.forEach((entry) => surfaces.get(entry.target)?.()));
+  }
+  surfaces.set(element, invalidate);
+  surfaceObserver?.observe(element);
+  return () => {
+    surfaces.delete(element);
+    surfaceObserver?.unobserve(element);
+    if (surfaces.size) return;
+    surfaceObserver?.disconnect();
+    surfaceObserver = undefined;
+    window.removeEventListener("scroll", invalidateSurfaces);
+    window.removeEventListener("resize", invalidateSurfaces);
+    window.removeEventListener("blur", invalidateSurfaces);
+    document.removeEventListener("toggle", invalidateSurfaces, true);
+    document.removeEventListener("visibilitychange", invalidateSurfaces);
+  };
+}
+
 /** One rasterized light moves above the material; no gradient is rebuilt per frame. */
 export function GlowSurface({ children, className }: GlowSurfaceProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -29,32 +60,29 @@ export function GlowSurface({ children, className }: GlowSurfaceProps) {
   // A change in input policy cancels the enhancement without remounting content.
   useEffect(() => {
     if (!enhanced) {
-      light.set(0);
+      light.jump(0);
+      opacity.jump(0);
+      sx.jump(sx.get());
+      sy.jump(sy.get());
       bounds.current = null;
       boundsDirty.current = true;
       pointerInside.current = false;
     }
-  }, [enhanced, light]);
+  }, [enhanced, light, opacity, sx, sy]);
 
   useEffect(() => {
-    if (!enhanced) return;
+    const element = ref.current;
+    if (!enhanced || !element) return;
     const invalidate = () => {
       bounds.current = null;
       boundsDirty.current = true;
-      light.set(0);
+      light.jump(0);
+      opacity.jump(0);
+      sx.jump(sx.get());
+      sy.jump(sy.get());
     };
-    window.addEventListener("scroll", invalidate, { passive: true });
-    window.addEventListener("resize", invalidate, { passive: true });
-    document.addEventListener("toggle", invalidate, true);
-    const observer = new ResizeObserver(invalidate);
-    if (ref.current) observer.observe(ref.current);
-    return () => {
-      window.removeEventListener("scroll", invalidate);
-      window.removeEventListener("resize", invalidate);
-      document.removeEventListener("toggle", invalidate, true);
-      observer.disconnect();
-    };
-  }, [enhanced, light]);
+    return registerSurface(element, invalidate);
+  }, [enhanced, light, opacity, sx, sy]);
 
   const onPointerEnter = (event: PointerEvent<HTMLDivElement>) => {
     if (!enhanced || event.pointerType !== "mouse") return;
@@ -107,14 +135,12 @@ export function GlowSurface({ children, className }: GlowSurfaceProps) {
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
       onPointerCancel={onPointerLeave}
+      onPointerDown={event => { if (event.pointerType !== "mouse") onPointerLeave(); }}
       onFocusCapture={onFocus}
       onBlurCapture={onBlur}
     >
       <span className={styles.lightEnvelope} aria-hidden="true">
         <motion.span className={styles.light} style={{ x: sx, y: sy, opacity: enhanced ? opacity : 0 }} />
-      </span>
-      <span className={styles.rimEnvelope} aria-hidden="true">
-        <motion.span className={`${styles.light} ${styles.rimLight}`} style={{ x: sx, y: sy, opacity: enhanced ? opacity : 0 }} />
       </span>
       {children}
     </div>

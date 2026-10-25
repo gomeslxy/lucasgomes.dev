@@ -1,11 +1,11 @@
 /** Shared art direction. Durations are milliseconds; pointer angles are degrees. */
 export const experienceConfig = {
   intro: {
-    minimumMs: 380,
-    maximumMs: 1100,
-    mobileMaximumMs: 850,
-    exitMs: 460,
-    mobileExitMs: 320,
+    minimumMs: 320,
+    maximumMs: 1400,
+    mobileMaximumMs: 900,
+    exitMs: 560,
+    mobileExitMs: 360,
   },
   pointer: {
     maxTiltX: .6,

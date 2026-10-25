@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpRight, Menu, X } from "lucide-react";
+import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { Magnetic } from "@/components/ui/magnetic";
 import { useScrollLock } from "@/lib/use-scroll-lock";
@@ -105,10 +106,13 @@ export function Nav() {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-[65] px-4 pt-3 pointer-events-none sm:px-6">
+      <header
+        data-nav-header
+        className="fixed inset-x-0 top-0 z-[65] px-4 pt-3 pointer-events-none sm:px-6"
+      >
         <nav
           aria-label="Navegação Principal"
-          className="mx-auto flex max-w-[1600px] items-center justify-between rounded-full border border-white/10 bg-ink/75 px-5 py-2.5 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5)] pointer-events-auto transition-all duration-300"
+          className="mx-auto flex max-w-[1600px] items-center justify-between rounded-full border border-white/10 bg-[#0c0b0cf5] px-5 py-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] pointer-events-auto"
         >
           {/* Logo / Brand Name */}
           <Magnetic strength={0.15}>
@@ -121,7 +125,7 @@ export function Nav() {
             >
               <span className="font-sans font-bold tracking-tight text-bone text-base sm:text-lg flex items-center gap-2">
                 Lucas
-                <span className="h-2 w-2 rounded-full bg-crimson animate-pulse-dot" />
+                <span className="h-2 w-2 rounded-full bg-crimson" />
               </span>
             </button>
           </Magnetic>
@@ -137,8 +141,8 @@ export function Nav() {
                     type="button"
                     onClick={() => go(link.id)}
                     className={cn(
-                      "press relative flex min-h-[44px] items-center rounded-full px-4 font-mono text-[0.68rem] tracking-widest uppercase transition-colors outline-none focus-visible:ring-2 focus-visible:ring-crimson",
-                      isActive ? "text-bone font-semibold" : "text-ash hover:text-bone"
+                      "press relative flex min-h-[44px] items-center rounded-full px-4 font-mono text-[0.68rem] font-semibold tracking-widest uppercase outline-none focus-visible:ring-2 focus-visible:ring-crimson",
+                      isActive ? "text-bone" : "text-ash hover:text-bone"
                     )}
                   >
                     <span>{link.label}</span>
@@ -159,7 +163,7 @@ export function Nav() {
                   id="nav-contact"
                   type="button"
                   onClick={() => go("contato")}
-                  className="press group relative flex min-h-[44px] items-center gap-2 rounded-full border border-crimson/40 bg-crimson/10 px-5 font-mono text-[0.65rem] font-semibold tracking-widest text-bone uppercase outline-none hover:bg-crimson hover:text-white focus-visible:ring-2 focus-visible:ring-crimson transition-all duration-300"
+                  className="press group relative flex min-h-[44px] items-center gap-2 rounded-full border border-crimson/40 bg-crimson/10 px-5 font-mono text-[0.65rem] font-semibold tracking-widest text-bone uppercase outline-none hover:bg-crimson hover:text-white focus-visible:ring-2 focus-visible:ring-crimson transition-transform duration-300"
                 >
                   <span>Contato</span>
                   <ArrowUpRight className="h-3.5 w-3.5 text-crimson group-hover:text-white transition-transform duration-300 group-hover:rotate-45" />
@@ -173,7 +177,7 @@ export function Nav() {
               ref={triggerRef}
               type="button"
               onClick={() => setOpen(true)}
-              className="press flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-bone md:hidden outline-none hover:border-white/30 focus-visible:ring-2 focus-visible:ring-crimson transition-colors"
+              className="press flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-bone md:hidden outline-none hover:border-white/30 focus-visible:ring-2 focus-visible:ring-crimson"
               aria-label="Abrir menu principal"
               aria-expanded={open}
               aria-controls="mobile-menu"
@@ -186,13 +190,16 @@ export function Nav() {
 
       {/* Cinematic Fullscreen Mobile Navigation Drawer */}
       {open && (
-        <div
+        <motion.div
           ref={dialogRef}
           id="mobile-menu"
           role="dialog"
           aria-modal="true"
           aria-label="Menu de Navegação"
-          className="fixed inset-0 z-[75] flex flex-col justify-between overflow-y-auto bg-ink/95 backdrop-blur-xl text-bone animate-in fade-in duration-200"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: .35, ease: [.16, 1, .3, 1] }}
+          className="fixed inset-0 z-[75] flex flex-col justify-between overflow-y-auto bg-ink text-bone"
         >
           {/* Mobile Header Bar */}
           <div className="gutter flex items-center justify-between py-5 border-b border-white/10">
@@ -203,7 +210,7 @@ export function Nav() {
               id="nav-menu-close"
               type="button"
               onClick={() => setOpen(false)}
-              className="press flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/20 text-bone hover:border-crimson focus-visible:ring-2 focus-visible:ring-crimson transition-colors"
+              className="press flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/20 text-bone hover:border-crimson focus-visible:ring-2 focus-visible:ring-crimson"
               aria-label="Fechar menu"
             >
               <X className="h-5 w-5" />
@@ -220,7 +227,7 @@ export function Nav() {
                   onClick={() => go(link.id)}
                   className="press flex min-h-[64px] w-full items-baseline justify-between py-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-crimson group"
                 >
-                  <span className="display text-[clamp(2.6rem,11vw,4.5rem)] text-bone group-hover:text-crimson transition-colors">
+                  <span className="display text-[clamp(2.6rem,11vw,4.5rem)] text-bone group-hover:text-crimson">
                     {link.label}
                   </span>
                   <span className="font-mono text-xs text-ash">[{link.index}]</span>
@@ -234,7 +241,7 @@ export function Nav() {
             <a
               id="mobile-email"
               href={`mailto:${profile.email}`}
-              className="inline-flex min-h-[44px] items-center break-all hover:text-bone transition-colors"
+              className="inline-flex min-h-[44px] items-center break-all hover:text-bone"
             >
               {profile.email}
             </a>
@@ -243,7 +250,7 @@ export function Nav() {
               Disponível
             </span>
           </div>
-        </div>
+        </motion.div>
       )}
     </>
   );

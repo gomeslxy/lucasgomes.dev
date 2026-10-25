@@ -21,8 +21,9 @@ export function VelocityMarquee({ items, baseVelocity = -2, className, itemClass
     if (!root || !track || baseVelocity === 0) return;
 
     let visible = false;
+    const motionPolicy = window.matchMedia("(min-width: 768px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)");
     const update = () => {
-      track.style.animationPlayState = visible && !document.hidden ? "running" : "paused";
+      track.style.animationPlayState = visible && !document.hidden && motionPolicy.matches ? "running" : "paused";
     };
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry?.isIntersecting ?? false;
@@ -30,11 +31,13 @@ export function VelocityMarquee({ items, baseVelocity = -2, className, itemClass
     });
     observer.observe(root);
     document.addEventListener("visibilitychange", update);
+    motionPolicy.addEventListener("change", update);
 
     return () => {
       track.style.animationPlayState = "paused";
       observer.disconnect();
       document.removeEventListener("visibilitychange", update);
+      motionPolicy.removeEventListener("change", update);
     };
   }, [baseVelocity]);
 

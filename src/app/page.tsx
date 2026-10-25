@@ -29,13 +29,13 @@ export default function Home() {
       <main id="main-content" tabIndex={-1} className="relative flex flex-col w-full max-w-full overflow-x-clip outline-none">
         <Hero />
         <SpatialSection index="01" label="PROJETOS"><WorksShowcase /></SpatialSection>
-        <SpatialSection index="02" label="SOBRE"><Manifesto /></SpatialSection>
-        <SpatialSection index="03" label="CONEXÕES" fold={false}><MarqueeBands /></SpatialSection>
-        <SpatialSection index="04" label="STACK"><StackCapabilities /></SpatialSection>
-        <SpatialSection index="05" label="TRAJETÓRIA" fold={false} light><Trajectory /></SpatialSection>
+        <SpatialSection index="02" label="SOBRE" fold={false}><Manifesto /></SpatialSection>
+        <SpatialSection index="—" label="CONEXÕES" fold={false}><MarqueeBands /></SpatialSection>
+        <SpatialSection index="03" label="STACK"><StackCapabilities /></SpatialSection>
+        <SpatialSection index="04" label="TRAJETÓRIA" fold={false} light><Trajectory /></SpatialSection>
       </main>
 
-      <ContactFooter />
+      <SpatialSection index="05" label="CONTATO" fold={false}><ContactFooter /></SpatialSection>
     </ExperienceProvider>
   );
 }

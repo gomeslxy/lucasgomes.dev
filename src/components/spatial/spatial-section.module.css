@@ -3,20 +3,17 @@
   background: #080808;
 }
 
-.section[data-fold] { perspective: 1800px; }
-
 .section[data-light] { background: #eaeaea; }
 
 .content {
   position: relative;
-  transform-origin: 50% 0;
 }
 
 .seam {
   position: absolute;
-  inset: 0 0 auto;
-  height: 90px;
-  perspective: 700px;
+  inset: -36px 0 auto;
+  height: 100px;
+  overflow: clip;
   pointer-events: none;
   z-index: 4;
 }
@@ -27,12 +24,11 @@
   display: flex;
   align-items: center;
   gap: 22px;
-  min-height: 66px;
+  min-height: 60px;
   padding: 12px max(24px, 3vw);
   border-top: 1px solid #ff637a50;
   border-bottom: 1px solid #ff637a18;
   background: linear-gradient(180deg, #301016, #100b0d);
-  box-shadow: 0 18px 24px #00000035;
   transform-origin: 50% 0;
   color: #d68f98;
   font: 8px var(--font-mono);
@@ -41,6 +37,10 @@
 }
 
 .foldPlane i { flex: 1; height: 1px; background: #ffabb41c; }
+
+.thread { position: absolute; top: 36px; left: var(--gutter); right: var(--gutter); height: 1px; transform-origin: left; background: #e11d2a55; }
+.section[data-light] .foldPlane { color: #6b353a; background: linear-gradient(180deg, #eaeaea, #d8d5d3); border-color: #a5121c40; }
+.section[data-light] .foldPlane i { background: #a5121c33; }
 
 @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
   .content { transform: none !important; opacity: 1 !important; }
