@@ -4,10 +4,7 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-/**
- * High-performance, zero-layout-thrashing text fitter.
- * Scales font-size to precisely match container width without intermediate DOM mutations.
- */
+/** Fit once per width/font change; ignore height changes caused by our own write. */
 export function useFitText<C extends HTMLElement, T extends HTMLElement>() {
   const containerRef = useRef<C>(null);
   const textRef = useRef<T>(null);
@@ -18,10 +15,12 @@ export function useFitText<C extends HTMLElement, T extends HTMLElement>() {
     if (!container || !text) return;
 
     let rafId: number | null = null;
+    let measuredWidth = -1;
 
     const fit = () => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
+      if (rafId !== null) return;
       rafId = requestAnimationFrame(() => {
+        rafId = null;
         const available = container.clientWidth;
         if (!available) return;
 
@@ -31,7 +30,8 @@ export function useFitText<C extends HTMLElement, T extends HTMLElement>() {
         if (currentWidth > 0 && currentSize > 0) {
           // Multiply with 0.996 safety margin to prevent subpixel layout overflow
           const targetSize = (currentSize * (available / currentWidth)) * 0.996;
-          text.style.fontSize = `${Math.max(12, targetSize)}px`;
+          const nextSize = Math.max(12, targetSize);
+          if (Math.abs(nextSize - currentSize) > 0.1) text.style.fontSize = `${nextSize}px`;
         }
       });
     };
@@ -44,7 +44,12 @@ export function useFitText<C extends HTMLElement, T extends HTMLElement>() {
       });
     }
 
-    const ro = new ResizeObserver(() => fit());
+    const ro = new ResizeObserver(([entry]) => {
+      const width = entry?.contentRect.width ?? 0;
+      if (Math.abs(width - measuredWidth) < 0.5) return;
+      measuredWidth = width;
+      fit();
+    });
     ro.observe(container);
 
     return () => {

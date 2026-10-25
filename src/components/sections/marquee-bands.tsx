@@ -10,7 +10,7 @@ export function MarqueeBands() {
       className="relative z-10 w-full max-w-full overflow-hidden overflow-x-clip bg-ink py-16 md:py-[6.5vw]"
     >
       {/* Top Crimson Band */}
-      <div className="relative -rotate-[2.8deg] scale-x-110 bg-crimson py-2.5 md:py-[0.85vw] text-ink shadow-2xl">
+      <div className="relative -rotate-[2.8deg] scale-x-110 bg-crimson py-2.5 md:py-[0.85vw] text-ink">
         <VelocityMarquee
           items={marqueeA}
           baseVelocity={-1.5}
@@ -20,7 +20,7 @@ export function MarqueeBands() {
       </div>
 
       {/* Counter Bone Band */}
-      <div className="relative -mt-6 md:-mt-[4vw] rotate-[2deg] scale-x-110 border-y border-ink bg-bone py-2.5 md:py-[0.85vw] text-ink shadow-2xl">
+      <div className="relative -mt-6 md:-mt-[4vw] rotate-[2deg] scale-x-110 border-y border-ink bg-bone py-2.5 md:py-[0.85vw] text-ink">
         <VelocityMarquee
           items={marqueeB}
           baseVelocity={1.5}

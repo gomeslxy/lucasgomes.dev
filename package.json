@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -14,7 +15,6 @@
     "lucide-react": "^1.61.0",
     "motion": "^14.6.0",
     "next": "^15.5.28",
-    "pdf-to-png-converter": "^4.2.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "sharp": "^0.35.5"

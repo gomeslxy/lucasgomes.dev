@@ -1,0 +1,184 @@
+.surface {
+  position: relative;
+  isolation: isolate;
+}
+
+.surface::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border: 1px solid rgb(239 103 112 / 12%);
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 280ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.surface:hover::after,
+.surface:focus-within::after {
+  opacity: .5;
+}
+
+.lightEnvelope {
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.light {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle at center, rgb(255 193 174 / 12%), rgb(225 29 42 / 4%) 35%, transparent 72%);
+  pointer-events: none;
+}
+
+/* The mask is static. Only the small prepainted light travels across the rim. */
+.rimEnvelope {
+  position: absolute;
+  inset: -1px;
+  z-index: 1;
+  border-radius: inherit;
+  padding: 1px;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+
+.rimLight {
+  background: radial-gradient(circle at center, rgb(255 205 209 / 18%), rgb(237 74 90 / 14%) 30%, transparent 72%);
+}
+
+.capabilitySurface {
+  border: 1px solid rgb(255 255 255 / 11%);
+  border-radius: 14px;
+  background: linear-gradient(150deg, rgb(255 255 255 / 3%), transparent 45%), #101011;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 3%) inset, 0 10px 28px rgb(0 0 0 / 12%);
+}
+
+.capabilitySurface:has(details[open]) {
+  border-color: rgb(225 29 42 / 48%);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 4%) inset, 0 16px 36px rgb(0 0 0 / 18%);
+}
+
+.capability {
+  position: relative;
+  padding: 22px;
+  border-radius: inherit;
+}
+
+.capability::before {
+  content: "";
+  position: absolute;
+  top: 25px;
+  bottom: 25px;
+  left: -1px;
+  width: 2px;
+  border-radius: 2px;
+  background: #e94754;
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 350ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.capability[open]::before {
+  transform: scaleY(1);
+}
+
+.capability summary {
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+  border-radius: 5px;
+}
+
+.capability summary::-webkit-details-marker { display: none; }
+.capability summary:focus-visible { outline: 2px solid #ed5a67; outline-offset: 6px; }
+
+.moduleHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.moduleTitle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.moduleIndex {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 9px;
+  background: rgb(255 255 255 / 2%);
+  color: #979197;
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.capability[open] .moduleIndex {
+  border-color: rgb(225 29 42 / 25%);
+  background: rgb(225 29 42 / 8%);
+  color: #f37780;
+}
+
+.moduleToggle {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 50%;
+  color: #a29aa0;
+  font-size: 17px;
+}
+
+.moduleToggle span { transition: transform 350ms cubic-bezier(.16, 1, .3, 1); }
+.capability[open] .moduleToggle span { transform: rotate(45deg); }
+.capability[open] .moduleToggle { color: #ee707b; border-color: rgb(225 29 42 / 30%); }
+
+.technology {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.contactStatus {
+  min-height: 20px;
+  margin-top: 14px;
+  font-size: 11px;
+  line-height: 1.65;
+  color: #baaeb5;
+}
+
+.contactStatus[data-error="true"] {
+  color: #f2a8ae;
+}
+
+@media (min-width: 768px) { .capability { padding: 28px; } }
+@media (max-width: 380px) {
+  .capability { padding: 18px; }
+  .moduleTitle { gap: 10px; }
+  .moduleIndex { width: 30px; height: 30px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .light { display: none; }
+  .capability::before, .moduleToggle span, .surface::after { transition: none; }
+}

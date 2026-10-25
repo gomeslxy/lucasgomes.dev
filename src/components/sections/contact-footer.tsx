@@ -1,227 +1,184 @@
 "use client";
 
-import { useLenis } from "lenis/react";
-import { ArrowUp, ArrowUpRight, Check, Copy } from "lucide-react";
+import { ArrowUp, ArrowUpRight, Check, Copy, Mail, MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { BigName } from "@/components/ui/big-name";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
+import { GlowSurface } from "@/components/ui/glow-surface";
 import { Magnetic } from "@/components/ui/magnetic";
-import { RollText } from "@/components/ui/roll-text";
-import { SectionLabel } from "@/components/ui/section-label";
 import { profile } from "@/lib/data";
-import { useFitText } from "@/lib/use-fit-text";
+import styles from "@/components/spatial/living-surface.module.css";
+
+type ContactKind = "email" | "phone";
 
 export function ContactFooter() {
-  const lenis = useLenis();
-  const [copiedEmail, setCopiedEmail] = useState(false);
-  const [copiedPhone, setCopiedPhone] = useState(false);
-  const emailTimerRef = useRef<number | null>(null);
-  const phoneTimerRef = useRef<number | null>(null);
-  const { containerRef, textRef } = useFitText<HTMLDivElement, HTMLSpanElement>();
+  const [copied, setCopied] = useState<ContactKind | null>(null);
+  const [announcement, setAnnouncement] = useState("");
+  const [copyFailed, setCopyFailed] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    return () => {
-      if (emailTimerRef.current) window.clearTimeout(emailTimerRef.current);
-      if (phoneTimerRef.current) window.clearTimeout(phoneTimerRef.current);
-    };
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
   }, []);
 
-  const copyToClipboard = async (text: string, type: "email" | "phone") => {
+  async function copyContact(value: string, kind: ContactKind) {
+    if (timer.current) clearTimeout(timer.current);
+    setCopied(null);
+    setAnnouncement("");
+    setCopyFailed(false);
+
     try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        const textarea = document.createElement("textarea");
-        textarea.value = text;
-        textarea.style.position = "fixed";
-        textarea.style.left = "-9999px";
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-      }
-
-      if (type === "email") {
-        setCopiedEmail(true);
-        if (emailTimerRef.current) window.clearTimeout(emailTimerRef.current);
-        emailTimerRef.current = window.setTimeout(() => setCopiedEmail(false), 2200);
-      } else {
-        setCopiedPhone(true);
-        if (phoneTimerRef.current) window.clearTimeout(phoneTimerRef.current);
-        phoneTimerRef.current = window.setTimeout(() => setCopiedPhone(false), 2200);
-      }
+      await navigator.clipboard.writeText(value);
+      setCopied(kind);
+      setAnnouncement(kind === "email" ? "E-mail copiado com sucesso!" : "Telefone copiado com sucesso!");
+      timer.current = setTimeout(() => { setCopied(null); setAnnouncement(""); }, 3000);
     } catch {
-      // Fallback: window.prompt or direct selection
+      setCopyFailed(true);
+      setAnnouncement("Não foi possível copiar. Use os links de e-mail ou telefone acima.");
     }
-  };
-
-  const scrollToTop = () => {
-    lenis?.scrollTo(0, { duration: 1.6, easing: (t) => 1 - Math.pow(1 - t, 4) });
-  };
+  }
 
   return (
-    <footer id="contato" className="relative bg-ink text-bone border-t border-white/10 pt-[clamp(6rem,11vw,9.5rem)] pb-8 overflow-hidden">
-      <div className="gutter">
-        <SectionLabel index="05" title="Contato & Propostas" aside="Pronto para novos desafios" tone="dark" />
+    <footer id="contato" className="relative overflow-hidden border-t border-white/10 bg-ink pt-16 text-bone sm:pt-24">
+      <div className="gutter mx-auto max-w-[1600px]">
+        {/* Header Metadata Rail */}
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5 font-mono text-[0.6875rem] uppercase tracking-widest">
+          <span className="flex items-center gap-3">
+            <span className="text-crimson font-bold">[05]</span>
+            <span>VAMOS CONVERSAR</span>
+          </span>
+          <span className="inline-flex items-center gap-2 text-bone/70">
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-crimson animate-pulse-dot" />
+            <span>DISPONÍVEL PARA CONTRATAÇÃO</span>
+          </span>
+        </div>
 
-        {/* Big CTA Heading & Direct Actions */}
-        <div className="mt-14 md:mt-20 grid gap-10 lg:grid-cols-12 items-start">
-          <div className="lg:col-span-8">
-            <h2 className="display text-[clamp(3.4rem,10.5vw,9.5rem)] leading-[0.82]">
-              Vamos <br />
-              <span className="font-serif italic text-crimson text-[0.85em] normal-case tracking-normal">construir</span> <br />
-              o próximo.
+        {/* Content Grid */}
+        <div className="grid items-start gap-12 py-12 md:py-20 lg:grid-cols-[1.2fr_1fr] lg:gap-16">
+          <div className="min-w-0">
+            <h2 className="display text-[clamp(2.8rem,7vw,7rem)] uppercase leading-[0.92] tracking-tighter">
+              Boas ideias.<br />
+              <span className="text-crimson">Melhor em equipe.</span>
             </h2>
-            <p className="mt-8 text-base md:text-lg text-bone/70 leading-relaxed max-w-xl">
-              Disponível para novos projetos, freelas e oportunidades em Tecnologia/Desenvolvimento — presencial em Indaiatuba/Campinas, modelo híbrido ou remoto global.
+            <p className="mt-8 max-w-lg text-base leading-relaxed text-bone/70 sm:text-lg">
+              Estou pronto para agregar valor a times que priorizam engenharia consistente, atenção meticulosa a cada detalhe de interface e evolução técnica contínua.
             </p>
+            <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs text-ash">
+              <span>📍 Indaiatuba & Região de Campinas</span>
+              <span>·</span>
+              <span>Presencial · Híbrido · Remoto</span>
+            </div>
           </div>
 
-          {/* Quick Direct Actions Box */}
-          <div className="lg:col-span-4 bg-coal border border-white/10 p-6 md:p-8 flex flex-col gap-6">
-            <div className="flex items-center gap-2.5">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inset-0 animate-pulse-dot rounded-full bg-crimson" />
-                <span className="relative h-2 w-2 rounded-full bg-crimson" />
-              </span>
-              <span className="label text-ash text-[0.62rem]">Status Atual: Disponível</span>
-            </div>
+          {/* Interactive Contact Card with Pointer-reactive Glow */}
+          <GlowSurface className="min-w-0 rounded-2xl border border-white/10 bg-[#101011] p-6 sm:p-8 shadow-2xl">
+            <p className="font-mono text-[0.6875rem] uppercase tracking-widest text-ash">
+              Canal Direto de Comunicação
+            </p>
 
-            <div className="space-y-4 pt-4 border-t border-white/10">
-              {/* Email copy */}
-              <div>
-                <span className="label text-smoke block text-[0.6rem]">E-mail Principal</span>
-                <div className="mt-1.5 flex items-center justify-between gap-3 bg-graphite border border-white/10 px-4 py-2.5">
-                  <span className="text-xs md:text-sm font-mono text-bone truncate">{profile.email}</span>
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(profile.email, "email")}
-                    className="label min-h-[44px] min-w-[44px] text-ash hover:text-crimson flex items-center gap-1.5 transition-colors shrink-0 outline-none focus-visible:ring-1 focus-visible:ring-crimson px-2"
-                    title="Copiar e-mail"
-                    aria-label="Copiar e-mail"
-                  >
-                    {copiedEmail ? <Check className="w-3.5 h-3.5 text-crimson" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span className="text-[0.62rem]">{copiedEmail ? "Copiado!" : "Copiar"}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* WhatsApp & Call */}
-              <div>
-                <span className="label text-smoke block text-[0.6rem]">WhatsApp / Telefone</span>
-                <div className="mt-1.5 flex items-center justify-between gap-3 bg-graphite border border-white/10 px-4 py-2.5">
-                  <span className="text-xs md:text-sm font-mono text-bone truncate">{profile.phoneDisplay}</span>
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard("+5511989940080", "phone")}
-                    className="label min-h-[44px] min-w-[44px] text-ash hover:text-crimson flex items-center gap-1.5 transition-colors shrink-0 outline-none focus-visible:ring-1 focus-visible:ring-crimson px-2"
-                    title="Copiar telefone"
-                    aria-label="Copiar telefone"
-                  >
-                    {copiedPhone ? <Check className="w-3.5 h-3.5 text-crimson" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span className="text-[0.62rem]">{copiedPhone ? "Copiado!" : "Copiar"}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Direct WhatsApp CTA Button */}
-            <Magnetic strength={0.2} className="w-full">
+            <Magnetic strength={0.15}>
               <a
-                href={profile.whatsapp}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex min-h-[48px] w-full items-center justify-center gap-3 rounded-full bg-crimson text-bone font-mono text-xs uppercase tracking-widest hover:bg-crimson-deep transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white"
+                href={`mailto:${profile.email}`}
+                className="press group mt-6 flex min-h-[52px] items-center justify-between gap-3 rounded-xl bg-bone px-5 py-3.5 text-sm font-mono font-semibold uppercase tracking-wider text-ink outline-none hover:bg-white focus-visible:ring-2 focus-visible:ring-crimson transition-all"
               >
-                <span>Falar no WhatsApp</span>
-                <ArrowUpRight className="h-4 w-4 transition-transform duration-500 ease-expo group-hover:rotate-45" />
+                <span className="flex items-center gap-3">
+                  <Mail aria-hidden="true" className="h-4 w-4 text-crimson" />
+                  <span>Enviar E-mail Direto</span>
+                </span>
+                <ArrowUpRight aria-hidden="true" className="h-4 w-4 motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5 motion-safe:group-hover:-translate-y-0.5" />
               </a>
             </Magnetic>
-          </div>
-        </div>
 
-        {/* Social channels and metadata links */}
-        <div className="mt-20 pt-8 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div>
-            <span className="label text-smoke block text-[0.6rem]">GitHub</span>
+            {/* Quick Copy Contact List */}
+            <div className="mt-6 divide-y divide-white/10">
+              <div className="flex min-w-0 items-center justify-between gap-3 py-3.5">
+                <a
+                  href={`mailto:${profile.email}`}
+                  className="flex min-h-[44px] min-w-0 items-center break-all font-mono text-xs md:text-sm text-bone/85 hover:text-crimson transition-colors"
+                >
+                  {profile.email}
+                </a>
+                <button
+                  type="button"
+                  onClick={() => copyContact(profile.email, "email")}
+                  aria-label={copied === "email" ? "E-mail copiado" : "Copiar e-mail"}
+                  className="press flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 text-ash hover:border-crimson hover:text-bone transition-colors motion-safe:active:scale-95"
+                >
+                  {copied === "email" ? <Check aria-hidden="true" className="h-4 w-4 text-emerald-400" /> : <Copy aria-hidden="true" className="h-4 w-4" />}
+                </button>
+              </div>
+
+              <div className="flex min-w-0 items-center justify-between gap-3 py-3.5">
+                <a
+                  href="tel:+5511989940080"
+                  className="flex min-h-[44px] items-center font-mono text-xs md:text-sm text-bone/85 hover:text-crimson transition-colors"
+                >
+                  {profile.phoneDisplay}
+                </a>
+                <button
+                  type="button"
+                  onClick={() => copyContact("+5511989940080", "phone")}
+                  aria-label={copied === "phone" ? "Telefone copiado" : "Copiar telefone"}
+                  className="press flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 text-ash hover:border-crimson hover:text-bone transition-colors motion-safe:active:scale-95"
+                >
+                  {copied === "phone" ? <Check aria-hidden="true" className="h-4 w-4 text-emerald-400" /> : <Copy aria-hidden="true" className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
             <a
-              href={profile.github}
+              href={profile.whatsapp}
               target="_blank"
               rel="noopener noreferrer"
-              className="group mt-2 min-h-[44px] inline-flex items-center gap-2 text-sm font-medium hover:text-crimson transition-colors"
+              className="press mt-4 flex min-h-[44px] items-center justify-between gap-3 rounded-lg border border-white/15 bg-white/[0.02] px-4 py-2.5 text-xs font-mono uppercase tracking-wider text-bone/80 hover:border-emerald-500/50 hover:text-emerald-400 transition-colors"
             >
-              <GithubIcon size={16} />
-              <RollText text={profile.githubHandle} />
+              <span className="flex items-center gap-2">
+                <MessageSquare className="h-3.5 w-3.5 text-emerald-400" />
+                <span>Conversar no WhatsApp</span>
+              </span>
+              <ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" />
             </a>
-          </div>
 
-          <div>
-            <span className="label text-smoke block text-[0.6rem]">LinkedIn</span>
-            <a
-              href={profile.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group mt-2 min-h-[44px] inline-flex items-center gap-2 text-sm font-medium hover:text-crimson transition-colors"
-            >
-              <LinkedinIcon size={16} />
-              <RollText text="Lucas Gomes" />
-            </a>
-          </div>
-
-          <div>
-            <span className="label text-smoke block text-[0.6rem]">SaaS em Produção</span>
-            <a
-              href={profile.agendra}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group mt-2 min-h-[44px] inline-flex items-center gap-2 text-sm font-medium text-crimson hover:underline"
-            >
-              <span>agendra.site</span>
-              <ArrowUpRight size={14} />
-            </a>
-          </div>
-
-          <div>
-            <span className="label text-smoke block text-[0.6rem]">Localização</span>
-            <span className="mt-2 block text-sm font-medium text-bone/80">
-              {profile.city} · {profile.region}
-            </span>
-          </div>
+            <p role="status" aria-live="polite" aria-atomic="true" data-error={copyFailed} className={styles.contactStatus}>{announcement}</p>
+          </GlowSurface>
         </div>
 
-        {/* Giant Footer Display Typography with Fluid clamp() */}
-        <div className="mt-24 md:mt-32 pt-8 border-t border-white/10">
-          <div ref={containerRef} className="w-full overflow-hidden select-none">
-            <span
-              ref={textRef}
-              className="display block whitespace-nowrap text-bone leading-[0.78] tracking-tighter text-[clamp(3.6rem,16.2vw,16.8rem)]"
-            >
-              LUCAS GOMES
-            </span>
-          </div>
+        {/* Social Links Row */}
+        <div className="grid grid-cols-2 gap-4 border-t border-white/10 py-6 sm:grid-cols-3 font-mono text-xs">
+          <a
+            href={profile.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex min-h-[44px] items-center gap-2 text-bone/70 hover:text-bone transition-colors"
+          >
+            <GithubIcon size={16} /> <span>GitHub</span> <ArrowUpRight aria-hidden="true" size={14} className="text-ash" />
+          </a>
+          <a
+            href={profile.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex min-h-[44px] items-center gap-2 text-bone/70 hover:text-bone transition-colors"
+          >
+            <LinkedinIcon size={16} /> <span>LinkedIn</span> <ArrowUpRight aria-hidden="true" size={14} className="text-ash" />
+          </a>
+          <a
+            href="#case-agendra"
+            className="col-span-2 flex min-h-[44px] items-center gap-2 text-bone/70 hover:text-crimson transition-colors sm:col-span-1 sm:justify-self-end"
+          >
+            <span>Case Agendra</span> <ArrowUpRight aria-hidden="true" size={14} />
+          </a>
         </div>
 
-        {/* Bottom Colophon Bar */}
-        <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-ash">
-          <span className="label text-[0.6rem]">
-            © 2026 Lucas Gomes do Amaral. Todos os direitos reservados.
-          </span>
+        {/* Monumental Signature */}
+        <BigName />
 
-          <div className="flex items-center gap-6">
-            <span className="label text-[0.6rem] text-smoke hidden md:block">
-              Next.js 15 · React 19 · Motion · Lenis
-            </span>
-            <Magnetic strength={0.3}>
-              <button
-                type="button"
-                onClick={scrollToTop}
-                className="label min-h-[44px] text-[0.62rem] flex items-center gap-1.5 text-bone hover:text-crimson transition-colors outline-none focus-visible:ring-1 focus-visible:ring-crimson px-2 rounded-sm"
-              >
-                <span>Voltar ao Topo</span>
-                <ArrowUp className="w-3.5 h-3.5" />
-              </button>
-            </Magnetic>
-          </div>
+        {/* Bottom Micro Copyright Bar */}
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 py-6 text-xs font-mono text-ash/70 sm:flex-row">
+          <span>© 2026 Lucas · Desenvolvedor Full-Stack & IA</span>
+          <a href="#hero" className="flex min-h-[44px] items-center gap-2 text-bone/80 hover:text-crimson transition-colors">
+            <span>Voltar ao topo</span>
+            <ArrowUp aria-hidden="true" size={14} />
+          </a>
         </div>
       </div>
     </footer>
