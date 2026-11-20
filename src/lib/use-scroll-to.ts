@@ -31,6 +31,21 @@ export function useScrollTo() {
         pending.current = null;
         const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         if (lenis) {
+          if (typeof target === "string" && target !== "#hero") {
+            const element = target.startsWith("#")
+              ? document.getElementById(target.slice(1))
+              : document.querySelector<HTMLElement>(target);
+            if (element) {
+              const marginTop = parseFloat(getComputedStyle(element).scrollMarginTop) || 0;
+              lenis.scrollTo(element, {
+                offset: -marginTop,
+                immediate: reduced,
+                duration: 0.9,
+                easing: EASE_EXPO_FN,
+              });
+              return;
+            }
+          }
           lenis.scrollTo(target, { immediate: reduced, duration: 0.9, easing: EASE_EXPO_FN });
           return;
         }

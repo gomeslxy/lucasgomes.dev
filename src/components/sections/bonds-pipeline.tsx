@@ -2,8 +2,8 @@ import { ArchitecturePipeline, type PipelineNode } from "@/components/sections/a
 
 const NODES: readonly PipelineNode[] = [
   {
-    k: "Sportlife UI",
-    title: "Sportlife VFX Interface",
+    k: "Interface",
+    title: "Interface & Catálogo",
     desc: "Next.js App Router, Motion e microinterações na navegação do catálogo.",
   },
   {
@@ -12,9 +12,9 @@ const NODES: readonly PipelineNode[] = [
     desc: "Supabase Realtime Channels para atualizar estoque e pedidos sem recarregar a página.",
   },
   {
-    k: "Smart Checkout",
-    title: "Checkout Matemático",
-    desc: "Validação matemática de CPF em tempo real (client e server) com máscaras dinâmicas de input.",
+    k: "Checkout",
+    title: "Validação de checkout",
+    desc: "Validação de CPF no cliente e no servidor, com máscaras de entrada e sanitização de dados.",
   },
   {
     k: "PKCE Auth",
@@ -22,8 +22,8 @@ const NODES: readonly PipelineNode[] = [
     desc: "Autenticação Supabase Auth via Next.js Server Actions com mitigação de CSRF e token exchange seguro.",
   },
   {
-    k: "Hardened Edge",
-    title: "Anti-Brute Force na Borda",
+    k: "Edge Security",
+    title: "Rate limiting na Edge",
     desc: "Rate limiting por IP com Upstash Redis nos endpoints críticos (/login, /signup, /admin, verificação).",
   },
   {
@@ -44,7 +44,7 @@ const FOOTNOTES = [
 export function BondsPipeline() {
   return (
     <ArchitecturePipeline
-      title="Arquitetura de Engenharia — Pipeline BONDS AGENCE V4"
+      title="BONDS AGENCE V4 · Fluxo da arquitetura"
       nodes={NODES}
       footnotes={FOOTNOTES}
     />

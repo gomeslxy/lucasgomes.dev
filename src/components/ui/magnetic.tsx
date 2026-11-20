@@ -11,6 +11,25 @@ type MagneticProps = {
   className?: string;
 };
 
+const magnetics = new Set<() => void>();
+const invalidateMagnetics = () => magnetics.forEach((invalidate) => invalidate());
+
+function registerMagnetic(invalidate: () => void) {
+  if (!magnetics.size) {
+    window.addEventListener("scroll", invalidateMagnetics, { passive: true });
+    window.addEventListener("resize", invalidateMagnetics, { passive: true });
+    window.addEventListener("blur", invalidateMagnetics);
+  }
+  magnetics.add(invalidate);
+  return () => {
+    magnetics.delete(invalidate);
+    if (magnetics.size) return;
+    window.removeEventListener("scroll", invalidateMagnetics);
+    window.removeEventListener("resize", invalidateMagnetics);
+    window.removeEventListener("blur", invalidateMagnetics);
+  };
+}
+
 /**
  * Tactile GPU-only magnetic pull on fine-pointer desktop.
  * The outer hit wrapper stays stationary so targets never jitter out from under
@@ -39,6 +58,7 @@ function MagneticInteraction({
   strength: number;
   className?: string;
 }) {
+  const boundsStorage = useRef({ left: 0, top: 0, width: 0, height: 0 });
   const boundsRef = useRef<{ left: number; top: number; width: number; height: number } | null>(null);
   const maxTravel = Math.min(6, Math.max(0, strength * 24));
   const x = useMotionValue(0);
@@ -48,34 +68,33 @@ function MagneticInteraction({
 
   useEffect(() => {
     const invalidate = () => {
+      if (!boundsRef.current && x.get() === 0 && y.get() === 0) return;
       boundsRef.current = null;
-      x.set(0);
-      y.set(0);
+      if (x.get() !== 0) x.set(0);
+      if (y.get() !== 0) y.set(0);
     };
-    window.addEventListener("scroll", invalidate, { passive: true });
-    window.addEventListener("resize", invalidate, { passive: true });
-    window.addEventListener("blur", invalidate);
-    return () => {
-      window.removeEventListener("scroll", invalidate);
-      window.removeEventListener("resize", invalidate);
-      window.removeEventListener("blur", invalidate);
-    };
+    return registerMagnetic(invalidate);
   }, [x, y]);
+
+  const measureBounds = (element: HTMLElement) => {
+    const rect = element.getBoundingClientRect();
+    const target = boundsStorage.current;
+    target.left = rect.left;
+    target.top = rect.top;
+    target.width = rect.width;
+    target.height = rect.height;
+    boundsRef.current = target;
+    return target;
+  };
 
   const handlePointerEnter = (event: PointerEvent<HTMLSpanElement>) => {
     if (event.pointerType !== "mouse") return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    boundsRef.current = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+    measureBounds(event.currentTarget);
   };
 
   const handlePointerMove = (event: PointerEvent<HTMLSpanElement>) => {
     if (event.pointerType !== "mouse") return;
-    let rect = boundsRef.current;
-    if (!rect) {
-      const measured = event.currentTarget.getBoundingClientRect();
-      rect = { left: measured.left, top: measured.top, width: measured.width, height: measured.height };
-      boundsRef.current = rect;
-    }
+    const rect = boundsRef.current ?? measureBounds(event.currentTarget);
     if (!rect.width || !rect.height) return;
     const nx = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width) * 2 - 1));
     const ny = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height) * 2 - 1));
@@ -85,8 +104,8 @@ function MagneticInteraction({
 
   const handlePointerLeave = () => {
     boundsRef.current = null;
-    x.set(0);
-    y.set(0);
+    if (x.get() !== 0) x.set(0);
+    if (y.get() !== 0) y.set(0);
   };
 
   return (

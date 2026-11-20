@@ -26,6 +26,7 @@ type Scene = {
   bidirectional: boolean;
   exitStart: number;
   exitEnd: number;
+  lastProgress?: number;
 };
 
 /** One event source and one geometry pass for all editorial reveals and bridges. */
@@ -57,7 +58,12 @@ export class ScrollDirector {
     };
     this.scenes.add(scene);
     const siblings = this.targets.get(element) ?? new Set<Scene>();
-    if ([...siblings].some(sibling => this.active.has(sibling))) this.active.add(scene);
+    for (const sibling of siblings) {
+      if (this.active.has(sibling)) {
+        this.active.add(scene);
+        break;
+      }
+    }
     siblings.add(scene);
     this.targets.set(element, siblings);
     this.intersection?.observe(element);
@@ -98,7 +104,6 @@ export class ScrollDirector {
     else window.addEventListener("scroll", this.onNative, { passive: true });
     window.addEventListener("resize", this.invalidate, { passive: true });
     document.addEventListener("portfolio:intro-ready", this.invalidate);
-    document.addEventListener("toggle", this.invalidate, true);
     document.addEventListener("visibilitychange", this.onVisibility);
     void document.fonts.ready.then(() => { if (this.running) this.invalidate(); });
     this.invalidate();
@@ -107,21 +112,28 @@ export class ScrollDirector {
 
   private update(scene: Scene) {
     if (!scene.measured || document.hidden) return;
+    let nextProgress: number;
     if (scene.settledOnLoad) {
       const topInView = scene.top - this.y;
       const bottomInView = scene.top + scene.height - this.y;
       if (topInView < this.viewport * scene.end && bottomInView > this.viewport * scene.exitStart) {
-        scene.value.set(1);
-        return;
+        nextProgress = 1;
+      } else {
+        scene.settledOnLoad = false;
+        nextProgress = scene.bidirectional
+          ? bidirectionalSceneProgress(this.y, scene.top, scene.height, this.viewport, scene.start, scene.end, scene.exitStart, scene.exitEnd)
+          : sceneProgress(this.y, scene.top, this.viewport, scene.start, scene.end);
       }
-      scene.settledOnLoad = false;
+    } else {
+      nextProgress = scene.bidirectional
+        ? bidirectionalSceneProgress(this.y, scene.top, scene.height, this.viewport, scene.start, scene.end, scene.exitStart, scene.exitEnd)
+        : sceneProgress(this.y, scene.top, this.viewport, scene.start, scene.end);
     }
 
-    const progress = scene.bidirectional
-      ? bidirectionalSceneProgress(this.y, scene.top, scene.height, this.viewport, scene.start, scene.end, scene.exitStart, scene.exitEnd)
-      : sceneProgress(this.y, scene.top, this.viewport, scene.start, scene.end);
-
-    scene.value.set(progress);
+    if (scene.lastProgress !== nextProgress) {
+      scene.lastProgress = nextProgress;
+      scene.value.set(nextProgress);
+    }
   }
 
   private onLenis = (instance: Lenis) => {
@@ -143,18 +155,22 @@ export class ScrollDirector {
     if (!this.running || document.hidden) return;
     this.viewport = window.innerHeight;
     this.y = this.lenis?.scroll ?? window.scrollY;
-    // All geometry reads precede every MotionValue write.
-    for (const scene of this.scenes) {
-      const rect = scene.element.getBoundingClientRect();
-      scene.top = rect.top + window.scrollY;
-      scene.height = rect.height ?? (rect.bottom - rect.top);
-      if (!scene.measured && rect.top < this.viewport * .98 && rect.bottom > 0) {
-        scene.settledOnLoad = true;
-      }
-      scene.measured = true;
+    // One DOM read per unique element, followed by all MotionValue writes.
+    for (const [element, scenes] of this.targets) {
+      const rect = element.getBoundingClientRect();
+      const top = rect.top + window.scrollY;
+      const height = rect.height ?? (rect.bottom - rect.top);
       const inMargin = rect.bottom >= -this.viewport * .35 && rect.top <= this.viewport * 1.35;
-      if (inMargin) this.active.add(scene);
-      else this.active.delete(scene);
+      for (const scene of scenes) {
+        scene.top = top;
+        scene.height = height;
+        if (!scene.measured && rect.top < this.viewport * .98 && rect.bottom > 0) {
+          scene.settledOnLoad = true;
+        }
+        scene.measured = true;
+        if (inMargin) this.active.add(scene);
+        else this.active.delete(scene);
+      }
     }
     for (const scene of this.scenes) this.update(scene);
   };
@@ -174,12 +190,12 @@ export class ScrollDirector {
     this.intersection = undefined;
     this.resize = undefined;
     this.active.clear();
+    for (const scene of this.scenes) scene.lastProgress = undefined;
     cancelFrame(this.measure);
     cancelFrame(this.flush);
     window.removeEventListener("scroll", this.onNative);
     window.removeEventListener("resize", this.invalidate);
     document.removeEventListener("portfolio:intro-ready", this.invalidate);
-    document.removeEventListener("toggle", this.invalidate, true);
     document.removeEventListener("visibilitychange", this.onVisibility);
   }
 }

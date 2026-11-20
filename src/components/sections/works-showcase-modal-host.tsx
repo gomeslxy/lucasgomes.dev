@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { AnimatePresence } from "motion/react";
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { projects } from "@/lib/data";
 
 const ProjectArchitectureModal = dynamic(
   () => import("@/components/sections/project-architecture-modal").then((mod) => mod.ProjectArchitectureModal),
@@ -13,7 +12,7 @@ const ProjectArchitectureModal = dynamic(
 
 const WorksModalContext = createContext<((slug: string) => void) | null>(null);
 
-/** Client boundary that lazy-loads the architecture modal only on demand. */
+/** Client boundary that lazy-loads the architecture modal and its dataset only on demand. */
 export function WorksShowcaseModalHost({ children }: { children: ReactNode }) {
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const [hasOpened, setHasOpened] = useState(false);
@@ -32,10 +31,6 @@ export function WorksShowcaseModalHost({ children }: { children: ReactNode }) {
     setSelectedSlug(null);
   }, []);
 
-  const selectedProject = selectedSlug
-    ? projects.find((project) => project.slug === selectedSlug) ?? null
-    : null;
-
   return (
     <WorksModalContext.Provider value={openProject}>
       {children}
@@ -43,10 +38,10 @@ export function WorksShowcaseModalHost({ children }: { children: ReactNode }) {
         hasOpened &&
         createPortal(
           <AnimatePresence>
-            {selectedProject && (
+            {selectedSlug && (
               <ProjectArchitectureModal
-                key={selectedProject.slug}
-                project={selectedProject}
+                key={selectedSlug}
+                projectSlug={selectedSlug}
                 onClose={closeProject}
               />
             )}

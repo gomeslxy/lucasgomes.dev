@@ -33,10 +33,10 @@ export function ProfileActions() {
         }}><span>Ver projetos</span><ArrowDownRight size={17} aria-hidden="true" /></a>
         <button type="button" onClick={copyEmail} className={`${styles.copyAction} press`}>
           {copyState === "copied" ? <Check size={15} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-          <span>{copyState === "copied" ? "E-mail copiado!" : "Copiar contato"}</span>
+          <span>{copyState === "copied" ? "E-mail copiado!" : "Copiar e-mail"}</span>
         </button>
       </div>
-      <p className={styles.availability}><span />Aberto a boas conexões</p>
+      <p className={styles.availability}><span />Presencial (Indaiatuba/RMC), híbrido ou remoto</p>
       <div className={styles.copyFeedback} role="status" aria-live="polite" aria-atomic="true">
         {copyState === "copied" && <span className="sr-only">E-mail {profile.email} copiado para a área de transferência.</span>}
         {copyState === "failed" && <a href={`mailto:${profile.email}`}><Mail size={13} aria-hidden="true" />Copiar indisponível. Enviar e-mail ↗</a>}

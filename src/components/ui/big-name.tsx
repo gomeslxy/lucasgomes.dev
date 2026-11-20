@@ -43,9 +43,10 @@ export function BigName() {
 
   useEffect(() => {
     const invalidate = () => {
+      if (!bounds.current && x.get() === 0 && y.get() === 0) return;
       bounds.current = null;
-      x.set(0);
-      y.set(0);
+      if (x.get() !== 0) x.set(0);
+      if (y.get() !== 0) y.set(0);
     };
     if (!enhanced) {
       invalidate();

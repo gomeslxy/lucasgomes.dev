@@ -31,17 +31,21 @@ export function Nav() {
 
   useEffect(() => {
     const intersecting = intersectingRef.current;
+    let contactVisible = false;
 
     const pickActive = () => {
-      const atBottom =
-        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 48;
       let next = activeRef.current;
 
-      if (atBottom && document.getElementById("contato")) {
+      if (contactVisible) {
         next = "contato";
       } else {
-        const match = chapters.find((chapter) => intersecting.has(chapter.id));
-        if (match) next = match.id;
+        for (let i = chapters.length - 1; i >= 0; i--) {
+          const chapter = chapters[i];
+          if (chapter && intersecting.has(chapter.id)) {
+            next = chapter.id;
+            break;
+          }
+        }
       }
 
       if (next !== activeRef.current) {
@@ -58,7 +62,7 @@ export function Nav() {
         }
         pickActive();
       },
-      { rootMargin: "-25% 0px -65% 0px", threshold: 0 },
+      { rootMargin: "-20% 0px -55% 0px", threshold: 0 },
     );
 
     chapters.forEach((chapter) => {
@@ -66,18 +70,23 @@ export function Nav() {
       if (el) observer.observe(el);
     });
 
-    let scrollTimer: ReturnType<typeof setTimeout> | undefined;
-    const onScrollSettled = () => {
-      if (scrollTimer !== undefined) clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(pickActive, 120);
-    };
+    const contactEl = document.getElementById("contato");
+    const contactObserver = contactEl
+      ? new IntersectionObserver(
+          ([entry]) => {
+            contactVisible = !!entry?.isIntersecting;
+            pickActive();
+          },
+          { threshold: 0.3 },
+        )
+      : null;
 
-    window.addEventListener("scroll", onScrollSettled, { passive: true });
+    if (contactEl && contactObserver) contactObserver.observe(contactEl);
+
     return () => {
-      if (scrollTimer !== undefined) clearTimeout(scrollTimer);
       observer.disconnect();
+      contactObserver?.disconnect();
       intersecting.clear();
-      window.removeEventListener("scroll", onScrollSettled);
     };
   }, []);
 

@@ -235,7 +235,7 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
         hasCompletedHold = true;
         currentVal = 100;
         writeProgress(100);
-        setStatusMessage("[PRONTO] RECURSOS PREPARADOS // ENTRANDO NO PORTFÓLIO");
+        setStatusMessage("[PRONTO] ABRINDO PORTFÓLIO");
         schedule(() => {
           if (!disposed && !finished) {
             reveal("resources-ready");
@@ -261,7 +261,7 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
       if (!disposed && !finished) {
         setDiagnostics((d) => ({ ...d, dom: true }));
         targetVal = Math.max(targetVal, 52);
-        setStatusMessage("[02/04] SINCRONIZANDO TIPOGRAFIA & MATRIZES EDITORIAIS");
+        setStatusMessage("[02/04] CARREGANDO TIPOGRAFIA");
       }
     });
 
@@ -270,7 +270,7 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
           if (!disposed && !finished) {
             setDiagnostics((d) => ({ ...d, fonts: true }));
             targetVal = Math.max(targetVal, 78);
-            setStatusMessage("[03/04] CARREGANDO ATIVOS & DECODIFICANDO IMAGENS");
+            setStatusMessage("[03/04] CARREGANDO IMAGENS");
           }
         })
       : Promise.resolve();
@@ -294,7 +294,7 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
       if (!disposed && !finished) {
         setDiagnostics((d) => ({ ...d, assets: true }));
         targetVal = 100;
-        setStatusMessage("[04/04] CALIBRANDO CINEMÁTICA 3D & SCROLL INERCIAL");
+        setStatusMessage("[04/04] FINALIZANDO INTERFACE");
       }
     };
 
@@ -339,7 +339,7 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
           data-phase={phase}
           role="dialog"
           aria-modal="true"
-          aria-label="Carregando portfólio de Lucas Gomes"
+          aria-label="Carregando portfólio de Lucas"
         >
           {/* Architectural Split Shutters */}
           <div className={styles.shutterTop} aria-hidden="true" />
@@ -365,7 +365,7 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
           <div className={styles.hudCornerTR} aria-hidden="true">
             <div className={styles.cornerMeta}>
               <span>[INTERFACE // EM PREPARAÇÃO]</span>
-              <span>DEV // CREATIVE SYSTEM</span>
+              <span>DEV // FULL-STACK & IA</span>
             </div>
             <span className={styles.crosshair}>+</span>
           </div>
@@ -373,7 +373,7 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
           <div className={styles.hudCornerBL} aria-hidden="true">
             <span className={styles.crosshair}>+</span>
             <div className={styles.cornerMeta}>
-              <span>LUCAS GOMES</span>
+              <span>LUCAS</span>
               <span>FULL-STACK & IA · 2026</span>
             </div>
           </div>
@@ -397,7 +397,7 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
             {/* Top Micro-Capsule */}
             <div className={styles.systemCapsule}>
               <span className={styles.pulseDot} aria-hidden="true" />
-              <span>PORTFÓLIO EM PREPARAÇÃO · LUCAS GOMES</span>
+              <span>PORTFÓLIO · LUCAS</span>
             </div>
 
             {/* Monumental Counter */}
@@ -462,7 +462,7 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
               </li>
               <li className={styles.diagnosticItem} data-ready={diagnostics.assets}>
                 <span className={styles.diagnosticDot} aria-hidden="true" />
-                <span>IMAGENS {diagnostics.assets ? "DECODIFICADAS" : "PROCESSANDO"}</span>
+                <span>IMAGENS {diagnostics.assets ? "PRONTAS" : "CARREGANDO"}</span>
               </li>
             </ul>
           </div>

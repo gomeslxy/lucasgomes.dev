@@ -212,33 +212,26 @@
   background: #9ec897;
 }
 
-.badges {
-  display: flex;
-  gap: 6px;
-  padding-bottom: 8px;
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  margin-bottom: 6px;
+  border: 1px solid rgb(158 200 151 / 24%);
+  border-radius: 999px;
+  background: rgb(158 200 151 / 7%);
+  color: #cbe3c7;
+  font: 10px var(--font-mono);
+  letter-spacing: 0.04em;
 }
 
-.badge {
-  display: grid;
-  place-items: center;
-  height: 29px;
-  width: 29px;
-  border: 1px solid #ffffff0b;
-  border-radius: 7px;
-  background: #ffffff05;
-  color: #b8b2b5;
-}
-
-.tsBadge {
-  font-size: 11px;
-  font-weight: 750;
-  letter-spacing: -.05em;
-}
-
-.specialBadge {
-  color: #ec626c;
-  background: #e11d2a0d;
-  border-color: #e11d2a22;
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9ec897;
+  flex-shrink: 0;
 }
 
 .nameRow {
@@ -256,12 +249,6 @@
 
 .namePeriod {
   color: #ef3847;
-}
-
-.nameBadge {
-  margin-top: 7px;
-  color: #eb6b73;
-  stroke-width: 1.6;
 }
 
 .handle {
@@ -300,8 +287,9 @@
 
 .socials {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
+  gap: 6px 14px;
   margin-top: 15px;
 }
 
@@ -341,43 +329,25 @@
   letter-spacing: .15em;
 }
 
-.about p {
-  margin-top: 11px;
-  color: #b8b2b6;
-  font-size: 13px;
-  line-height: 1.65;
-  max-width: 390px;
+.about {
+  margin-bottom: 14px;
 }
 
-.stack {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 16px;
-  margin-bottom: 19px;
-}
-
-.stack li {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px 9px;
-  border: 1px solid #ffffff10;
-  border-radius: 5px;
-  background: #ffffff03;
-  color: #c4bec3;
-  font: 10px var(--font-mono);
+.pitchTitle {
+  margin-top: 8px;
+  color: #f2f1ee;
+  font-size: 17px;
+  font-weight: 600;
   line-height: 1.3;
+  letter-spacing: -0.02em;
 }
 
-.stack li:hover {
-  border-color: #e9475555;
-  color: #f2dbdd;
-}
-
-.reactMark {
-  font-size: 12px;
-  line-height: 1;
+.about p {
+  margin-top: 7px;
+  color: #b2acb0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  max-width: 410px;
 }
 
 .cardFooter {
@@ -584,8 +554,12 @@
     top: 0;
     height: 100svh;
     min-height: 0;
-    padding-top: 108px;
-    padding-bottom: 28px;
+    padding-top: 88px;
+    padding-bottom: 18px;
+  }
+
+  .cardBody {
+    padding: 22px 31px 20px;
   }
 
   .cardPlane {
@@ -597,7 +571,7 @@
   }
 
   .stageFooter {
-    margin-top: 22px;
+    margin-top: 14px;
   }
 }
 
@@ -719,8 +693,10 @@
     border-width: 4px;
   }
 
-  .badges {
-    padding-bottom: 3px;
+  .statusPill {
+    margin-bottom: 3px;
+    font-size: 9px;
+    padding: 4px 9px;
   }
 
   .nameRow h1 {

@@ -76,7 +76,7 @@ export function ProfileStage({ children }: { children: ReactNode }) {
           <span className={styles.backgroundWord}>LUCAS</span>
           <span className={`${styles.guide} ${styles.guideLeft}`} />
           <span className={`${styles.guide} ${styles.guideRight}`} />
-          <span className={styles.sideNote}>DESIGN MINDED. ENGINEERING DRIVEN.</span>
+          <span className={styles.sideNote}>NEXT.JS · TYPESCRIPT · POSTGRESQL · IA</span>
         </div>
         <div className={styles.stageShell}>
           <motion.div ref={cardRef} data-profile-scroll className={styles.cardPlane} style={reduced || !enhanced ? undefined : { z, y, rotateX, rotateZ, opacity }}>
@@ -89,12 +89,12 @@ export function ProfileStage({ children }: { children: ReactNode }) {
             </ProfileDepth>
           </motion.div>
           <motion.div className={styles.nextChapter} aria-hidden="true" style={reduced || !spatial ? { opacity: 0 } : { opacity: labelOpacity, y: labelY }}>
-            <span>MENOS DISCURSO. MAIS CÓDIGO.</span>
-            <p>Veja em <em>prática.</em><MoveUpRight /></p>
+            <span>01 / PROJETOS</span>
+            <p>Projetos em <em>destaque</em><MoveUpRight /></p>
           </motion.div>
         </div>
         <motion.div ref={footerRef} className={styles.stageFooter} style={reduced || !enhanced ? undefined : { opacity: cueOpacity }}>
-          <span className={styles.footerNote}><span className={styles.footerAsterisk}>✳</span> CURIOSIDADE É O MEU ESTADO PADRÃO.</span>
+          <span className={styles.footerNote}><span className={styles.footerAsterisk}>✳</span> NEXT.JS · TYPESCRIPT · POSTGRESQL · SUPABASE</span>
           <a
             href="#work"
             onClick={(event) => {
@@ -104,10 +104,10 @@ export function ProfileStage({ children }: { children: ReactNode }) {
             }}
             className={styles.scrollHint}
           >
-            <span>CONTINUE EXPLORANDO</span>
+            <span>VER PROJETOS</span>
             <span className={styles.scrollIcon}><ArrowDown size={14} aria-hidden="true" /></span>
           </a>
-          <span className={styles.footerIndex}><span>PORTFÓLIO PESSOAL</span><ArrowUpRight size={12} aria-hidden="true" />2026</span>
+          <span className={styles.footerIndex}><span>INDAIATUBA · SP</span><ArrowUpRight size={12} aria-hidden="true" />2026</span>
         </motion.div>
       </div>
     </section>

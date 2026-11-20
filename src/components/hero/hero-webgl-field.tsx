@@ -1,6 +1,6 @@
 "use client";
 
-import type { MotionValue } from "motion/react";
+import { cancelFrame, frame, type MotionValue } from "motion/react";
 import { useEffect, useRef, type RefObject } from "react";
 
 const VERTEX_SHADER_SOURCE = `
@@ -77,6 +77,8 @@ void main() {
 }
 `;
 
+const FULLSCREEN_TRIANGLE = new Float32Array([-1, -1, 3, -1, -1, 3]);
+
 function compileShader(gl: WebGLRenderingContext, type: number, source: string): WebGLShader | null {
   const shader = gl.createShader(type);
   if (!shader) return null;
@@ -96,8 +98,8 @@ type HeroWebGLFieldProps = {
 
 /**
  * Zero-dependency WebGL architectural coordinate lattice for the Hero backdrop.
- * Enforces strict GPU/memory hygiene: DPR <= 2, RAF paused when offscreen,
- * tab-hidden, or during intro loading, and full resource disposal on unmount.
+ * Enforces strict GPU/memory hygiene: DPR <= 2 (1.5 on >2200px), RAF paused
+ * when offscreen, tab-hidden, or during intro loading, and full cleanup.
  */
 export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -135,37 +137,40 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
     let inView = true;
     let rafId: number | null = null;
     let startTime = performance.now();
+    let lastTime = 0;
 
     let targetX = 0.68;
     let targetY = 0.58;
     let currentX = 0.68;
     let currentY = 0.58;
 
-    let cachedBounds: { left: number; top: number; width: number; height: number } | null = null;
+    const cachedBounds = { left: 0, top: 0, width: 0, height: 0, valid: false };
     let widthPx = 1;
     let heightPx = 1;
 
     const releaseResources = () => {
-      if (buffer) {
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-        gl.deleteBuffer(buffer);
-        buffer = null;
+      if (!gl.isContextLost()) {
+        if (buffer) {
+          gl.bindBuffer(gl.ARRAY_BUFFER, null);
+          gl.deleteBuffer(buffer);
+        }
+        if (program) {
+          gl.useProgram(null);
+          if (vertexShader) gl.detachShader(program, vertexShader);
+          if (fragmentShader) gl.detachShader(program, fragmentShader);
+          gl.deleteProgram(program);
+        }
+        if (vertexShader) gl.deleteShader(vertexShader);
+        if (fragmentShader) gl.deleteShader(fragmentShader);
       }
-      if (program) {
-        gl.useProgram(null);
-        if (vertexShader) gl.detachShader(program, vertexShader);
-        if (fragmentShader) gl.detachShader(program, fragmentShader);
-        gl.deleteProgram(program);
-        program = null;
-      }
-      if (vertexShader) {
-        gl.deleteShader(vertexShader);
-        vertexShader = null;
-      }
-      if (fragmentShader) {
-        gl.deleteShader(fragmentShader);
-        fragmentShader = null;
-      }
+      buffer = null;
+      program = null;
+      vertexShader = null;
+      fragmentShader = null;
+      uResolution = null;
+      uMouse = null;
+      uScroll = null;
+      uTime = null;
     };
 
     const initPipeline = (): boolean => {
@@ -198,14 +203,15 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
         return false;
       }
 
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Float32Array([-1, -1, 3, -1, -1, 3]),
-        gl.STATIC_DRAW,
-      );
-
       const positionLoc = gl.getAttribLocation(program, "a_position");
+      if (positionLoc < 0) {
+        releaseResources();
+        return false;
+      }
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, FULLSCREEN_TRIANGLE, gl.STATIC_DRAW);
+
       gl.enableVertexAttribArray(positionLoc);
       gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
 
@@ -218,13 +224,25 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
       gl.disable(gl.DEPTH_TEST);
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.clearColor(0, 0, 0, 0);
       return true;
     };
 
-    const resize = () => {
-      cachedBounds = null;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const updateCanvasBounds = () => {
       const rect = canvas.getBoundingClientRect();
+      cachedBounds.left = rect.left;
+      cachedBounds.top = rect.top;
+      cachedBounds.width = rect.width;
+      cachedBounds.height = rect.height;
+      cachedBounds.valid = true;
+    };
+
+    const applyResize = () => {
+      if (disposed || contextLost) return;
+      cachedBounds.valid = false;
+      const rect = canvas.getBoundingClientRect();
+      const maxDpr = rect.width > 2200 ? 1.5 : 2;
+      const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
       widthPx = Math.max(1, Math.round(rect.width * dpr));
       heightPx = Math.max(1, Math.round(rect.height * dpr));
       if (canvas.width !== widthPx || canvas.height !== heightPx) {
@@ -232,6 +250,12 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
         canvas.height = heightPx;
       }
       gl.viewport(0, 0, widthPx, heightPx);
+      if (uResolution) gl.uniform2f(uResolution, widthPx, heightPx);
+    };
+
+    const scheduleResize = () => {
+      cachedBounds.valid = false;
+      frame.read(applyResize);
     };
 
     const isIntroLoading = () => document.documentElement.dataset.introPhase === "loading";
@@ -239,6 +263,7 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
     const canAnimate = () => !disposed && !contextLost && inView && !document.hidden && !isIntroLoading();
 
     const stopLoop = () => {
+      lastTime = 0;
       if (rafId !== null) {
         cancelAnimationFrame(rafId);
         rafId = null;
@@ -249,12 +274,14 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
       rafId = null;
       if (!canAnimate() || !program) return;
 
-      currentX += (targetX - currentX) * 0.08;
-      currentY += (targetY - currentY) * 0.08;
+      const dt = lastTime ? Math.min(64, Math.max(0, now - lastTime)) : 16.67;
+      lastTime = now;
+      const alpha = 1 - Math.exp(-dt * 0.005);
 
-      gl.clearColor(0, 0, 0, 0);
+      currentX += (targetX - currentX) * alpha;
+      currentY += (targetY - currentY) * alpha;
+
       gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.uniform2f(uResolution, widthPx, heightPx);
       gl.uniform2f(uMouse, currentX, currentY);
       gl.uniform1f(uScroll, scrollProgress.get());
       gl.uniform1f(uTime, (now - startTime) * 0.001);
@@ -265,7 +292,10 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
 
     const syncLoop = () => {
       if (canAnimate()) {
-        if (rafId === null) rafId = requestAnimationFrame(renderFrame);
+        if (rafId === null) {
+          lastTime = 0;
+          rafId = requestAnimationFrame(renderFrame);
+        }
       } else {
         stopLoop();
       }
@@ -275,24 +305,20 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
       canvas.style.display = "none";
       return;
     }
-    resize();
+    applyResize();
 
     const invalidateBounds = () => {
-      cachedBounds = null;
+      cachedBounds.valid = false;
     };
 
     const onPointerEnter = (event: PointerEvent) => {
       if (event.pointerType !== "mouse") return;
-      const rect = section.getBoundingClientRect();
-      cachedBounds = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+      updateCanvasBounds();
     };
 
     const onPointerMove = (event: PointerEvent) => {
       if (event.pointerType !== "mouse") return;
-      if (!cachedBounds) {
-        const rect = section.getBoundingClientRect();
-        cachedBounds = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
-      }
+      if (!cachedBounds.valid) updateCanvasBounds();
       if (!cachedBounds.width || !cachedBounds.height) return;
       const nx = Math.max(0, Math.min(1, (event.clientX - cachedBounds.left) / cachedBounds.width));
       const ny = Math.max(0, Math.min(1, (event.clientY - cachedBounds.top) / cachedBounds.height));
@@ -301,7 +327,7 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
     };
 
     const onPointerLeave = () => {
-      cachedBounds = null;
+      cachedBounds.valid = false;
       targetX = 0.68;
       targetY = 0.58;
     };
@@ -316,7 +342,7 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
       contextLost = false;
       startTime = performance.now();
       if (initPipeline()) {
-        resize();
+        applyResize();
         syncLoop();
       }
     };
@@ -327,7 +353,7 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
     });
     intersectionObserver.observe(section);
 
-    const resizeObserver = new ResizeObserver(resize);
+    const resizeObserver = new ResizeObserver(scheduleResize);
     resizeObserver.observe(canvas);
 
     const introObserver = new MutationObserver(syncLoop);
@@ -341,7 +367,6 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
     section.addEventListener("pointerleave", onPointerLeave);
     section.addEventListener("pointercancel", onPointerLeave);
     window.addEventListener("scroll", invalidateBounds, { passive: true });
-    window.addEventListener("resize", resize, { passive: true });
     document.addEventListener("visibilitychange", syncLoop);
     canvas.addEventListener("webglcontextlost", onContextLost);
     canvas.addEventListener("webglcontextrestored", onContextRestored);
@@ -351,6 +376,7 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
     return () => {
       disposed = true;
       stopLoop();
+      cancelFrame(applyResize);
       intersectionObserver.disconnect();
       resizeObserver.disconnect();
       introObserver.disconnect();
@@ -359,7 +385,6 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
       section.removeEventListener("pointerleave", onPointerLeave);
       section.removeEventListener("pointercancel", onPointerLeave);
       window.removeEventListener("scroll", invalidateBounds);
-      window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", syncLoop);
       canvas.removeEventListener("webglcontextlost", onContextLost);
       canvas.removeEventListener("webglcontextrestored", onContextRestored);

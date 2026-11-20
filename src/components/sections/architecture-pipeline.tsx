@@ -13,7 +13,7 @@ type ArchitecturePipelineProps = {
 
 export function ArchitecturePipeline({
   title,
-  statusLabel = "FLUXO ILUSTRATIVO",
+  statusLabel = "MAPA DE ARQUITETURA",
   nodes,
   footnotes,
 }: ArchitecturePipelineProps) {
