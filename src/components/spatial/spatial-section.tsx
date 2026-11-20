@@ -17,7 +17,7 @@ type SpatialSectionProps = {
 /** The seam moves independently. Content, sticky scenes and dialogs stay untransformed. */
 export function SpatialSection({ children, index, label, fold = true, light = false }: SpatialSectionProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const { progress, enhanced } = useSceneProgress(ref, { start: 1.08, end: .12 });
+  const { progress, enhanced } = useSceneProgress(ref, { start: 1.08, end: .12, bidirectional: false });
   const transform = useTransform(progress, value => {
     const p = quintic(value);
     return `perspective(800px) translate3d(0, ${(1 - p) * 32}px, 0) rotateX(${fold ? (1 - p) * -26 : 0}deg) scaleX(${.94 + p * .06})`;

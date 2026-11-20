@@ -12,6 +12,7 @@ export const profile = {
   modes: ["Presencial · Indaiatuba / RMC", "Híbrido", "Remoto"],
   email: "la181009@gmail.com",
   phoneDisplay: "+55 (11) 98994-0080",
+  phoneE164: "+5511989940080",
   whatsapp: "https://wa.me/5511989940080",
   github: "https://github.com/gomeslxy",
   githubHandle: "@gomeslxy",

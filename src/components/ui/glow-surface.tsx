@@ -115,7 +115,7 @@ export function GlowSurface({ children, className }: GlowSurfaceProps) {
   };
 
   const onFocus = (event: FocusEvent<HTMLDivElement>) => {
-    if (!enhanced) return;
+    if (!enhanced || !(event.target instanceof HTMLElement) || !event.target.matches(":focus-visible")) return;
     const container = event.currentTarget.getBoundingClientRect();
     const target = event.target.getBoundingClientRect();
     x.set(target.left - container.left + target.width / 2 - 200);

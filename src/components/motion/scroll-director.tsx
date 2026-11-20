@@ -154,6 +154,7 @@ export class ScrollDirector {
       scene.measured = true;
       const inMargin = rect.bottom >= -this.viewport * .35 && rect.top <= this.viewport * 1.35;
       if (inMargin) this.active.add(scene);
+      else this.active.delete(scene);
     }
     for (const scene of this.scenes) this.update(scene);
   };
@@ -191,6 +192,7 @@ export function ScrollDirectorProvider({ children }: { children: ReactNode }) {
   const enhanced = useEnhancedMotion();
   useEffect(() => {
     if (enhanced) return director.start(lenis);
+    return undefined;
   }, [director, enhanced, lenis]);
   return <DirectorContext.Provider value={director}>{children}</DirectorContext.Provider>;
 }

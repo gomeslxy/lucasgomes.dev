@@ -44,21 +44,46 @@ export function bidirectionalSceneProgress(
   return Math.min(enter, exit);
 }
 
-export function revealPose(progress: number, pattern: RevealPattern, delay = 0) {
+function normalizedRevealProgress(progress: number, delay = 0) {
   const offset = Math.min(.45, Math.max(0, delay));
-  const p = unit((progress - offset) / (1 - offset));
-  const ease = quintic(p);
-  const remaining = 1 - ease;
+  return unit((progress - offset) / (1 - offset));
+}
+
+export function revealTransform(progress: number, pattern: RevealPattern, delay = 0): string {
+  const p = normalizedRevealProgress(progress, delay);
+  const remaining = 1 - quintic(p);
   switch (pattern) {
     case "heading":
-      return { opacity: 1, transform: `translate3d(0, ${remaining * 108}%, 0) rotate(${remaining * 2.4}deg)` };
+      return `translate3d(0, ${remaining * 108}%, 0) rotate(${remaining * 2.4}deg)`;
     case "meta":
-      return { opacity: quintic(unit(p * 1.5)), transform: `translate3d(${remaining * 12}px, 0, 0)` };
+      return `translate3d(${remaining * 12}px, 0, 0)`;
     case "body":
-      return { opacity: ease, transform: `translate3d(0, ${remaining * 22}px, 0)` };
+      return `translate3d(0, ${remaining * 22}px, 0)`;
     case "depth":
-      return { opacity: ease, transform: `perspective(1000px) translate3d(0, ${remaining * 36}px, ${remaining * -64}px) rotateX(${remaining * 4}deg)` };
+      return `perspective(1000px) translate3d(0, ${remaining * 36}px, ${remaining * -64}px) rotateX(${remaining * 4}deg)`;
     case "row":
-      return { opacity: quintic(unit(p * 1.25)), transform: `translate3d(${remaining * -28}px, 0, 0)` };
+      return `translate3d(${remaining * -28}px, 0, 0)`;
   }
+}
+
+export function revealOpacity(progress: number, pattern: RevealPattern, delay = 0): number {
+  const p = normalizedRevealProgress(progress, delay);
+  switch (pattern) {
+    case "heading":
+      return 1;
+    case "meta":
+      return quintic(unit(p * 1.5));
+    case "body":
+    case "depth":
+      return quintic(p);
+    case "row":
+      return quintic(unit(p * 1.25));
+  }
+}
+
+export function revealPose(progress: number, pattern: RevealPattern, delay = 0) {
+  return {
+    opacity: revealOpacity(progress, pattern, delay),
+    transform: revealTransform(progress, pattern, delay),
+  };
 }

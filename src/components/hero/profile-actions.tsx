@@ -26,12 +26,12 @@ export function ProfileActions() {
   return (
     <footer className={styles.cardFooter} data-profile-layer="actions">
       <div className={styles.actions}>
-        <a href="#work" className={styles.primaryAction} onClick={(event) => {
+        <a href="#work" className={`${styles.primaryAction} press`} onClick={(event) => {
           if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
           event.preventDefault();
           scrollTo("#work");
         }}><span>Ver projetos</span><ArrowDownRight size={17} aria-hidden="true" /></a>
-        <button type="button" onClick={copyEmail} className={styles.copyAction}>
+        <button type="button" onClick={copyEmail} className={`${styles.copyAction} press`}>
           {copyState === "copied" ? <Check size={15} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
           <span>{copyState === "copied" ? "E-mail copiado!" : "Copiar contato"}</span>
         </button>

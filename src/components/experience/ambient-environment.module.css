@@ -6,10 +6,11 @@
   pointer-events: none;
   user-select: none;
   opacity: 1;
+  transition: opacity 420ms var(--ease-expo);
   contain: strict;
 }
 
-.environment[data-light="true"] { visibility: hidden; }
+.environment[data-light="true"] { opacity: 0; }
 
 .halo {
   position: absolute;
@@ -43,6 +44,8 @@
 
 .motes { position: absolute; inset: 0; }
 .mote { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #f1a8b3; opacity: .12; }
+.mote[data-side="left"] { left: var(--mote-edge, 2%); }
+.mote[data-side="right"] { right: var(--mote-edge, 2%); }
 .mote:nth-child(3n) { width: 1px; height: 1px; background: #dac3c9; }
 .rail { position: absolute; top: 16%; bottom: 12%; width: 1px; background: linear-gradient(transparent, #e5788730, transparent); opacity: .18; }
 .railLeft { left: 12px; }
@@ -77,8 +80,9 @@
   .haloLeft { left: -145px; top: 18%; }
   .haloRight { right: -145px; bottom: 5%; }
   .lattice { display: none; }
-  .mote { left: 3px !important; right: auto !important; width: 1px; height: 1px; animation: none; }
-  .mote:nth-child(even) { left: auto !important; right: 3px !important; }
+  .mote { width: 1px; height: 1px; animation: none; }
+  .mote[data-side="left"] { left: 3px; }
+  .mote[data-side="right"] { right: 3px; }
   .mote[data-mobile-hidden] { display: none; }
   .rail { opacity: .08; }
   .railLeft { left: 5px; }

@@ -3,6 +3,7 @@
 import { cancelFrame, frame } from "motion/react";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { experienceConfig } from "@/lib/experience-config";
+import { INTRO_SESSION_KEY } from "@/lib/intro-bootstrap";
 import { useScrollLock } from "@/lib/use-scroll-lock";
 import styles from "./experience-intro.module.css";
 
@@ -19,16 +20,7 @@ declare global {
   }
 }
 
-const SESSION_KEY = "lucas:portfolio-intro:v3";
 const timings = experienceConfig.intro;
-
-/**
- * Runs inline in <head> before hydration.
- * If reduced motion is requested, back/forward navigation, or already visited (without reload),
- * sets dataset.introPhase to 'ready' instantly (0ms delay, zero flash).
- * Allows refreshing (F5 / Cmd+R) to replay the intro smoothly.
- */
-const BOOTSTRAP = `(function(){try{var r=document.documentElement,c=${JSON.stringify(timings)},m=matchMedia('(max-width: 767px), (pointer: coarse)').matches,n=performance.getEntriesByType('navigation')[0],seen=false;try{seen=sessionStorage.getItem('${SESSION_KEY}')==='seen'}catch(e){}var isReload=n&&n.type==='reload';var skip=matchMedia('(prefers-reduced-motion: reduce)').matches||!!location.hash||document.hidden||(seen&&!isReload)||(n&&n.type==='back_forward');r.dataset.introPhase=skip?'ready':'loading';r.style.setProperty('--intro-exit-ms',(m?c.mobileExitMs:c.exitMs)+'ms');r.style.setProperty('--intro-max-ms',(m?c.mobileMaximumMs:c.maximumMs)+'ms');var state={startedAt:performance.now(),skip:!!skip,timer:0};window.__portfolioIntroBootstrap=state;if(!skip){state.timer=setTimeout(function(){try{if(state.recover)state.recover()}finally{r.dataset.introPhase='ready'}},(m?c.mobileMaximumMs:c.maximumMs)+(m?c.mobileExitMs:c.exitMs)+300);}}catch(e){document.documentElement.dataset.introPhase='ready';}})();`;
 
 export function ExperienceIntro({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<IntroPhase>("loading");
@@ -92,19 +84,20 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
 
     const remember = () => {
       try {
-        sessionStorage.setItem(SESSION_KEY, "seen");
+        sessionStorage.setItem(INTRO_SESSION_KEY, "seen");
       } catch {
         /* storage may be disabled */
       }
     };
 
-    const restoreDom = () => {
-      if (!owned) return;
+    const restoreDom = (): boolean => {
+      if (!owned) return false;
       owned = false;
       if (content) {
         if (previousInert === null) content.removeAttribute("inert");
         else content.setAttribute("inert", previousInert);
       }
+      return true;
     };
 
     const restoreFocus = () => {
@@ -119,7 +112,7 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
       if (disposed || finished) return;
       finished = true;
       livePhase = "ready";
-      restoreDom();
+      const wasOwned = restoreDom();
       root.dataset.introPhase = "ready";
       root.dataset.introResult = reason;
       clearTimers();
@@ -128,7 +121,7 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
       remember();
       setLocked(false);
       setPhase("ready");
-      restoreFocus();
+      if (wasOwned) restoreFocus();
       document.dispatchEvent(new CustomEvent("portfolio:intro-ready", { bubbles: true, detail: { reason } }));
     };
 
@@ -143,10 +136,9 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
 
     finishRef.current = finish;
 
-    // Check if we should skip intro entirely
     let seen = false;
     try {
-      seen = sessionStorage.getItem(SESSION_KEY) === "seen";
+      seen = sessionStorage.getItem(INTRO_SESSION_KEY) === "seen";
     } catch {
       /* ignore */
     }
@@ -177,7 +169,6 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
     setLocked(true);
     if (bootstrap) bootstrap.recover = () => finish("safety-release");
 
-    // Keyboard and accessibility listeners
     const onKeyDown = (e: KeyboardEvent) => {
       if (finished) return;
       if (e.key === "Escape") {
@@ -185,14 +176,13 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
         finish("skipped");
       }
     };
-    window.addEventListener("keydown", onKeyDown, true);
     const onVisibility = () => { if (document.hidden) finish("backgrounded"); };
     const onMotionPreference = () => { if (reduced.matches) finish("reduced-motion"); };
+    window.addEventListener("keydown", onKeyDown, { capture: true, signal: lifecycle.signal });
     document.addEventListener("visibilitychange", onVisibility, { signal: lifecycle.signal });
     reduced.addEventListener("change", onMotionPreference, { signal: lifecycle.signal });
     skipRef.current?.focus({ preventScroll: true });
 
-    // High precision fluid interpolation synced with real asset milestones and minimum duration
     let currentVal = 0;
     let targetVal = 24;
     let allReady = false;
@@ -226,7 +216,6 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
       if (disposed || finished) return;
 
       const timeProgress = Math.min(1, elapsed() / Math.max(1, minimumMs));
-      // Paced ceiling: ensures the animation doesn't rush ahead before the user can appreciate it
       const timePacedCeiling = allReady
         ? Math.round(timeProgress * 100)
         : Math.min(88, Math.round(Math.pow(timeProgress, 0.75) * 94));
@@ -242,7 +231,6 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
         writeProgress(currentVal);
       }
 
-      // When ready and minimum elapsed time has passed
       if (allReady && elapsed() >= minimumMs && currentVal >= 99 && !hasCompletedHold) {
         hasCompletedHold = true;
         currentVal = 100;
@@ -254,12 +242,10 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
           }
         }, 160);
       }
-
     };
     stopProgress = () => cancelFrame(tick);
     frame.update(tick, true);
 
-    // 1. DOM Ready check
     const domReady =
       document.readyState !== "loading"
         ? Promise.resolve()
@@ -279,7 +265,6 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
       }
     });
 
-    // 2. Font Loading check
     const stepFonts = document.fonts?.ready
       ? document.fonts.ready.then(() => {
           if (!disposed && !finished) {
@@ -290,8 +275,6 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
         })
       : Promise.resolve();
 
-    // 3. Decode the image candidates already selected by next/image. Loading
-    // raw /profile URLs again would duplicate the optimized image requests.
     const preloadHeroAssets = async () => {
       const images = Array.from(content?.querySelectorAll<HTMLImageElement>("#hero img") ?? []);
       await Promise.allSettled(
@@ -317,13 +300,11 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
 
     const stepAssets = preloadHeroAssets();
 
-    // Coordinate readiness
     Promise.allSettled([stepDom, stepFonts, stepAssets]).then(() => {
       targetVal = 100;
       allReady = true;
     });
 
-    // Safety timeout: Maximum allowed intro duration
     schedule(() => {
       if (!disposed && !finished) {
         targetVal = 100;
@@ -332,7 +313,6 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
       }
     }, maximumMs - elapsed());
 
-    // Absolute fallback
     schedule(() => {
       finish("safety-release");
     }, maximumMs + exitMs + 240 - elapsed());
@@ -343,17 +323,15 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
       lifecycle.abort();
       if (bootstrap?.timer) clearTimeout(bootstrap.timer);
       if (bootstrap) bootstrap.recover = undefined;
-      window.removeEventListener("keydown", onKeyDown, true);
-      restoreDom();
+      const wasOwned = restoreDom();
       root.dataset.introPhase = "ready";
-      restoreFocus();
+      if (wasOwned) restoreFocus();
       finishRef.current = () => {};
     };
   }, []);
 
   return (
     <>
-      <script dangerouslySetInnerHTML={{ __html: BOOTSTRAP }} />
       {phase !== "ready" && (
         <div
           className={styles.intro}

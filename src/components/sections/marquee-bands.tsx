@@ -8,7 +8,7 @@ import { useSceneProgress } from "@/components/motion/scroll-director";
 
 export function MarqueeBands() {
   const ref = useRef<HTMLElement>(null);
-  const { progress, enhanced } = useSceneProgress(ref, { start: 1, end: -.5 });
+  const { progress, enhanced } = useSceneProgress(ref, { start: 1, end: -.5, bidirectional: false });
   const upper = useTransform(progress, p => `translate3d(${(p - .5) * 36}px, 0, 0) rotate(-2.8deg) scaleX(1.1)`);
   const lower = useTransform(progress, p => `translate3d(${(.5 - p) * 28}px, 0, 0) rotate(2deg) scaleX(1.1)`);
   return (

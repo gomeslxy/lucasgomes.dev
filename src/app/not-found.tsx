@@ -2,19 +2,19 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-[#080808] text-[#EAEAEA] px-6 text-center">
-      <p className="font-mono text-xs uppercase tracking-widest text-[#E11D2A] mb-3">
+    <main className="flex min-h-[100svh] flex-col items-center justify-center bg-ink px-6 text-center text-bone">
+      <p className="mb-3 font-mono text-xs uppercase tracking-widest text-crimson">
         [404] — Página Não Encontrada
       </p>
-      <h1 className="font-serif italic text-5xl md:text-7xl font-normal tracking-tight mb-6">
+      <h1 className="mb-6 font-serif text-5xl font-normal italic tracking-tight md:text-7xl">
         Destino Inexistente
       </h1>
-      <p className="text-zinc-400 max-w-md text-sm mb-8 leading-relaxed">
+      <p className="mb-8 max-w-md text-sm leading-relaxed text-ash">
         A rota solicitada não existe ou foi movida. Retorne para a página inicial do portfólio.
       </p>
       <Link
         href="/"
-        className="px-6 py-3 rounded-full border border-white/10 hover:border-white/30 bg-white/5 hover:bg-white/10 text-xs font-mono tracking-wider uppercase transition-colors"
+        className="press inline-flex min-h-[44px] items-center justify-center rounded-full border border-white/15 bg-white/5 px-6 text-xs font-mono uppercase tracking-wider text-bone hover:border-crimson hover:bg-crimson/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crimson"
       >
         Voltar ao Início
       </Link>

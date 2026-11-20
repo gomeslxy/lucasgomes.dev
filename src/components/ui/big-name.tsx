@@ -1,12 +1,14 @@
 "use client";
 
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
-import { useEffect, useRef, type PointerEvent } from "react";
+import { useEffect, useRef, type MouseEvent, type PointerEvent } from "react";
 import { useSceneProgress } from "@/components/motion/scroll-director";
 import { experienceConfig } from "@/lib/experience-config";
+import { useScrollTo } from "@/lib/use-scroll-to";
 
 export function BigName() {
   const ref = useRef<HTMLAnchorElement>(null);
+  const scrollTo = useScrollTo();
   const { progress: scrollYProgress, enhanced } = useSceneProgress(ref, { start: .96, end: .5 });
   const bounds = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
 
@@ -64,12 +66,19 @@ export function BigName() {
     };
   }, [enhanced, x, y]);
 
+  function handleClick(event: MouseEvent<HTMLAnchorElement>) {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    scrollTo("#hero");
+  }
+
   return (
     <motion.a
       ref={ref}
       href="#hero"
+      onClick={handleClick}
       aria-label="Lucas — voltar ao início do portfólio"
-      className="sig relative isolate mt-6 block overflow-hidden rounded-xl py-6 text-center outline-none focus-visible:ring-2 focus-visible:ring-crimson sm:py-10 group"
+      className="relative isolate mt-6 block overflow-hidden rounded-xl py-6 text-center outline-none focus-visible:ring-2 focus-visible:ring-crimson sm:py-10 group"
       initial={false}
       onPointerEnter={enhanced ? enter : undefined}
       onPointerMove={enhanced ? move : undefined}
@@ -108,7 +117,7 @@ export function BigName() {
         </motion.div>
       </div>
 
-      <p className="font-mono text-[0.62rem] uppercase tracking-widest text-ash/70 mt-3 group-hover:text-crimson">
+      <p className="font-mono text-[0.65rem] uppercase tracking-widest text-ash mt-3 group-hover:text-crimson">
         ↑ Clique para voltar ao topo
       </p>
     </motion.a>

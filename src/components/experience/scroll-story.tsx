@@ -3,6 +3,7 @@
 import { ArrowDown, ArrowDownRight } from "lucide-react";
 import { motion, useTransform, type MotionValue } from "motion/react";
 import { useId, type CSSProperties } from "react";
+import { AnchorLink } from "@/components/ui/anchor-link";
 import { getStoryFrame, STORY_SETTINGS } from "@/lib/scrollytelling";
 import { useScrollStory } from "@/lib/use-scroll-story";
 import styles from "./scroll-story.module.css";
@@ -54,7 +55,7 @@ export function ScrollStory({ chapters, continueTo }: ScrollStoryProps) {
               />
             ))}
           </div>
-          <StoryDiagram progress={progress} enhanced={enhanced} />
+          <StoryDiagram progress={progress} enhanced={enhanced} activeChapter={activeChapter} />
         </div>
 
         <div className={styles.controls} data-story-controls>
@@ -72,7 +73,9 @@ export function ScrollStory({ chapters, continueTo }: ScrollStoryProps) {
               />
             ))}
           </nav>
-          <a href={continueTo} className={styles.continue}>Continuar <ArrowDownRight size={17} aria-hidden="true" /></a>
+          <AnchorLink href={continueTo} className={styles.continue}>
+            Continuar <ArrowDownRight size={17} aria-hidden="true" />
+          </AnchorLink>
         </div>
       </div>
     </div>
@@ -125,20 +128,52 @@ function ChapterButton({ chapter, index, count, active, progress, headingId, onS
   );
 }
 
-/** Three small composited planes; geometry and lighting are painted once in CSS. */
-function StoryDiagram({ progress, enhanced }: { progress: MotionValue<number>; enhanced: boolean }) {
-  const rotate = useTransform(progress, [0, 0.5, 1], [-12, 0, 12]);
+/** Three layered 3D planes; geometry and lighting are painted once in CSS. */
+function StoryDiagram({
+  progress,
+  enhanced,
+  activeChapter,
+}: {
+  progress: MotionValue<number>;
+  enhanced: boolean;
+  activeChapter: number;
+}) {
   const coreRotate = useTransform(progress, [0, 0.5, 1], [0, 90, 180]);
-  const outerTransform = useTransform(progress, [0, 0.5, 1], ["translate3d(0, 0, 0) rotate(-12deg)", "translate3d(0, -22px, 0) rotate(0deg)", "translate3d(0, -44px, 0) rotate(12deg)"]);
-  const innerTransform = useTransform(progress, [0, 0.5, 1], ["translate3d(0, 0, 0) rotate(12deg)", "translate3d(0, 22px, 0) rotate(0deg)", "translate3d(0, 44px, 0) rotate(-12deg)"]);
+  const outerTransform = useTransform(
+    progress,
+    [0, 0.5, 1],
+    [
+      "perspective(900px) rotateX(10deg) rotateY(-8deg) translate3d(0, 10px, 0) rotate(-10deg)",
+      "perspective(900px) rotateX(0deg) rotateY(0deg) translate3d(0, -16px, 18px) rotate(0deg)",
+      "perspective(900px) rotateX(-10deg) rotateY(8deg) translate3d(0, -34px, 34px) rotate(10deg)",
+    ],
+  );
+  const middleTransform = useTransform(
+    progress,
+    [0, 0.5, 1],
+    [
+      "perspective(900px) rotateX(6deg) rotateY(-4deg) translate3d(0, 4px, 0) rotate(-8deg)",
+      "perspective(900px) rotateX(0deg) rotateY(0deg) translate3d(0, 0px, 12px) rotate(0deg)",
+      "perspective(900px) rotateX(-6deg) rotateY(4deg) translate3d(0, -6px, 20px) rotate(8deg)",
+    ],
+  );
+  const innerTransform = useTransform(
+    progress,
+    [0, 0.5, 1],
+    [
+      "perspective(900px) rotateX(-8deg) rotateY(6deg) translate3d(0, -8px, 0) rotate(10deg)",
+      "perspective(900px) rotateX(0deg) rotateY(0deg) translate3d(0, 16px, 24px) rotate(0deg)",
+      "perspective(900px) rotateX(8deg) rotateY(-6deg) translate3d(0, 34px, 42px) rotate(-10deg)",
+    ],
+  );
 
   return (
-    <div className={styles.diagram} data-story-diagram aria-hidden="true">
+    <div className={styles.diagram} data-story-diagram data-active-chapter={activeChapter} aria-hidden="true">
       <div className={styles.diagramMeta}><span>ARQUITETURA / VISTA EXPANDIDA</span><span>FIG. 02</span></div>
       <div className={styles.diagramDrawing}>
         <span className={styles.axisX} /><span className={styles.axisY} />
         <motion.div className={`${styles.plane} ${styles.outerPlane}`} style={enhanced ? { transform: outerTransform } : undefined}><span>03 / PESSOAS</span><i /></motion.div>
-        <motion.div className={`${styles.plane} ${styles.middlePlane}`} style={enhanced ? { rotate } : undefined}><span>02 / SISTEMA</span><i /></motion.div>
+        <motion.div className={`${styles.plane} ${styles.middlePlane}`} style={enhanced ? { transform: middleTransform } : undefined}><span>02 / SISTEMA</span><i /></motion.div>
         <motion.div className={`${styles.plane} ${styles.innerPlane}`} style={enhanced ? { transform: innerTransform } : undefined}><span>01 / DADOS</span><i /></motion.div>
         <motion.div className={styles.core} style={enhanced ? { rotate: coreRotate } : undefined}><span /><span /></motion.div>
       </div>

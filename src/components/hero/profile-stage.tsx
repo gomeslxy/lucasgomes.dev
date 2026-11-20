@@ -1,28 +1,24 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { ArrowDown, ArrowUpRight, MoveUpRight } from "lucide-react";
 import { motion, useMotionValueEvent, useReducedMotion, useScroll, useTransform } from "motion/react";
-import { type ReactNode, useEffect, useRef, useSyncExternalStore } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { useScrollTo } from "@/lib/use-scroll-to";
-import { useEnhancedMotion } from "@/lib/use-animation-policy";
+import { useEnhancedMotion, useSpatialHeroPolicy } from "@/lib/use-animation-policy";
 import { ProfileDepth } from "./profile-depth";
 import styles from "./hero.module.css";
 
-// Match CSS pinning: short viewports and touch keep natural flow.
-const SPATIAL_QUERY = "(min-width: 900px) and (min-height: 880px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)";
-function subscribe(callback: () => void) {
-  const media = window.matchMedia(SPATIAL_QUERY);
-  media.addEventListener("change", callback);
-  return () => media.removeEventListener("change", callback);
-}
-const getSnapshot = () => window.matchMedia(SPATIAL_QUERY).matches;
-const getServerSnapshot = () => false;
+const HeroWebGLField = dynamic(
+  () => import("./hero-webgl-field").then((mod) => mod.HeroWebGLField),
+  { ssr: false },
+);
 
 export function ProfileStage({ children }: { children: ReactNode }) {
   const sectionRef = useRef<HTMLElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLDivElement>(null);
-  const spatial = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const spatial = useSpatialHeroPolicy();
   const reduced = useReducedMotion();
   const enhanced = useEnhancedMotion();
   const scrollTo = useScrollTo();
@@ -74,6 +70,9 @@ export function ProfileStage({ children }: { children: ReactNode }) {
       <div className={styles.stickyStage}>
         <div className={styles.background} aria-hidden="true">
           <div className={styles.atmosphere} />
+          {enhanced && !reduced && (
+            <HeroWebGLField scrollProgress={scrollYProgress} sectionRef={sectionRef} />
+          )}
           <span className={styles.backgroundWord}>LUCAS</span>
           <span className={`${styles.guide} ${styles.guideLeft}`} />
           <span className={`${styles.guide} ${styles.guideRight}`} />
@@ -96,7 +95,18 @@ export function ProfileStage({ children }: { children: ReactNode }) {
         </div>
         <motion.div ref={footerRef} className={styles.stageFooter} style={reduced || !enhanced ? undefined : { opacity: cueOpacity }}>
           <span className={styles.footerNote}><span className={styles.footerAsterisk}>✳</span> CURIOSIDADE É O MEU ESTADO PADRÃO.</span>
-          <a href="#work" onClick={(event) => { event.preventDefault(); scrollTo("#work"); }} className={styles.scrollHint}><span>CONTINUE EXPLORANDO</span><span className={styles.scrollIcon}><ArrowDown size={14} aria-hidden="true" /></span></a>
+          <a
+            href="#work"
+            onClick={(event) => {
+              if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+              event.preventDefault();
+              scrollTo("#work");
+            }}
+            className={styles.scrollHint}
+          >
+            <span>CONTINUE EXPLORANDO</span>
+            <span className={styles.scrollIcon}><ArrowDown size={14} aria-hidden="true" /></span>
+          </a>
           <span className={styles.footerIndex}><span>PORTFÓLIO PESSOAL</span><ArrowUpRight size={12} aria-hidden="true" />2026</span>
         </motion.div>
       </div>
