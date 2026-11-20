@@ -44,7 +44,7 @@ const FOOTNOTES = [
 export function BondsPipeline() {
   return (
     <ArchitecturePipeline
-      title="BONDS AGENCE V4 · Fluxo da arquitetura"
+      title="BONDS AGENCE · Fluxo da arquitetura"
       nodes={NODES}
       footnotes={FOOTNOTES}
     />

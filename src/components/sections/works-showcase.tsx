@@ -104,12 +104,11 @@ function FlagshipCase({ project }: { project: Project }) {
         <Reveal
           pattern="depth"
           delay={0.08}
-          innerClassName="h-full"
+          innerClassName="h-full flex flex-col justify-center"
           className="lg:col-span-7 p-4 sm:p-6 lg:border-r lg:border-white/10"
         >
           <ProjectPreview
             project={project}
-            minHeightClass="min-h-[280px] sm:min-h-[380px] lg:min-h-[460px]"
             imageSizes="(max-width: 1023px) 92vw, (max-width: 1600px) 56vw, 880px"
           />
         </Reveal>
@@ -189,10 +188,9 @@ function ProductionSplitCase({ project }: { project: Project }) {
       <div className="grid lg:grid-cols-12 items-stretch">
         {/* Left Visual + Flow Column */}
         <div className="lg:col-span-5 p-4 sm:p-6 lg:border-r lg:border-white/10 flex flex-col justify-between gap-5">
-          <Reveal pattern="depth" delay={0.08} innerClassName="h-full" className="flex-1">
+          <Reveal pattern="depth" delay={0.08} innerClassName="h-full flex flex-col justify-center" className="flex-1">
             <ProjectPreview
               project={project}
-              minHeightClass="min-h-[280px] sm:min-h-[340px] lg:min-h-[420px]"
               imageSizes="(max-width: 1023px) 92vw, (max-width: 1600px) 40vw, 640px"
             />
           </Reveal>
@@ -295,39 +293,39 @@ function ProductionSplitCase({ project }: { project: Project }) {
 
 function ProjectPreview({
   project,
-  minHeightClass,
   imageSizes,
 }: {
   project: Project;
-  minHeightClass: string;
   imageSizes: string;
 }) {
   return (
     <ProjectModalTrigger
       projectSlug={project.slug}
       ariaLabel={`Ver detalhes técnicos de ${project.shortTitle}`}
-      className={`group/media relative block w-full h-full ${minHeightClass} cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-[#141416] text-left hover:border-crimson/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson`}
+      className="group/media flex w-full flex-col cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-[#141416] text-left hover:border-crimson/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson"
     >
-      <div className="absolute inset-x-0 top-0 z-10 flex h-9 items-center justify-between gap-2 border-b border-white/10 bg-[#121214]/95 px-3.5 font-mono text-[10px]">
+      <div className="flex h-9 shrink-0 items-center justify-between gap-2 border-b border-white/10 bg-[#121214] px-3.5 font-mono text-[10px]">
         <span className="text-bone/85 tracking-wide">{project.domain}</span>
         <span className="uppercase tracking-[0.14em] text-ash">Preview</span>
       </div>
 
-      <Image
-        src={project.image}
-        alt={project.imageAlt}
-        fill
-        sizes={imageSizes}
-        className="object-cover object-top pt-9 motion-safe:transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-safe:group-hover/media:scale-[1.03]"
-      />
-      <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent" />
+      <div className="relative aspect-[1024/470] w-full overflow-hidden bg-[#0c0c0e]">
+        <Image
+          src={project.image}
+          alt={project.imageAlt}
+          fill
+          sizes={imageSizes}
+          quality={90}
+          className="object-cover object-top motion-safe:transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-safe:group-hover/media:scale-[1.02]"
+        />
+      </div>
 
-      <div className="absolute inset-x-4 bottom-4 flex items-center justify-between gap-3 text-white">
+      <div className="flex items-center justify-between gap-3 border-t border-white/10 bg-[#121214] px-4 py-3 text-white">
         <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-bone/85">
           Ver detalhes técnicos
         </span>
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/25 bg-black/60 motion-safe:transition-transform motion-safe:group-hover/media:scale-110 group-hover/media:border-crimson">
-          <ArrowUpRight size={18} className="text-white group-hover/media:text-crimson" aria-hidden="true" />
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-white/20 bg-black/40 motion-safe:transition-transform motion-safe:group-hover/media:scale-110 group-hover/media:border-crimson">
+          <ArrowUpRight size={15} className="text-white group-hover/media:text-crimson" aria-hidden="true" />
         </span>
       </div>
     </ProjectModalTrigger>

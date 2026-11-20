@@ -2,6 +2,7 @@
 
 import { cancelFrame, frame, type MotionValue } from "motion/react";
 import { useEffect, useRef, type RefObject } from "react";
+import { markWebGLFieldReady } from "@/lib/readiness-signals";
 
 const VERTEX_SHADER_SOURCE = `
 attribute vec2 a_position;
@@ -120,6 +121,7 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
 
     if (!gl) {
       canvas.style.display = "none";
+      markWebGLFieldReady();
       return;
     }
 
@@ -270,6 +272,15 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
       }
     };
 
+    const drawFrame = (now: number) => {
+      if (!program || disposed || contextLost) return;
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.uniform2f(uMouse, currentX, currentY);
+      gl.uniform1f(uScroll, scrollProgress.get());
+      gl.uniform1f(uTime, (now - startTime) * 0.001);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    };
+
     const renderFrame = (now: number) => {
       rafId = null;
       if (!canAnimate() || !program) return;
@@ -281,11 +292,7 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
       currentX += (targetX - currentX) * alpha;
       currentY += (targetY - currentY) * alpha;
 
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.uniform2f(uMouse, currentX, currentY);
-      gl.uniform1f(uScroll, scrollProgress.get());
-      gl.uniform1f(uTime, (now - startTime) * 0.001);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      drawFrame(now);
 
       rafId = requestAnimationFrame(renderFrame);
     };
@@ -303,9 +310,12 @@ export function HeroWebGLField({ scrollProgress, sectionRef }: HeroWebGLFieldPro
 
     if (!initPipeline()) {
       canvas.style.display = "none";
+      markWebGLFieldReady();
       return;
     }
     applyResize();
+    drawFrame(startTime);
+    markWebGLFieldReady();
 
     const invalidateBounds = () => {
       cachedBounds.valid = false;

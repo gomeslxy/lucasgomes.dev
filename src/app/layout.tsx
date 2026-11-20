@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   },
   title: "Lucas — Desenvolvedor Full-Stack | Indaiatuba, SP",
   description:
-    "Lucas, desenvolvedor Full-Stack com foco em Next.js, React, TypeScript e PostgreSQL. Projetos com RLS, tempo real, rate limiting na Edge e integrações de IA: Agendra e BONDS AGENCE V4.",
+    "Lucas, desenvolvedor Full-Stack com foco em Next.js, React, TypeScript e PostgreSQL. Projetos com RLS, tempo real, rate limiting na Edge e integrações de IA: Agendra e BONDS AGENCE.",
   keywords: [
     "Lucas",
     "Desenvolvedor Full-Stack",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     "PostgreSQL RLS",
     "Arquitetura Multi-Tenant",
     "Agendra",
-    "BONDS AGENCE V4",
+    "BONDS AGENCE",
     "Supabase Realtime",
     "Upstash Redis",
     "Indaiatuba",
@@ -65,9 +65,9 @@ export const metadata: Metadata = {
     url: "/",
     title: "Lucas — Desenvolvedor Full-Stack",
     description:
-      "Projetos Full-Stack com Next.js, TypeScript, PostgreSQL (RLS), tempo real e IA aplicada: Agendra e BONDS AGENCE V4.",
+      "Projetos Full-Stack com Next.js, TypeScript, PostgreSQL (RLS), tempo real e IA aplicada: Agendra e BONDS AGENCE.",
     siteName: "Lucas — Portfólio",
-    images: [{ url: "/work/agendra.jpg", width: 896, height: 1200, alt: "Agendra — plataforma multi-tenant com IA" }],
+    images: [{ url: "/work/agendra.jpg", width: 1024, height: 464, alt: "Agendra — plataforma multi-tenant com IA" }],
   },
   twitter: {
     card: "summary_large_image",
