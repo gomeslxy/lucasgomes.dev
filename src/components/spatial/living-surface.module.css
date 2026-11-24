@@ -40,24 +40,6 @@
   pointer-events: none;
 }
 
-/* The mask is static. Only the small prepainted light travels across the rim. */
-.rimEnvelope {
-  position: absolute;
-  inset: -1px;
-  z-index: 1;
-  border-radius: inherit;
-  padding: 1px;
-  overflow: hidden;
-  pointer-events: none;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-}
-
-.rimLight {
-  background: radial-gradient(circle at center, rgb(255 205 209 / 18%), rgb(237 74 90 / 14%) 30%, transparent 72%);
-}
-
 .capabilitySurface {
   border: 1px solid rgb(255 255 255 / 11%);
   border-radius: 14px;

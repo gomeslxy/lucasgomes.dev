@@ -2,6 +2,7 @@ import { SectionLabel } from "@/components/ui/section-label";
 import { GlowSurface } from "@/components/ui/glow-surface";
 import { capabilities, interests } from "@/lib/data";
 import styles from "@/components/spatial/living-surface.module.css";
+import { Reveal } from "@/components/motion/reveal";
 
 export function StackCapabilities() {
   return (
@@ -14,13 +15,13 @@ export function StackCapabilities() {
           <div className="lg:col-span-5 flex flex-col justify-between">
             <div>
               <h2 className="display text-[clamp(2.6rem,7vw,6rem)] leading-[0.85]">
-                Tecnologias <br />
-                <span className="font-serif italic text-crimson text-[0.85em] normal-case tracking-normal">em</span> <br />
-                prática.
+                <Reveal as="span" pattern="heading">Tecnologias</Reveal>
+                <Reveal as="span" pattern="heading" delay={.08}><span className="font-serif italic text-crimson text-[0.85em] normal-case tracking-normal">em</span></Reveal>
+                <Reveal as="span" pattern="heading" delay={.16}>prática.</Reveal>
               </h2>
-              <p className="mt-8 text-base text-bone/70 leading-relaxed max-w-md">
+              <Reveal pattern="body" delay={.1} className="mt-8 max-w-md"><p className="text-base text-bone/70 leading-relaxed">
                 Minha stack conecta interfaces, APIs e dados. Uso os projetos para aprofundar decisões de arquitetura, testar integrações e entender os limites de cada ferramenta.
-              </p>
+              </p></Reveal>
             </div>
 
             {/* Lifestyle / Personal interests */}
@@ -28,12 +29,12 @@ export function StackCapabilities() {
               <span className="label text-ash text-xs">Interesses</span>
               <div className="mt-4 flex flex-wrap gap-2">
                 {interests.map((item) => (
-                  <span
+                  <Reveal as="span" pattern="meta" delay={interests.indexOf(item) * .035}
                     key={item}
-                    className="label rounded-full border border-white/15 px-3 py-1.5 text-[0.62rem] text-bone/70 hover:border-crimson hover:text-bone transition-colors select-none"
+                    className="label rounded-full border border-white/15 px-3 py-1.5 text-[0.62rem] text-bone/70 hover:border-crimson hover:text-bone select-none"
                   >
                     {item}
-                  </span>
+                  </Reveal>
                 ))}
               </div>
             </div>
@@ -42,7 +43,7 @@ export function StackCapabilities() {
           {/* Native disclosure avoids hover-driven state and animated layout. */}
           <div className="lg:col-span-7 flex flex-col gap-4">
             {capabilities.map((cap, index) => (
-              <GlowSurface key={cap.index} className={styles.capabilitySurface}>
+              <Reveal key={cap.index} pattern="row" delay={index * .035}><GlowSurface className={styles.capabilitySurface}>
                 <details name="capabilities" open={index === 0} className={styles.capability}>
                   <summary>
                     <span className={styles.moduleHeader}>
@@ -65,7 +66,7 @@ export function StackCapabilities() {
                     ))}
                   </ul>
                 </details>
-              </GlowSurface>
+              </GlowSurface></Reveal>
             ))}
           </div>
         </div>

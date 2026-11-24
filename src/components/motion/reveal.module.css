@@ -1,0 +1,11 @@
+@layer components {
+.anchor { display: block; min-width: 0; }
+.content { display: block; min-width: 0; transform-origin: 0 100%; }
+.anchor[data-reveal="heading"] { overflow: clip; padding-block: .08em .16em; margin-bottom: -.16em; }
+.anchor[data-reveal="meta"] .content { transform-origin: 0 50%; }
+.anchor[data-reveal="depth"] .content { transform-origin: 50% 60%; }
+.anchor:focus-within > .content { transform: none !important; opacity: 1 !important; }
+@media (max-width: 767px), (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .content { transform: none !important; opacity: 1 !important; }
+}
+}

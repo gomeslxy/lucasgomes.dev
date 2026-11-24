@@ -1,5 +1,19 @@
 # Refatoração de performance
 
+## Orquestração global e auditoria visual — 25/10/2026
+
+A rota principal agora usa `ScrollDirectorProvider` para as revelações editoriais, costuras e assinatura, com uma fonte compartilhada, IO/RO compartilhados e geometria em cache. Cinco padrões (`heading`, `meta`, `body`, `depth`, `row`) diferenciam títulos, badges, parágrafos, chamadas e registros. As costuras animam planos pequenos, mantendo o conteúdo e ancestors sticky estacionários.
+
+Intro, header, materiais e cards foram revisados para eliminar blur global, backdrop filters móveis, transforms de artigos completos e transições amplas. O contador não renderiza React por frame. Bloqueios de scroll agora respeitam múltiplos proprietários. A intro tem mínimo de 320ms e saída de 560/360ms. Build final passou: rota estática e First Load JS de 209kB; o tamanho não é uma redução de bundle medida.
+
+Os testes de curvas, lifecycle do diretor, cache de geometria, anchors compartilhados e ownership das travas passaram. O guard percorreu 55 dependências da rota e aprovou keyframes/transições CSS limitados a transform/opacity. Isso valida código e contratos; não confirma composição pela GPU em todos os navegadores. [Diagnóstico e evidências da auditoria global](docs/PERFORMANCE-VISUAL-AUDIT.md).
+
+## Scrollytelling compacto — 25/10/2026
+
+O manifesto agora usa uma cena sticky com três capítulos e 680px de percurso animado. Lenis e Motion compartilham o ciclo de frames existente. O progresso alimenta MotionValues diretamente, com curva quintic, platôs de leitura e assentamento direcional após wheel. As atualizações animam apenas transform e opacity; medidas de geometria ficam em cache e são invalidadas por resize, fontes e término da intro. CSS reserva o tamanho antes da hidratação. O manifesto não recebe o fold de perspectiva do wrapper, e o conteúdo da intro libera will-change ao terminar.
+
+Testes matemáticos, TypeScript, build de produção e diff check passaram. A rota principal foi pré-renderizada; o build informou 207kB de First Load JS. Cena e controles foram conferidos no navegador integrado em 1280×720; composição também conferida em iframes de 320×740, 375×812 e 768×640. Sem avisos ou erros de console capturados na navegação inicial. FPS, CLS e aparelhos físicos não foram medidos. A arquitetura reduz fontes conhecidas de custo, mas esses checks não comprovam 60–120 FPS nem ausência universal de layout shifts. [Implementação, configuração, testes e roteiro de profiling](docs/SCROLLYTELLING.md).
+
 ## Redesign e reposicionamento — 24/10/2026
 
 Esta revisão substitui a organização visual descrita no registro anterior abaixo. A Hero e a grade de projetos agora são Server Components. O leque com 360vh não é mais importado pela página; os dois projetos podem ser acessados imediatamente. A seção Sobre também entrega conteúdo estático no HTML.

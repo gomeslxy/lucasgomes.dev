@@ -15,7 +15,7 @@ type CountUpProps = {
 
 export function CountUp({ value, pad = 2, suffix = "", className, duration = 1.8 }: CountUpProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "0px 0px -10% 0px" });
+  const inView = useInView(ref, { once: false, margin: "0px 0px -10% 0px" });
   const enhancedMotion = useEnhancedMotion();
   const mv = useMotionValue(0);
   const displayValue = `${String(value).padStart(pad, "0")}${suffix}`;
@@ -24,6 +24,7 @@ export function CountUp({ value, pad = 2, suffix = "", className, duration = 1.8
     const element = ref.current;
     if (!element || !enhancedMotion || !inView) return;
 
+    mv.set(0);
     // Update only this text node; a counter tick must not render React's tree.
     let previous = "";
     const unsubscribe = mv.on("change", (latest) => {

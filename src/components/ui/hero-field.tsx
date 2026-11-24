@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { cancelFrame, frame, motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import { useEffect, useRef, type RefObject } from "react";
 import { useEnhancedMotion } from "@/lib/use-animation-policy";
 import { SPRING_FOLLOW } from "@/lib/utils";
 
@@ -25,11 +25,12 @@ export function HeroField() {
     const el = ref.current;
     if (!el) return;
     // Direct attribute write: no React render when the hero enters/leaves.
-    const observer = new IntersectionObserver(([entry]) => {
-      el.dataset.heroPaused = String(!(entry?.isIntersecting ?? true));
-    });
+    let visible = true;
+    const update = () => { el.dataset.heroPaused = String(!visible || document.hidden); };
+    const observer = new IntersectionObserver(([entry]) => { visible = !!entry?.isIntersecting; update(); });
     observer.observe(el);
-    return () => observer.disconnect();
+    document.addEventListener("visibilitychange", update);
+    return () => { observer.disconnect(); document.removeEventListener("visibilitychange", update); };
   }, []);
 
   return (
@@ -51,9 +52,9 @@ export function HeroField() {
 
 function PointerLens({ fieldRef }: { fieldRef: RefObject<HTMLDivElement | null> }) {
   // Only mounted on the client (enhanced is false during SSR), so window is safe.
-  const [rest] = useState(() => ({ x: window.innerWidth * REST.x, y: window.innerHeight * REST.y }));
-  const x = useMotionValue(rest.x);
-  const y = useMotionValue(rest.y);
+  const rest = useRef({ x: window.innerWidth * REST.x, y: window.innerHeight * REST.y });
+  const x = useMotionValue(rest.current.x);
+  const y = useMotionValue(rest.current.y);
   const sx = useSpring(x, SPRING_FOLLOW);
   const sy = useSpring(y, SPRING_FOLLOW);
   const ix = useTransform(sx, (v) => -v);
@@ -66,34 +67,56 @@ function PointerLens({ fieldRef }: { fieldRef: RefObject<HTMLDivElement | null> 
 
     // Page-space origin, measured on entry only — never inside pointermove.
     let origin = { x: 0, y: 0 };
+    let inside = false;
+    let dirty = true;
     const measure = () => {
       const rect = field.getBoundingClientRect();
       origin = { x: rect.left + window.scrollX, y: rect.top + window.scrollY };
+      rest.current = { x: rect.width * REST.x, y: rect.height * REST.y };
+      dirty = false;
+      if (!inside) { x.set(rest.current.x); y.set(rest.current.y); }
     };
-    measure();
+    const queueMeasure = () => { dirty = true; frame.read(measure); };
+    const invalidate = () => { dirty = true; };
+    queueMeasure();
 
     const enter = (event: PointerEvent) => {
-      if (event.pointerType === "mouse") measure();
+      if (event.pointerType === "mouse") { inside = true; measure(); }
     };
     const move = (event: PointerEvent) => {
       if (event.pointerType !== "mouse") return;
+      if (dirty) measure();
       x.set(event.pageX - origin.x);
       y.set(event.pageY - origin.y);
     };
     const leave = () => {
-      x.set(rest.x);
-      y.set(rest.y);
+      inside = false;
+      x.set(rest.current.x);
+      y.set(rest.current.y);
     };
+    const suspend = () => { if (document.hidden) leave(); };
 
     section.addEventListener("pointerenter", enter);
     section.addEventListener("pointermove", move, { passive: true });
     section.addEventListener("pointerleave", leave);
+    section.addEventListener("pointercancel", leave);
+    window.addEventListener("scroll", invalidate, { passive: true });
+    window.addEventListener("resize", queueMeasure, { passive: true });
+    document.addEventListener("visibilitychange", suspend);
+    const observer = new ResizeObserver(queueMeasure);
+    observer.observe(field);
     return () => {
       section.removeEventListener("pointerenter", enter);
       section.removeEventListener("pointermove", move);
       section.removeEventListener("pointerleave", leave);
+      section.removeEventListener("pointercancel", leave);
+      window.removeEventListener("scroll", invalidate);
+      window.removeEventListener("resize", queueMeasure);
+      document.removeEventListener("visibilitychange", suspend);
+      observer.disconnect();
+      cancelFrame(measure);
     };
-  }, [fieldRef, rest, x, y]);
+  }, [fieldRef, x, y]);
 
   return (
     <motion.div className="hero-lens" style={{ x: sx, y: sy }}>

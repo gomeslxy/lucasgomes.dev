@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Auditoria local de movimento</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root { color-scheme: dark; font: 14px/1.5 system-ui, sans-serif; }
+    body { margin: 0; background: #1b1b1d; color: #f1f1ee; }
+    .toolbar { position: sticky; top: 0; z-index: 2; padding: 14px 18px; background: #232326; border-bottom: 1px solid #ffffff20; }
+    .toolbar h1 { margin: 0 0 8px; font-size: 16px; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    button { min-height: 44px; padding: 8px 14px; border: 1px solid #ffffff38; border-radius: 6px; color: inherit; background: #303034; font: inherit; cursor: pointer; }
+    button:hover { background: #414147; }
+    button:focus-visible { outline: 2px solid #ff8992; outline-offset: 3px; }
+    button[aria-pressed="true"] { border-color: #ff8992; }
+    button:disabled { cursor: wait; opacity: .45; }
+    #start { color: #fff; background: #b91d2d; font-weight: 650; }
+    #status { margin: 10px 0 0; min-height: 1.5em; color: #d2cbc9; }
+    .note { margin: 8px 0 0; color: #afa9a8; font-size: 12px; max-width: 110ch; }
+    .viewport { width: var(--audit-width, 1280px); max-width: 100%; margin: 18px auto; }
+    iframe { display: block; width: 100%; height: var(--audit-height, 720px); border: 1px solid #ffffff30; background: #080808; }
+    .output { padding: 0 18px 24px; max-width: 1280px; margin: auto; }
+    .output h2 { font-size: 15px; }
+    pre { padding: 16px; border: 1px solid #ffffff20; border-radius: 8px; background: #121214; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.65 ui-monospace, monospace; }
+  </style>
+</head>
+<body>
+  <header class="toolbar">
+    <h1>Auditoria local de movimento</h1>
+    <div class="controls">
+      <button id="start" type="button" disabled>Medir percurso</button>
+      <button type="button" data-width="1280" data-height="720" aria-pressed="true">1280 × 720</button>
+      <button type="button" data-width="768" data-height="640" aria-pressed="false">768 × 640</button>
+      <button type="button" data-width="375" data-height="812" aria-pressed="false">375 × 812</button>
+    </div>
+    <p id="status" role="status" aria-live="polite">Carregando prévia de produção…</p>
+    <p class="note">Um segundo de aquecimento e 16 segundos de scroll programático, ida e volta. Cadência de requestAnimationFrame não é trace da GPU, contagem de frames perdidos nem comprovação de 120 FPS. Mantenha esta aba visível e evite interagir durante a medição.</p>
+  </header>
+  <main>
+    <div class="viewport" id="viewport"><iframe id="preview" title="Prévia de produção para auditoria de movimento" src="/#hero" width="1280" height="720"></iframe></div>
+    <section class="output" aria-labelledby="results-title">
+      <h2 id="results-title">Resultado da passagem</h2>
+      <pre id="results">Nenhuma medição executada.</pre>
+    </section>
+  </main>
+  <script>
+    (() => {
+      "use strict";
+      const preview = document.getElementById("preview");
+      const viewport = document.getElementById("viewport");
+      const start = document.getElementById("start");
+      const status = document.getElementById("status");
+      const results = document.getElementById("results");
+      const sizes = Array.from(document.querySelectorAll("[data-width]"));
+      const lifecycle = new AbortController();
+      let activeRun;
+      let ready = false;
+      let disposed = false;
+      let requested = { width: 1280, height: 720 };
+      const round = value => Math.round(value * 1000) / 1000;
+      const failure = message => new DOMException(message, "AbortError");
+
+      function frameWindow() {
+        const win = preview.contentWindow;
+        if (!win || !win.document || win.document.readyState === "loading") throw new Error("A prévia ainda não está pronta.");
+        return win;
+      }
+
+      function setBusy(busy) {
+        start.disabled = busy || !ready;
+        start.setAttribute("aria-busy", String(busy));
+        sizes.forEach(button => { button.disabled = busy; });
+      }
+
+      function onLoad() {
+        if (activeRun) activeRun.abort(failure("A prévia foi recarregada durante a medição."));
+        try {
+          const win = frameWindow();
+          ready = !!win.document.querySelector("#hero");
+          status.textContent = ready ? "Prévia pronta. Selecione a viewport e inicie a medição." : "A origem não retornou o portfólio. Confira o servidor de produção.";
+        } catch {
+          ready = false;
+          status.textContent = "Não foi possível acessar a prévia na mesma origem local.";
+        }
+        if (!activeRun) setBusy(false);
+      }
+
+      function runFrames(win, duration, signal, onFrame) {
+        return new Promise((resolve, reject) => {
+          let raf = 0;
+          let last;
+          const began = win.performance.now();
+          const abort = () => {
+            win.cancelAnimationFrame(raf);
+            signal.removeEventListener("abort", abort);
+            reject(signal.reason || failure("Medição cancelada."));
+          };
+          const tick = timestamp => {
+            if (signal.aborted || disposed) { abort(); return; }
+            const elapsed = timestamp - began;
+            try {
+              onFrame?.({ elapsed, delta: last === undefined ? undefined : timestamp - last });
+              last = timestamp;
+              if (elapsed >= duration) {
+                signal.removeEventListener("abort", abort);
+                resolve(elapsed);
+              } else raf = win.requestAnimationFrame(tick);
+            } catch (error) {
+              signal.removeEventListener("abort", abort);
+              reject(error);
+            }
+          };
+          signal.addEventListener("abort", abort, { once: true });
+          if (signal.aborted) abort();
+          else raf = win.requestAnimationFrame(tick);
+        });
+      }
+
+      function observerFor(win, type, signal, callback) {
+        if (!win.PerformanceObserver || !win.PerformanceObserver.supportedEntryTypes?.includes(type)) return undefined;
+        try {
+          const observer = new win.PerformanceObserver(list => {
+            if (!signal.aborted && !disposed) callback(list.getEntries());
+          });
+          observer.observe({ type, buffered: false });
+          return { observer, callback };
+        } catch { return undefined; }
+      }
+
+      function waitForFonts(win, signal) {
+        if (!win.document.fonts?.ready) return Promise.resolve();
+        return new Promise((resolve, reject) => {
+          let finished = false;
+          const finish = error => {
+            if (finished) return;
+            finished = true;
+            clearTimeout(timer);
+            signal.removeEventListener("abort", abort);
+            if (error) reject(error);
+            else resolve();
+          };
+          const abort = () => finish(signal.reason || failure("Espera por fontes cancelada."));
+          const timer = setTimeout(() => finish(), 2500);
+          signal.addEventListener("abort", abort, { once: true });
+          if (signal.aborted) abort();
+          else win.document.fonts.ready.then(() => finish(), () => finish());
+        });
+      }
+
+      async function measure() {
+        if (activeRun || !ready || disposed) return;
+        const run = new AbortController();
+        activeRun = run;
+        setBusy(true);
+        results.textContent = "Medição em andamento…";
+        let win;
+        const observers = [];
+        const visibilityStates = new Set();
+        const visibility = () => {
+          try { visibilityStates.add(`parent:${document.visibilityState};iframe:${win.document.visibilityState}`); }
+          catch { visibilityStates.add("iframe:indisponível"); }
+        };
+        const abortPreview = () => run.abort(failure("A prévia foi descarregada."));
+        try {
+          win = frameWindow();
+          win.addEventListener("pagehide", abortPreview, { once: true });
+          document.addEventListener("visibilitychange", visibility);
+          win.document.addEventListener("visibilitychange", visibility);
+          visibility();
+          status.textContent = "Preparando fontes e aquecendo por pelo menos um segundo…";
+          // A timeout avoids hanging the harness on a broken font request.
+          await waitForFonts(win, run.signal);
+          if (run.signal.aborted) throw run.signal.reason;
+          win.scrollTo({ top: 0, behavior: "instant" });
+          const warmupMs = await runFrames(win, 1000, run.signal);
+          const scrollElement = win.document.scrollingElement || win.document.documentElement;
+          const maxScroll = Math.max(0, scrollElement.scrollHeight - win.innerHeight);
+          const frameRect = preview.getBoundingClientRect();
+          const actualViewport = { width: win.innerWidth, height: win.innerHeight, devicePixelRatio: win.devicePixelRatio };
+          const clippedByHost = frameRect.top < 0 || frameRect.bottom > window.innerHeight || frameRect.left < 0 || frameRect.right > window.innerWidth;
+          let cls = 0;
+          const longTasks = [];
+          const layout = observerFor(win, "layout-shift", run.signal, entries => {
+            for (const entry of entries) if (!entry.hadRecentInput) cls += entry.value;
+          });
+          const tasks = observerFor(win, "longtask", run.signal, entries => {
+            for (const entry of entries) longTasks.push(entry.duration);
+          });
+          if (layout) observers.push(layout);
+          if (tasks) observers.push(tasks);
+          const intervals = [];
+          status.textContent = "Medindo: oito segundos de ida e oito de volta…";
+          const durationMs = await runFrames(win, 16000, run.signal, ({ elapsed, delta }) => {
+            if (delta !== undefined && delta >= 0) intervals.push(delta);
+            const phase = Math.min(1, elapsed / 16000);
+            const position = phase <= .5 ? phase * 2 : (1 - phase) * 2;
+            win.scrollTo({ top: maxScroll * position, behavior: "instant" });
+          });
+          // Deliver any records queued between the last observer callback and RAF.
+          for (const item of observers) { item.callback(item.observer.takeRecords()); item.observer.disconnect(); }
+          observers.length = 0;
+          visibility();
+          const sorted = intervals.slice().sort((a, b) => a - b);
+          const percentile = p => sorted.length ? sorted[Math.min(sorted.length - 1, Math.ceil(sorted.length * p) - 1)] : 0;
+          const median = percentile(.5);
+          const overflowPx = Math.max(0, win.document.documentElement.scrollWidth - win.document.documentElement.clientWidth);
+          const report = {
+            status: "completed",
+            method: "Scroll programático instantâneo em iframe da prévia de produção; sem wheel/touch sintéticos.",
+            requestedViewport: requested,
+            actualViewport,
+            iframeClippedByHost: clippedByHost,
+            warmupMs: round(warmupMs),
+            traversalDurationMs: round(durationMs),
+            totalWarmupAndTraversalMs: round(warmupMs + durationMs),
+            maxScrollPx: round(maxScroll),
+            finalScrollY: round(win.scrollY),
+            cadence: {
+              samples: intervals.length,
+              medianIntervalMs: round(median),
+              p95IntervalMs: round(percentile(.95)),
+              maxIntervalMs: round(sorted[sorted.length - 1] || 0),
+              estimatedRafCadenceHz: median > 0 ? round(1000 / median) : null,
+              intervalsOver16_67Ms: intervals.filter(value => value > 16.67).length,
+              intervalsOver33_34Ms: intervals.filter(value => value > 33.34).length,
+            },
+            layoutShifts: { supported: !!layout, observedClsDuringTraversal: round(cls), excludesRecentInput: true },
+            longTasks: { supported: !!tasks, count: longTasks.length, totalMs: round(longTasks.reduce((sum, value) => sum + value, 0)), maxMs: round(Math.max(0, ...longTasks)) },
+            documentVisibility: Array.from(visibilityStates),
+            horizontalOverflow: { present: overflowPx > 0, pixels: overflowPx },
+            disclaimer: "Cadência rAF não mede composição/rasterização GPU nem frames efetivamente exibidos. Os limiares são contagens de intervalos, não dropped frames. A passagem não comprova 120 FPS, CLS de campo ou comportamento de inputs físicos. Instrumentação, iframe, recorte do host, visibilidade e carga do dispositivo alteram os resultados.",
+          };
+          results.textContent = JSON.stringify(report, null, 2);
+          status.textContent = "Medição concluída. O JSON registra as condições observadas desta passagem.";
+        } catch (error) {
+          if (!disposed) {
+            results.textContent = JSON.stringify({ status: "cancelled_or_failed", message: error?.message || String(error) }, null, 2);
+            status.textContent = "A medição foi interrompida. Confira a prévia antes de repetir.";
+          }
+        } finally {
+          for (const item of observers) item.observer.disconnect();
+          document.removeEventListener("visibilitychange", visibility);
+          try {
+            win?.document.removeEventListener("visibilitychange", visibility);
+            win?.removeEventListener("pagehide", abortPreview);
+          } catch { /* The iframe may have navigated to another origin. */ }
+          run.abort(failure("Passagem encerrada."));
+          if (activeRun === run) activeRun = undefined;
+          if (!disposed) setBusy(false);
+        }
+      }
+
+      preview.addEventListener("load", onLoad, { signal: lifecycle.signal });
+      start.addEventListener("click", measure, { signal: lifecycle.signal });
+      sizes.forEach(button => button.addEventListener("click", () => {
+        requested = { width: Number(button.dataset.width), height: Number(button.dataset.height) };
+        viewport.style.setProperty("--audit-width", `${requested.width}px`);
+        viewport.style.setProperty("--audit-height", `${requested.height}px`);
+        preview.width = requested.width;
+        preview.height = requested.height;
+        sizes.forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+        status.textContent = `Viewport solicitada: ${requested.width} × ${requested.height}. A largura real respeita a janela disponível, sem zoom.`;
+      }, { signal: lifecycle.signal }));
+      window.addEventListener("pagehide", () => {
+        disposed = true;
+        activeRun?.abort(failure("Ferramenta descarregada."));
+        lifecycle.abort();
+      }, { once: true });
+      // Also handle a cached iframe that completed before the load listener.
+      try { if (preview.contentDocument?.readyState === "complete") onLoad(); } catch { /* Wait for load. */ }
+    })();
+  </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
+import { cancelFrame, frame, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import { useEffect, useRef, type FocusEvent, type PointerEvent, type ReactNode } from "react";
 import { useEnhancedMotion } from "@/lib/use-animation-policy";
 import { experienceConfig } from "@/lib/experience-config";
@@ -118,10 +118,11 @@ export function ProfileDepth({ children }: { children: ReactNode }) {
       }
       host.style.setProperty("--depth-top", `${top}px`);
     };
-    measure();
-    const observer = new ResizeObserver(measure);
+    const queueMeasure = () => frame.read(measure);
+    queueMeasure();
+    const observer = new ResizeObserver(queueMeasure);
     observer.observe(content);
-    return () => observer.disconnect();
+    return () => { observer.disconnect(); cancelFrame(measure); };
   }, []);
 
   useEffect(() => {

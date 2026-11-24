@@ -53,7 +53,7 @@
 .location { display: flex; align-items: center; gap: 5px; margin-top: 9px; color: #8d878c; font-size: 11px; }
 .location > span { color: #514b50; padding: 0 3px; }
 .socials { display: flex; align-items: center; gap: 14px; margin-top: 15px; }
-.socials a { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; color: #a9a3a8; font-size: 11px; transition: color 180ms; }
+.socials a { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; color: #a9a3a8; font-size: 11px; }
 .socials a:hover { color: #fff; }
 .socials a > svg:last-child { color: #696368; }
 .socialDivider { width: 1px; height: 12px; background: #ffffff12; }
@@ -61,14 +61,14 @@
 .eyebrow { color: #a59ba1; font: 8px var(--font-mono); font-weight: 500; letter-spacing: .15em; }
 .about p { margin-top: 11px; color: #b8b2b6; font-size: 13px; line-height: 1.65; max-width: 390px; }
 .stack { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; margin-bottom: 19px; }
-.stack li { display: inline-flex; align-items: center; gap: 4px; padding: 5px 9px; border: 1px solid #ffffff10; border-radius: 5px; background: #ffffff03; color: #c4bec3; font: 9px var(--font-mono); line-height: 1.3; transition: border-color 180ms, color 180ms; }
+.stack li { display: inline-flex; align-items: center; gap: 4px; padding: 5px 9px; border: 1px solid #ffffff10; border-radius: 5px; background: #ffffff03; color: #c4bec3; font: 9px var(--font-mono); line-height: 1.3; }
 .stack li:hover { border-color: #e9475555; color: #f2dbdd; }
 .reactMark { font-size: 12px; line-height: 1; }
 .cardFooter { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-top: 1px solid #ffffff0c; padding: 17px 31px; border-radius: 0 0 24px 24px; background: #ffffff02; }
 .actions { display: flex; align-items: center; gap: 10px; }
-.primaryAction, .copyAction { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 45px; border-radius: 8px; font-size: 11px; font-weight: 550; cursor: pointer; transition: background 180ms, color 180ms, border-color 180ms; }
+.primaryAction, .copyAction { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 45px; border-radius: 8px; font-size: 11px; font-weight: 550; cursor: pointer; transition: transform 250ms var(--ease-expo); }
 .primaryAction { justify-content: space-between; min-width: 175px; padding: 0 17px; color: #fff; background: #d92130; border: 1px solid #ff4e5b66; box-shadow: 0 1px 0 #ffffff20 inset; }
-.primaryAction:hover { background: #ee2b3b; }
+.primaryAction:hover { background: #ee2b3b; transform: translateY(-1px); }
 .primaryAction svg { transition: transform 350ms var(--ease-expo); }
 .primaryAction:hover svg { transform: translate(2px, 2px); }
 .copyAction { min-width: 154px; padding: 0 14px; border: 1px solid #ffffff14; color: #bfb8bd; background: #ffffff03; }
@@ -93,7 +93,7 @@
 @media (min-width: 900px) and (min-height: 880px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .hero { height: 148svh; margin-bottom: -16svh; }
   .stickyStage { position: sticky; top: 0; height: 100svh; min-height: 0; padding-top: 108px; padding-bottom: 28px; }
-  .cardPlane { will-change: transform, opacity; }
+  .cardPlane { will-change: transform; }
   .stageShell { margin: auto; }
   .stageFooter { margin-top: 22px; }
 }
@@ -144,6 +144,7 @@
   .guideRight { right: 9px; }
 }
 @media (prefers-reduced-motion: reduce) { .cardPlane { transform: none !important; opacity: 1 !important; } }
+@media (hover: none), (pointer: coarse), (max-width: 767px) { .cardPlane { transform: none !important; opacity: 1 !important; } }
 
 /* Signal Assembly: one camera move, one light pass, then all layers become inert. */
 .entranceRig { position: relative; transform-origin: 50% 55%; }
@@ -190,6 +191,28 @@
 :global(html[data-intro-phase="loading"]) .nameLetter,
 :global(html[data-intro-phase="loading"]) .avatarWrap {
   animation-play-state: paused;
+}
+
+:global(html[data-intro-phase="loading"]) .backgroundWord {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.92);
+}
+
+:global(html[data-intro-phase="revealing"]) .backgroundWord {
+  opacity: 1;
+  transform: translate(-50%, -56%) scale(1);
+  transition: opacity 1200ms var(--ease-expo) 120ms, transform 1200ms var(--ease-expo) 120ms;
+}
+
+:global(html[data-intro-phase="loading"]) .stageFooter {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+:global(html[data-intro-phase="revealing"]) .stageFooter {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 800ms var(--ease-expo) 260ms, transform 800ms var(--ease-expo) 260ms;
 }
 
 .card::before,

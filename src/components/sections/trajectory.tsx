@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowUpRight, Award, Download, FileCheck, FileText, X } from "lucide-react";
 import { Magnetic } from "@/components/ui/magnetic";
 import { SectionLabel } from "@/components/ui/section-label";
@@ -10,19 +11,29 @@ import { certificates, education, experience, type CertificateItem } from "@/lib
 import { cn, EASE_EXPO } from "@/lib/utils";
 import { useEnhancedMotion } from "@/lib/use-animation-policy";
 import { useScrollLock } from "@/lib/use-scroll-lock";
+import { Reveal } from "@/components/motion/reveal";
 
 export function Trajectory() {
   const enhancedMotion = useEnhancedMotion();
   const [tab, setTab] = useState<"certificates" | "experience" | "all">("experience");
   const [selectedCert, setSelectedCert] = useState<CertificateItem | null>(null);
+  const [mounted, setMounted] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   useScrollLock(selectedCert !== null);
+
+  useEffect(() => { setMounted(true); }, []);
 
   // Keep keyboard focus inside the certificate dialog and return it to its trigger.
   useEffect(() => {
     if (!selectedCert) return;
 
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousInert = new Map<HTMLElement, boolean>();
+    for (const sibling of document.body.children) {
+      if (!(sibling instanceof HTMLElement) || sibling === modalRef.current || /^(SCRIPT|STYLE|LINK)$/.test(sibling.tagName)) continue;
+      previousInert.set(sibling, sibling.inert);
+      sibling.inert = true;
+    }
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
@@ -53,6 +64,7 @@ export function Trajectory() {
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      previousInert.forEach((value, element) => { element.inert = value; });
       if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
     };
   }, [selectedCert]);
@@ -61,21 +73,23 @@ export function Trajectory() {
   const showExp = tab === "all" || tab === "experience";
 
   return (
-    <section id="trajetoria" className="relative bg-bone text-ink py-[clamp(6rem,11vw,10rem)]">
+    <section id="trajetoria" aria-labelledby="trajectory-title" className="relative bg-bone text-ink py-[clamp(6rem,11vw,10rem)]">
       <div className="gutter">
         <SectionLabel index="04" title="Formação & Trajetória" aside="Aprendizado e experiência" tone="light" />
 
         {/* Section Headline & Filter Buttons */}
         <div className="mt-14 md:mt-20 flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-ink/20">
           <div>
-            <h2 className="display text-[clamp(2.6rem,7vw,6rem)] leading-[0.85] text-ink">
-              Aprender. <br />
-              <span className="font-serif italic text-crimson text-[0.85em] normal-case tracking-normal">Aplicar.</span> <br />
-              Evoluir.
+            <h2 id="trajectory-title" className="display text-[clamp(2.6rem,7vw,6rem)] leading-[0.85] text-ink">
+              <Reveal as="span" pattern="heading">Aprender.</Reveal>
+              <Reveal as="span" pattern="heading" delay={0.08}><span className="font-serif italic text-crimson text-[0.85em] normal-case tracking-normal">Aplicar.</span></Reveal>
+              <Reveal as="span" pattern="heading" delay={0.16}>Evoluir.</Reveal>
             </h2>
-            <p className="mt-6 text-base text-smoke leading-relaxed max-w-xl">
-              Cursos de JavaScript, IA aplicada, inglês e Excel complementam minha prática com projetos. A experiência no varejo também contribui para entender o contexto de quem usa o software.
-            </p>
+            <Reveal pattern="body" delay={0.16} className="mt-6 max-w-xl">
+              <p className="text-base text-smoke leading-relaxed">
+                Cursos de JavaScript, IA aplicada, inglês e Excel complementam minha prática com projetos. A experiência no varejo também contribui para entender o contexto de quem usa o software.
+              </p>
+            </Reveal>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 self-start md:self-end">
@@ -85,7 +99,7 @@ export function Trajectory() {
                 onClick={() => setTab("certificates")}
                 aria-pressed={tab === "certificates"}
                 className={cn(
-                  "font-mono tracking-widest uppercase min-h-[44px] px-4 py-2.5 rounded-full border transition-colors text-[0.62rem] outline-none focus-visible:ring-2 focus-visible:ring-crimson",
+                  "font-mono tracking-widest uppercase min-h-[44px] px-4 py-2.5 rounded-full border text-[0.62rem] outline-none focus-visible:ring-2 focus-visible:ring-crimson",
                   tab === "certificates" ? "bg-crimson text-bone border-crimson shadow-sm" : "border-ink/20 text-smoke hover:border-ink hover:text-ink"
                 )}
               >
@@ -98,7 +112,7 @@ export function Trajectory() {
                 onClick={() => setTab("experience")}
                 aria-pressed={tab === "experience"}
                 className={cn(
-                  "font-mono tracking-widest uppercase min-h-[44px] px-4 py-2.5 rounded-full border transition-colors text-[0.62rem] outline-none focus-visible:ring-2 focus-visible:ring-crimson",
+                  "font-mono tracking-widest uppercase min-h-[44px] px-4 py-2.5 rounded-full border text-[0.62rem] outline-none focus-visible:ring-2 focus-visible:ring-crimson",
                   tab === "experience" ? "bg-ink text-bone border-ink shadow-sm" : "border-ink/20 text-smoke hover:border-ink hover:text-ink"
                 )}
               >
@@ -111,7 +125,7 @@ export function Trajectory() {
                 onClick={() => setTab("all")}
                 aria-pressed={tab === "all"}
                 className={cn(
-                  "font-mono tracking-widest uppercase min-h-[44px] px-4 py-2.5 rounded-full border transition-colors text-[0.62rem] outline-none focus-visible:ring-2 focus-visible:ring-crimson",
+                  "font-mono tracking-widest uppercase min-h-[44px] px-4 py-2.5 rounded-full border text-[0.62rem] outline-none focus-visible:ring-2 focus-visible:ring-crimson",
                   tab === "all" ? "bg-ink text-bone border-ink shadow-sm" : "border-ink/20 text-smoke hover:border-ink hover:text-ink"
                 )}
               >
@@ -139,10 +153,10 @@ export function Trajectory() {
               </div>
 
               <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                {certificates.map((cert) => (
+                {certificates.map((cert, index) => (
+                  <Reveal key={cert.id} pattern="depth" delay={(index % 2) * 0.08} innerClassName="h-full">
                   <div
-                    key={cert.id}
-                    className="group relative flex flex-col justify-between p-6 md:p-8 bg-black/[0.02] border border-ink/15 hover:border-crimson hover:bg-black/[0.04] transition-colors duration-300 rounded-sm"
+                    className="group relative h-full flex flex-col justify-between p-6 md:p-8 bg-black/[0.02] border border-ink/15 hover:border-crimson hover:bg-black/[0.04] rounded-sm"
                   >
                     <div>
                       {/* Card Header */}
@@ -156,7 +170,7 @@ export function Trajectory() {
                       </div>
 
                       {/* Title & Issuer */}
-                      <h3 className="mt-4 break-words text-xl md:text-2xl font-bold tracking-tight text-ink group-hover:text-crimson transition-colors">
+                      <h3 className="mt-4 break-words text-xl md:text-2xl font-bold tracking-tight text-ink group-hover:text-crimson">
                         {cert.title}
                       </h3>
                       <p className="mt-1 text-xs font-mono text-smoke font-medium">
@@ -185,7 +199,7 @@ export function Trajectory() {
                       <button
                         type="button"
                         onClick={() => setSelectedCert(cert)}
-                        className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold uppercase tracking-wider text-ink hover:text-crimson transition-colors min-h-[44px]"
+                        className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold uppercase tracking-wider text-ink hover:text-crimson min-h-[44px]"
                       >
                         <FileText className="h-3.5 w-3.5 text-crimson" />
                         Ver na Página
@@ -194,13 +208,14 @@ export function Trajectory() {
                       <a
                         href={cert.downloadUrl}
                         download
-                        className="inline-flex items-center gap-1 text-[0.62rem] font-mono uppercase tracking-widest text-smoke hover:text-ink transition-colors min-h-[44px] px-2 py-1 rounded border border-ink/15 hover:border-ink"
+                        className="inline-flex items-center gap-1 text-[0.62rem] font-mono uppercase tracking-widest text-smoke hover:text-ink min-h-[44px] px-2 py-1 rounded border border-ink/15 hover:border-ink"
                       >
                         {cert.downloadLabel}
                         <ArrowUpRight className="h-3 w-3" />
                       </a>
                     </div>
                   </div>
+                  </Reveal>
                 ))}
               </div>
             </div>
@@ -219,10 +234,10 @@ export function Trajectory() {
                   </span>
                 </div>
                 <div className="divide-y divide-ink/15">
-                  {experience.map((item) => (
+                  {experience.map((item, index) => (
+                    <Reveal key={item.title} pattern="row" delay={index * 0.04}>
                     <div
-                      key={item.title}
-                      className="group py-6 md:py-8 grid grid-cols-1 md:grid-cols-12 gap-4 items-start hover:bg-black/[0.025] px-2 transition-colors rounded-sm"
+                      className="group py-6 md:py-8 grid grid-cols-1 md:grid-cols-12 gap-4 items-start hover:bg-black/[0.025] px-2 rounded-sm"
                     >
                       <div className="md:col-span-3">
                         <span className="label text-crimson font-mono text-[0.68rem] block font-semibold">{item.period}</span>
@@ -230,7 +245,7 @@ export function Trajectory() {
                       </div>
 
                       <div className="md:col-span-5">
-                        <h3 className="text-xl md:text-2xl font-bold tracking-tight text-ink group-hover:text-crimson transition-colors">
+                        <h3 className="text-xl md:text-2xl font-bold tracking-tight text-ink group-hover:text-crimson">
                           {item.title}
                         </h3>
                         <p className="label text-smoke text-[0.68rem] mt-1 tracking-wider">{item.org}</p>
@@ -245,6 +260,7 @@ export function Trajectory() {
                         </div>
                       </div>
                     </div>
+                    </Reveal>
                   ))}
                 </div>
               </div>
@@ -259,10 +275,10 @@ export function Trajectory() {
                   </span>
                 </div>
                 <div className="divide-y divide-ink/15">
-                  {education.map((item) => (
+                  {education.map((item, index) => (
+                    <Reveal key={item.title} pattern="row" delay={Math.min(index * 0.04, 0.16)}>
                     <div
-                      key={item.title}
-                      className="group py-6 md:py-8 grid grid-cols-1 md:grid-cols-12 gap-4 items-start hover:bg-black/[0.025] px-2 transition-colors rounded-sm"
+                      className="group py-6 md:py-8 grid grid-cols-1 md:grid-cols-12 gap-4 items-start hover:bg-black/[0.025] px-2 rounded-sm"
                     >
                       <div className="md:col-span-3">
                         <span className="label text-crimson font-mono text-[0.68rem] block font-semibold">{item.period}</span>
@@ -270,7 +286,7 @@ export function Trajectory() {
                       </div>
 
                       <div className="md:col-span-5">
-                        <h3 className="text-xl md:text-2xl font-bold tracking-tight text-ink group-hover:text-crimson transition-colors">
+                        <h3 className="text-xl md:text-2xl font-bold tracking-tight text-ink group-hover:text-crimson">
                           {item.title}
                         </h3>
                         <p className="label text-smoke text-[0.68rem] mt-1 tracking-wider">{item.org}</p>
@@ -285,6 +301,7 @@ export function Trajectory() {
                         </div>
                       </div>
                     </div>
+                    </Reveal>
                   ))}
                 </div>
               </div>
@@ -294,7 +311,7 @@ export function Trajectory() {
       </div>
 
       {/* Modal Lightbox for Instant In-Page Certificate Verification */}
-      <AnimatePresence>
+      {mounted && createPortal(<AnimatePresence>
         {selectedCert && (
           <div
             ref={modalRef}
@@ -303,6 +320,7 @@ export function Trajectory() {
             aria-labelledby="cert-modal-title"
             onClick={() => setSelectedCert(null)}
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-ink/95 cursor-pointer"
+            data-lenis-prevent
           >
             <motion.div
               initial={enhancedMotion ? { opacity: 0, scale: 0.96, y: 10 } : false}
@@ -328,7 +346,7 @@ export function Trajectory() {
                   <a
                     href={selectedCert.downloadUrl}
                     download
-                    className="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-ink hover:text-crimson border border-ink/20 hover:border-crimson rounded transition-colors"
+                    className="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-ink hover:text-crimson border border-ink/20 hover:border-crimson rounded"
                   >
                     <Download className="h-3.5 w-3.5" />
                     {selectedCert.downloadLabel}
@@ -337,7 +355,7 @@ export function Trajectory() {
                     type="button"
                     onClick={() => setSelectedCert(null)}
                     aria-label="Fechar comprovante (ESC)"
-                    className="flex min-h-[44px] min-w-[44px] items-center justify-center p-2 rounded-full hover:bg-black/5 text-ink transition-colors"
+                    className="flex min-h-[44px] min-w-[44px] items-center justify-center p-2 rounded-full hover:bg-black/5 text-ink"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -367,7 +385,7 @@ export function Trajectory() {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>, document.body)}
     </section>
   );
 }

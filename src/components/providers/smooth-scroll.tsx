@@ -4,6 +4,7 @@ import { ReactLenis, useLenis } from "lenis/react";
 import { cancelFrame, frame } from "motion/react";
 import { useEffect } from "react";
 import { useEnhancedMotion } from "@/lib/use-animation-policy";
+import { registerScrollLockRuntime } from "@/lib/use-scroll-lock";
 
 /** Drives Lenis from Motion's frame loop: one RAF for scroll + animations. */
 function LenisFrameDriver() {
@@ -11,9 +12,22 @@ function LenisFrameDriver() {
 
   useEffect(() => {
     if (!lenis) return;
+    const unregister = registerScrollLockRuntime(lenis);
     const update = ({ timestamp }: { timestamp: number }) => lenis.raf(timestamp);
-    frame.update(update, true);
-    return () => cancelFrame(update);
+    const visibility = () => {
+      cancelFrame(update);
+      if (document.hidden) {
+        // Discard unfinished inertia rather than replaying it after tab restore.
+        if (!lenis.isStopped && !lenis.isLocked) lenis.scrollTo(lenis.scroll, { immediate: true });
+      } else frame.update(update, true);
+    };
+    visibility();
+    document.addEventListener("visibilitychange", visibility);
+    return () => {
+      cancelFrame(update);
+      unregister();
+      document.removeEventListener("visibilitychange", visibility);
+    };
   }, [lenis]);
 
   return null;

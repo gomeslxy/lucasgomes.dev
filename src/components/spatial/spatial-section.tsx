@@ -1,8 +1,9 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion, useTransform } from "motion/react";
 import { useRef, type ReactNode } from "react";
-import { useEnhancedMotion } from "@/lib/use-animation-policy";
+import { useSceneProgress } from "@/components/motion/scroll-director";
+import { quintic } from "@/lib/motion-curves";
 import styles from "./spatial-section.module.css";
 
 type SpatialSectionProps = {
@@ -13,35 +14,28 @@ type SpatialSectionProps = {
   light?: boolean;
 };
 
-/** Short approach through perspective; no pinning or extra scrolling distance. */
+/** The seam moves independently. Content, sticky scenes and dialogs stay untransformed. */
 export function SpatialSection({ children, index, label, fold = true, light = false }: SpatialSectionProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const enhanced = useEnhancedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start 12%"] });
-  const rotateX = useTransform(scrollYProgress, [0, .6, 1], [8, 2, 0]);
-  const y = useTransform(scrollYProgress, [0, 1], [48, 0]);
-  const opacity = useTransform(() => .72 + scrollYProgress.get() * .28);
-  const seamRotate = useTransform(scrollYProgress, [0, .75, 1], [-64, -14, 0]);
-  const seamScale = useTransform(scrollYProgress, [0, 1], [.86, 1]);
-  const seamOpacity = useTransform(() => Math.max(0, Math.sin(scrollYProgress.get() * Math.PI) * .8));
+  const { progress, enhanced } = useSceneProgress(ref, { start: 1.08, end: .12 });
+  const transform = useTransform(progress, value => {
+    const p = quintic(value);
+    return `perspective(800px) translate3d(0, ${(1 - p) * 32}px, 0) rotateX(${fold ? (1 - p) * -26 : 0}deg) scaleX(${.94 + p * .06})`;
+  });
+  const opacity = useTransform(progress, value => Math.sin(Math.PI * value) * .8);
+  const lineScale = useTransform(progress, value => .18 + quintic(value) * .82);
 
   return (
-    <div ref={ref} className={styles.section} data-spatial-section={index} data-fold={fold && enhanced ? true : undefined} data-light={light || undefined}>
+    <div ref={ref} className={styles.section} data-spatial-section={index} data-light={light || undefined}>
       <div className={styles.seam} aria-hidden="true">
-        <motion.div className={styles.foldPlane} style={enhanced ? { rotateX: seamRotate, scaleX: seamScale, opacity: seamOpacity } : { opacity: 0 }}>
+        <motion.div className={styles.foldPlane} style={enhanced ? { transform, opacity } : { opacity: 0 }}>
           <span>{index} / {label}</span><i /><span>CONTINUE ↓</span>
         </motion.div>
+        <motion.i className={styles.thread} style={enhanced ? { scaleX: lineScale } : undefined} />
       </div>
-      <motion.div
-        className={styles.content}
-        style={enhanced && fold ? { rotateX, y, opacity } : undefined}
-        transformTemplate={(latest, generated) => {
-          const neutral = Number.parseFloat(String(latest.rotateX ?? 0)) === 0 && Number.parseFloat(String(latest.y ?? 0)) === 0;
-          return neutral ? "none" : generated;
-        }}
-      >
+      <div className={styles.content}>
         {children}
-      </motion.div>
+      </div>
     </div>
   );
 }

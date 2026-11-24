@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Code2,
   Cpu,
-  Database,
   ExternalLink,
   Layers,
   ShieldCheck,
@@ -15,14 +14,13 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { createPortal } from "react-dom";
-import { useEffect, useRef, useState, type PointerEvent } from "react";
-import { AnimatePresence, motion, useMotionValue, useScroll, useSpring, useTransform } from "motion/react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { Reveal } from "@/components/motion/reveal";
 import { SectionLabel } from "@/components/ui/section-label";
 import { projects, type Project } from "@/lib/data";
-import { useEnhancedMotion } from "@/lib/use-animation-policy";
 import { useScrollLock } from "@/lib/use-scroll-lock";
 import { cn, EASE_EXPO, SPRING_UI } from "@/lib/utils";
-import { experienceConfig } from "@/lib/experience-config";
 import { AgendraPipeline } from "@/components/sections/agendra-pipeline";
 import { BondsPipeline } from "@/components/sections/bonds-pipeline";
 
@@ -42,12 +40,16 @@ export function WorksShowcase() {
           <div>
             <SectionLabel index="01" title="Projetos Selecionados" aside="Engenharia de Ponta a Ponta" tone="dark" />
             <h2 id="work-title" className="display mt-6 text-[clamp(2.8rem,7vw,7rem)] leading-[0.88] tracking-tighter">
-              Engenharia <span className="font-serif italic font-normal text-crimson text-[0.85em]">em</span> prática.
+              <Reveal as="span" pattern="heading">
+                Engenharia <span className="font-serif italic font-normal text-crimson text-[0.85em]">em</span> prática.
+              </Reveal>
             </h2>
           </div>
-          <p className="max-w-md font-mono text-xs md:text-sm leading-relaxed text-bone/60">
-            [PROGRESSIVE_DISCLOSURE] Sistemas reais projetados com foco em concorrência, isolamento multi-tenant e interfaces reativas. Clique em cada card para acessar o blueprint técnico.
-          </p>
+          <Reveal pattern="body" delay={0.12} className="max-w-md">
+            <p className="font-mono text-xs md:text-sm leading-relaxed text-bone/60">
+              Sistemas reais, da interface aos dados. Explore cada projeto para conhecer os desafios, as decisões e a arquitetura por trás da experiência.
+            </p>
+          </Reveal>
         </div>
 
         {/* Project Cards: Ultra-clean, scan-friendly, non-repetitive */}
@@ -95,106 +97,18 @@ function ProjectCard({
   index: number;
   onOpenDetails: () => void;
 }) {
-  const enhanced = useEnhancedMotion();
-  const ref = useRef<HTMLLIElement>(null);
-  const bounds = useRef<{ left: number; top: number; width: number; height: number } | null>(null);
-  const boundsDirty = useRef(true);
-  const pointerInside = useRef(false);
-  const pointerX = useMotionValue(0.5);
-  const pointerY = useMotionValue(0.5);
-  const lightTarget = useMotionValue(0);
-
-  const px = useSpring(pointerX, experienceConfig.spring);
-  const py = useSpring(pointerY, experienceConfig.spring);
-  const light = useSpring(lightTarget, experienceConfig.spring);
-
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start 30%"] });
-  const entryAngle = useTransform(scrollYProgress, [0, 1], [6, 0]);
-  const rotateX = useTransform(() => entryAngle.get() + (py.get() - 0.5) * -1);
-  const rotateY = useTransform(px, [0, 1], [-0.5, 0.5]);
-  const y = useTransform(scrollYProgress, [0, 1], [24, 0]);
-  const spotlightX = useTransform(px, [0, 1], ["-35%", "35%"]);
-  const spotlightY = useTransform(py, [0, 1], ["-45%", "45%"]);
-
-  function enter(event: PointerEvent<HTMLLIElement>) {
-    if (!enhanced || event.pointerType !== "mouse") return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    bounds.current = { left: rect.left + window.scrollX, top: rect.top + window.scrollY, width: rect.width, height: rect.height };
-    boundsDirty.current = false;
-    pointerInside.current = true;
-    lightTarget.set(experienceConfig.pointer.lightOpacity);
-  }
-
-  function move(event: PointerEvent<HTMLLIElement>) {
-    if (!enhanced || event.pointerType !== "mouse" || !pointerInside.current) return;
-    if (boundsDirty.current || !bounds.current) {
-      const rect = event.currentTarget.getBoundingClientRect();
-      bounds.current = { left: rect.left + window.scrollX, top: rect.top + window.scrollY, width: rect.width, height: rect.height };
-      boundsDirty.current = false;
-      lightTarget.set(experienceConfig.pointer.lightOpacity);
-    }
-    const rect = bounds.current;
-    if (!rect.width || !rect.height) return;
-    pointerX.set(Math.max(0, Math.min(1, (event.pageX - rect.left) / rect.width)));
-    pointerY.set(Math.max(0, Math.min(1, (event.pageY - rect.top) / rect.height)));
-  }
-
-  function leave() {
-    bounds.current = null;
-    boundsDirty.current = true;
-    pointerInside.current = false;
-    pointerX.set(0.5);
-    pointerY.set(0.5);
-    lightTarget.set(0);
-  }
-
-  useEffect(() => {
-    if (!enhanced) return;
-    const invalidate = () => {
-      bounds.current = null;
-      boundsDirty.current = true;
-      if (pointerX.get() !== 0.5) pointerX.set(0.5);
-      if (pointerY.get() !== 0.5) pointerY.set(0.5);
-      lightTarget.set(0);
-    };
-    window.addEventListener("scroll", invalidate, { passive: true });
-    window.addEventListener("resize", invalidate, { passive: true });
-    const observer = new ResizeObserver(invalidate);
-    if (ref.current) observer.observe(ref.current);
-    return () => {
-      window.removeEventListener("scroll", invalidate);
-      window.removeEventListener("resize", invalidate);
-      observer.disconnect();
-    };
-  }, [enhanced, lightTarget, pointerX, pointerY]);
-
   const demoLink = project.links.find((l) => l.href.includes("site") || l.href.includes("vercel") || l.href.includes("http"));
 
   return (
-    <li
-      ref={ref}
-      className="relative [perspective:1400px]"
-      onPointerEnter={enter}
-      onPointerMove={move}
-      onPointerLeave={leave}
-      onPointerCancel={leave}
-    >
-      <motion.article
-        style={enhanced ? { rotateX, rotateY, y, transformOrigin: "50% 20%" } : undefined}
-        className="group relative isolate overflow-hidden rounded-[20px] border border-white/15 bg-[#0d0d0f] shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-colors hover:border-white/30 focus-within:border-crimson/50"
-      >
-        <motion.div
-          aria-hidden="true"
-          className="pointer-events-none absolute -inset-1/2 -z-1 bg-[radial-gradient(ellipse_at_center,#e11d2a15,transparent_50%)]"
-          style={{ x: spotlightX, y: spotlightY, opacity: enhanced ? light : 0 }}
-        />
-
+    <li id={`case-${project.slug}`} className="relative">
+      <article className="group relative isolate overflow-hidden rounded-[20px] border border-white/15 bg-[#0d0d0f] hover:border-white/30 focus-within:border-crimson/50">
         <div className="grid lg:grid-cols-[1.08fr_1fr] items-stretch">
           {/* Text Specification Column */}
           <div className={cn("relative flex flex-col justify-between p-6 sm:p-9 xl:p-12", index % 2 ? "lg:order-2" : "")}>
             <div>
               {/* Metadata row */}
-              <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[9px] uppercase tracking-[0.16em]">
+              <Reveal pattern="meta" className="font-mono text-[9px] uppercase tracking-[0.16em]">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="inline-flex items-center gap-2.5 text-bone/60">
                   <span className="font-bold text-crimson">[{project.index}]</span>
                   <span>{project.period}</span>
@@ -205,29 +119,34 @@ function ProjectCard({
                   <Code2 size={12} className="text-crimson" aria-hidden="true" />
                   {project.category}
                 </span>
-              </div>
+                </div>
+              </Reveal>
 
               {/* Title */}
-              <button
-                type="button"
-                onClick={onOpenDetails}
-                className="group/title mt-5 block text-left outline-none focus-visible:ring-2 focus-visible:ring-crimson"
-              >
-                <h3 className="display text-[clamp(2.4rem,4.5vw,4.8rem)] leading-[0.92] tracking-tighter transition-colors group-hover/title:text-crimson">
-                  {project.shortTitle}
-                </h3>
-              </button>
+              <h3 className="display mt-5 text-[clamp(2.4rem,4.5vw,4.8rem)] leading-[0.92] tracking-tighter">
+                <Reveal as="span" pattern="heading" delay={0.05}>
+                  <button
+                    type="button"
+                    onClick={onOpenDetails}
+                    className="block text-left outline-none hover:text-crimson focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crimson"
+                  >
+                    {project.shortTitle}
+                  </button>
+                </Reveal>
+              </h3>
 
               {/* Punchline: 1 clear impact sentence */}
-              <p className="mt-4 text-sm sm:text-base leading-relaxed text-bone/85 font-sans">
-                {project.punchline}
-              </p>
+              <Reveal pattern="body" delay={0.1} className="mt-4">
+                <p className="text-sm sm:text-base leading-relaxed text-bone/85 font-sans">{project.punchline}</p>
+              </Reveal>
 
               {/* Architectural metric tag */}
-              <div className="mt-5 inline-flex items-center gap-2 rounded-md border border-crimson/30 bg-crimson/10 px-3 py-1.5 font-mono text-[10px] text-bone">
-                <ShieldCheck size={13} className="text-crimson shrink-0" aria-hidden="true" />
-                <span>{project.keyMetricBadge}</span>
-              </div>
+              <Reveal pattern="depth" delay={0.16} className="mt-5">
+                <div className="inline-flex items-center gap-2 rounded-md border border-crimson/30 bg-crimson/10 px-3 py-1.5 font-mono text-[10px] text-bone">
+                  <ShieldCheck size={13} className="text-crimson shrink-0" aria-hidden="true" />
+                  <span>{project.keyMetricBadge}</span>
+                </div>
+              </Reveal>
 
               {/* Essential Stack: Exactly 4 tags */}
               <div className="mt-6">
@@ -250,7 +169,7 @@ function ProjectCard({
               <button
                 type="button"
                 onClick={onOpenDetails}
-                className="inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-lg bg-bone px-5 text-xs font-mono font-bold uppercase tracking-wider text-ink transition-all hover:bg-white hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson"
+                className="inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-lg bg-bone px-5 text-xs font-mono font-bold uppercase tracking-wider text-ink hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson"
               >
                 <Terminal size={14} className="text-crimson" aria-hidden="true" />
                 Ver Detalhes Técnicos & Case
@@ -261,7 +180,7 @@ function ProjectCard({
                   href={demoLink.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/15 px-4 text-xs font-mono text-bone/70 transition-colors hover:border-crimson/50 hover:text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson"
+                  className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/15 px-4 text-xs font-mono text-bone/70 hover:border-crimson/50 hover:text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson"
                 >
                   <ExternalLink size={13} aria-hidden="true" />
                   Live Demo
@@ -271,6 +190,7 @@ function ProjectCard({
           </div>
 
           {/* Media preview column: Clickable to expand */}
+          <Reveal pattern="depth" delay={0.08} innerClassName="h-full" className={cn("relative m-3 sm:m-4 min-h-[300px] lg:min-h-[420px]", index % 2 ? "lg:order-1" : "")}>
           <div
             onClick={onOpenDetails}
             role="button"
@@ -283,12 +203,11 @@ function ProjectCard({
             }}
             aria-label={`Abrir especificações técnicas de ${project.shortTitle}`}
             className={cn(
-              "group/media relative m-3 sm:m-4 min-h-[300px] lg:min-h-[420px] cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-[#141416] transition-all hover:border-crimson/40",
-              index % 2 ? "lg:order-1" : "",
+              "group/media relative min-h-[300px] lg:min-h-[420px] h-full cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-[#141416] hover:border-crimson/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson",
             )}
           >
             {/* Terminal / Browser Chrome Header */}
-            <div className="absolute inset-x-0 top-0 z-10 flex h-9 items-center gap-1.5 border-b border-white/10 bg-[#121214]/95 px-3.5 backdrop-blur-sm">
+            <div className="absolute inset-x-0 top-0 z-10 flex h-9 items-center gap-1.5 border-b border-white/10 bg-[#121214]/95 px-3.5">
               <span className="h-2 w-2 rounded-full bg-crimson/80" />
               <span className="h-2 w-2 rounded-full bg-white/20" />
               <span className="h-2 w-2 rounded-full bg-white/20" />
@@ -303,7 +222,7 @@ function ProjectCard({
               alt={project.imageAlt}
               fill
               sizes="(max-width: 1023px) 92vw, 48vw"
-              className="object-cover object-top pt-9 transition-transform duration-700 ease-out group-hover/media:scale-[1.03]"
+              className="object-cover object-top pt-9 motion-safe:transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-safe:group-hover/media:scale-[1.03]"
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent" />
 
@@ -312,13 +231,14 @@ function ProjectCard({
               <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-white/70">
                 Clique para explorar arquitetura
               </span>
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/25 bg-black/60 transition-transform group-hover/media:scale-110 group-hover/media:border-crimson">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/25 bg-black/60 motion-safe:transition-transform motion-safe:group-hover/media:scale-110 group-hover/media:border-crimson">
                 <ArrowUpRight size={18} className="text-white group-hover/media:text-crimson" aria-hidden="true" />
               </span>
             </div>
           </div>
+          </Reveal>
         </div>
-      </motion.article>
+      </article>
     </li>
   );
 }
@@ -342,6 +262,15 @@ function ProjectArchitectureModal({
   // Focus trap & Escape key listener
   useEffect(() => {
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousInert = new Map<HTMLElement, boolean>();
+    const dialog = modalRef.current?.parentElement;
+    if (dialog) {
+      for (const sibling of document.body.children) {
+        if (!(sibling instanceof HTMLElement) || sibling === dialog || /^(SCRIPT|STYLE|LINK)$/.test(sibling.tagName)) continue;
+        previousInert.set(sibling, sibling.inert);
+        sibling.inert = true;
+      }
+    }
     const keydown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -370,6 +299,7 @@ function ProjectArchitectureModal({
 
     return () => {
       window.removeEventListener("keydown", keydown);
+      previousInert.forEach((value, element) => { element.inert = value; });
       if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
     };
   }, [onClose]);
@@ -379,7 +309,7 @@ function ProjectArchitectureModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="blueprint-dialog-title"
-      className="fixed inset-0 z-[120] overflow-y-auto bg-black/85 backdrop-blur-md px-3 py-6 sm:px-6 md:py-10"
+      className="fixed inset-0 z-[120] overflow-y-auto bg-black/85 px-3 py-6 sm:px-6 md:py-10"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -416,7 +346,7 @@ function ProjectArchitectureModal({
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden sm:inline-flex min-h-[36px] items-center gap-1.5 rounded-md border border-white/15 px-3 py-1 font-mono text-[10px] uppercase text-bone/75 hover:border-crimson hover:text-bone transition-colors"
+                className="hidden sm:inline-flex min-h-[36px] items-center gap-1.5 rounded-md border border-white/15 px-3 py-1 font-mono text-[10px] uppercase text-bone/75 hover:border-crimson hover:text-bone"
               >
                 {link.label}
                 <ArrowUpRight size={12} className="text-crimson" aria-hidden="true" />
@@ -427,7 +357,7 @@ function ProjectArchitectureModal({
               type="button"
               onClick={onClose}
               aria-label="Fechar blueprint de arquitetura"
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/20 text-bone/70 hover:border-crimson hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/20 text-bone/70 hover:border-crimson hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson"
             >
               <X size={16} aria-hidden="true" />
             </button>
@@ -465,7 +395,7 @@ function ProjectArchitectureModal({
                   onClick={() => setActiveTab(tab.id as typeof activeTab)}
                   aria-pressed={isActive}
                   className={cn(
-                    "inline-flex min-h-[38px] items-center gap-2 rounded-lg border px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-all",
+                    "inline-flex min-h-[38px] items-center gap-2 rounded-lg border px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-wider",
                     isActive
                       ? "border-crimson bg-crimson text-bone font-bold shadow-sm"
                       : "border-white/10 bg-white/4 text-bone/60 hover:border-white/25 hover:text-bone",
@@ -550,7 +480,7 @@ function ProjectArchitectureModal({
                 {project.highlights.map((highlight, index) => (
                   <div
                     key={highlight.title}
-                    className="rounded-xl border border-white/10 bg-white/2 p-5 hover:border-white/20 transition-colors"
+                    className="rounded-xl border border-white/10 bg-white/2 p-5 hover:border-white/20"
                   >
                     <div className="flex items-center gap-2 font-mono text-[10px] text-crimson font-bold mb-2">
                       <span>ESPECIFICAÇÃO [0{index + 1}]</span>
@@ -633,7 +563,7 @@ function ProjectArchitectureModal({
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-bone px-5 font-mono text-xs font-bold uppercase tracking-wider text-ink transition-all hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson"
+                    className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-bone px-5 font-mono text-xs font-bold uppercase tracking-wider text-ink hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson"
                   >
                     {link.label}
                     <ArrowUpRight size={14} aria-hidden="true" />

@@ -25,7 +25,7 @@ const container: Variants = {
 };
 
 const piece: Variants = {
-  hidden: { y: "110%", rotate: 4 },
+  hidden: { y: "110%", rotate: 4, transition: { duration: 0.45, ease: EASE_EXPO } },
   visible: { y: "0%", rotate: 0, transition: { duration: 0.95, ease: EASE_EXPO } },
 };
 
@@ -37,7 +37,7 @@ export function SplitReveal({
   delay = 0,
   stagger = 0.03,
   by = "char",
-  once = true,
+  once = false,
   trigger,
 }: SplitRevealProps) {
   const enhancedMotion = useEnhancedMotion();
@@ -66,7 +66,7 @@ function AnimatedSplitReveal({
   delay = 0,
   stagger = 0.03,
   by = "char",
-  once = true,
+  once = false,
   trigger,
 }: SplitRevealProps) {
   const ref = useRef<HTMLSpanElement>(null);

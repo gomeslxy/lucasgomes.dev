@@ -45,5 +45,7 @@ O scroll usa Lenis somente no desktop com ponteiro preciso e sem preferência po
 - [Hero de perfil: estrutura, efeito 3D e personalização](docs/PROFILE-HERO.md)
 - [Auditoria de transformação e os três efeitos centrais](docs/TRANSFORMATION-AUDIT.md)
 - [Intro, atmosfera e configuração das interações](docs/ATMOSPHERE-INTRO.md)
+- [Scrollytelling: arquitetura, configuração, reutilização e profiling](docs/SCROLLYTELLING.md)
+- [Auditoria global: diagnóstico, repertório de movimento e validação](docs/PERFORMANCE-VISUAL-AUDIT.md)
 
 As funcionalidades dos cases foram descritas a partir das informações já existentes no portfólio; seus repositórios e resultados externos não foram auditados nesta reformulação. FPS e Core Web Vitals precisam ser medidos em produção e nos dispositivos alvo. CLS 0 é um objetivo de estabilidade, não uma garantia universal; LCP mede tempo e não deve ser prometido como zero.
