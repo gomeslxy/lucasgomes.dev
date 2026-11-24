@@ -1,6 +1,6 @@
 import { profile } from "@/lib/data";
 
-/** Content for the hero profile card. Scannable technical identity and direct proof links. */
+/** Structured content for the hero profile card. */
 export const heroProfile = {
   displayName: "Lucas",
   handle: profile.githubHandle,
@@ -16,23 +16,26 @@ export const heroProfile = {
     {
       id: "agendra",
       label: "Agendra",
-      detail: "Multi-tenant RLS · RAG pgvector · Fallback multi-LLM",
+      detail: "Qualificação e agenda com IA · Supabase · Redis · WhatsApp API",
       href: "#case-agendra",
-      tag: "Estudo técnico",
+      tag: "Projeto de estudo",
+      tone: "default" as const,
     },
     {
       id: "bonds",
-      label: "BONDS AGENCE",
-      detail: "E-commerce realtime · Baixa atômica SQL · Rate limit na Edge",
+      label: "Bonds Agence",
+      detail: "E-commerce Next.js · Stripe · Supabase Realtime · Resend",
       href: "#case-bonds",
-      tag: "Em produção",
+      tag: "Finalizado",
+      tone: "completed" as const,
     },
     {
       id: "background",
       label: "Experiência e formação",
-      detail: "Inglês B2 (Callan) · Cursos SENAI · Experiência no varejo",
+      detail: "Full-Stack autônomo · Cursos SENAI · Inglês B2 (Callan)",
       href: "#trajetoria",
       tag: "Perfil",
+      tone: "default" as const,
     },
   ],
 } as const;

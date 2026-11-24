@@ -1,6 +1,8 @@
 {
   "name": "lucas-gomes-portfolio",
   "version": "1.0.0",
+  "description": "Portfólio de Lucas Gomes (@gomeslxy) — Desenvolvedor Full-Stack (Next.js, TypeScript, PostgreSQL).",
+  "author": "Lucas Gomes <la181009@gmail.com> (https://github.com/gomeslxy)",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -8,8 +10,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:motion": "node scripts/test-motion-system.cjs && node scripts/test-scroll-lock.cjs && node scripts/check-motion.cjs",
-    "audit:serve": "node scripts/serve-motion-audit.cjs"
+    "test:motion": "node scripts/test-motion-system.cjs && node scripts/test-scroll-lock.cjs && node scripts/check-motion.cjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

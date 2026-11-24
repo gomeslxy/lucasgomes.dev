@@ -1,5 +1,8 @@
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://lucasgomes.dev").replace(/\/+$/, "");
+
 export const profile = {
   name: "Lucas",
+  fullName: "Lucas Gomes",
   signature: "Lucas",
   city: "Indaiatuba, SP",
   country: "Brasil",
@@ -62,6 +65,7 @@ export type Project = {
   mechanisms: ProjectMechanism[];
   flowSteps: string[];
   statusBadge: string;
+  statusTone?: "completed" | "study";
   essentialStack: string[];
   technicalDescription: string;
   challenge: string;
@@ -79,18 +83,18 @@ export const projects: Project[] = [
     index: "01",
     shortTitle: "Agendra",
     title: "Agendra — Plataforma Omnichannel com IA & Multi-Tenancy",
-    domain: "agendra.site",
+    domain: "www.agendra.site",
     role: "Arquitetura e Desenvolvimento Full-Stack",
     period: "2025 — Presente",
     category: "Full-Stack · IA · Multi-Tenant",
     image: "/work/agendra.jpg",
     imageAlt: "Interface do Agendra exibindo página inicial, conversa no WhatsApp com IA e agenda sincronizada",
     punchline:
-      "Plataforma multi-tenant de atendimento e agendamento por WhatsApp e Instagram Direct com IA e busca semântica.",
+      "Projeto de estudo full-stack de qualificação de leads e agendamento automatizado via WhatsApp com IA, busca semântica e isolamento multi-tenant.",
     audience:
       "Empresas com atendimento comercial e agendamento por mensagens.",
     problem:
-      "Isolar dados e documentos de diferentes empresas no mesmo banco, mantendo o atendimento ativo mesmo quando uma API de IA atinge limite de requisições (429).",
+      "Qualificar leads e automatizar agendamentos no WhatsApp com IA isolando dados e documentos de diferentes empresas no mesmo banco, sem interrupções quando um provedor de LLM atinge limite de requisições (429).",
     mechanisms: [
       {
         label: "PostgreSQL RLS",
@@ -115,17 +119,18 @@ export const projects: Project[] = [
       "Multi-LLM Fallback",
       "Google Calendar",
     ],
-    statusBadge: "Estudo de Arquitetura",
+    statusBadge: "Projeto de Estudo",
+    statusTone: "study",
     essentialStack: [
       "Next.js 15",
       "TypeScript",
-      "PostgreSQL (RLS)",
+      "Supabase (PostgreSQL / RLS)",
       "pgvector (HNSW)",
       "Upstash Redis",
       "WhatsApp Cloud API",
     ],
     technicalDescription:
-      "Aplicação Next.js 15 App Router com PostgreSQL via Supabase. O isolamento de dados roda no banco via Row Level Security (RLS), a busca documental usa pgvector (HNSW) e o roteamento entre Groq, Gemini e Cerebras evita interrupções por cota, com agenda sincronizada via Google Calendar OAuth2 e locks no Redis.",
+      "Projeto de estudo em Next.js 15 App Router, TypeScript e Supabase (PostgreSQL). Realiza qualificação de leads e agendamento automatizado via WhatsApp Cloud API com isolamento multi-tenant por Row Level Security (RLS), busca semântica via pgvector (HNSW), circuit breaker entre Groq, Gemini e Cerebras, agenda via Google Calendar OAuth2 e locks atômicos no Upstash Redis.",
     challenge:
       "Receber e responder conversas em tempo real via WhatsApp e Instagram Direct sem vazar contexto documental entre empresas diferentes e sem sofrer indisponibilidade por rate limits (429) das APIs de LLM.",
     consideration:
@@ -175,7 +180,7 @@ export const projects: Project[] = [
       "Google Calendar OAuth2",
     ],
     links: [
-      { label: "Acessar projeto", href: "https://agendra.site" },
+      { label: "Acessar projeto", href: "https://www.agendra.site" },
       { label: "Ver código", href: "https://github.com/gomeslxy/Agendra" },
     ],
     metrics: [
@@ -187,55 +192,56 @@ export const projects: Project[] = [
   {
     slug: "bonds",
     index: "02",
-    shortTitle: "BONDS AGENCE",
-    title: "BONDS AGENCE — E-Commerce Full-Stack & Edge Security",
+    shortTitle: "Bonds Agence",
+    title: "Bonds Agence — E-Commerce Full-Stack & Edge Security",
     domain: "bonds-agence.vercel.app",
     role: "Desenvolvimento Full-Stack e Arquitetura",
     period: "2025",
     category: "E-Commerce · Realtime · Edge Security",
     image: "/work/bonds.jpg",
-    imageAlt: "Interface da loja virtual BONDS AGENCE com destaque Sportlife e chamada para explorar coleção",
+    imageAlt: "Interface da loja virtual Bonds Agence com destaque Sportlife e chamada para explorar coleção",
     punchline:
-      "E-commerce com sincronização de estoque em tempo real via WebSockets, baixa atômica no PostgreSQL e rate limiting na Edge.",
+      "E-commerce full-stack com checkout Stripe, estoque em tempo real no Supabase, e-mails transacionais via Resend e rate limiting na Edge.",
     audience:
       "Loja virtual de vestuário streetwear com lançamentos de estoque limitado.",
     problem:
       "Evitar venda de peças esgotadas (overselling) durante acessos simultâneos em lançamentos limitados e proteger login, cupons e checkout contra abuso automatizado.",
     mechanisms: [
       {
-        label: "Estoque Realtime e SQL Atômico",
+        label: "Checkout Stripe e SQL Atômico",
         detail:
-          "Atualização imediata de saldo via Supabase Realtime Channels, com validação e baixa atômica no PostgreSQL.",
+          "Pagamentos integrados ao Stripe com validação e baixa atômica de estoque no PostgreSQL contra overselling.",
       },
       {
-        label: "Rate Limiting na Edge",
+        label: "Supabase Realtime e Auth PKCE",
         detail:
-          "Upstash Redis (Sliding Window) no Edge Middleware protegendo login, cadastro, cupons e checkout antes do banco.",
+          "Atualização imediata de saldo via WebSockets e autenticação SSR com Server Actions e cookies HTTP-only.",
       },
       {
-        label: "Auth PKCE e Gestão",
+        label: "Edge Security e Resend",
         detail:
-          "Autenticação via Server Actions com cookies HTTP-only, validação de CPF (client/server) e painel administrativo.",
+          "Rate limiting (Sliding Window) com Upstash Redis no Edge Middleware e envio de e-mails transacionais via Resend.",
       },
     ],
     flowSteps: [
       "Catálogo Next.js",
       "Edge Rate Limit",
-      "Auth PKCE",
+      "Checkout Stripe",
       "Baixa Atômica SQL",
-      "Realtime Broadcast",
+      "Realtime & Resend",
     ],
-    statusBadge: "Aplicação em Produção",
+    statusBadge: "Finalizado",
+    statusTone: "completed",
     essentialStack: [
       "Next.js App Router",
       "TypeScript",
-      "Supabase Realtime",
-      "PostgreSQL",
+      "Stripe",
+      "Supabase",
+      "Resend",
       "Upstash Redis",
-      "Tailwind CSS",
     ],
     technicalDescription:
-      "Desenvolvido com Next.js App Router, TypeScript e Supabase. O estoque é atualizado em tela via Supabase Realtime Channels enquanto transações atômicas no PostgreSQL garantem consistência na compra, com proteção na borda via Vercel Edge Middleware e Upstash Redis.",
+      "Arquitetura e-commerce desenvolvida com Next.js App Router, TypeScript, Stripe, Supabase e Resend. Pagamentos e confirmação de pedidos operam sobre transações atômicas no PostgreSQL e canais Realtime de estoque, com proteção na borda via Upstash Redis e e-mails transacionais via Resend.",
     challenge:
       "Em lançamentos de tiragem limitada, múltiplos compradores disputam os mesmos itens no mesmo segundo. O sistema precisa impedir overselling (venda de item sem estoque) e proteger endpoints de login e checkout contra bots.",
     consideration:
@@ -267,17 +273,19 @@ export const projects: Project[] = [
       },
     ],
     features: [
+      "Checkout e confirmação de pagamentos integrados ao Stripe",
       "Inventário sincronizado em tempo real via Supabase Realtime Channels",
       "Proteção de checkout e autenticação via Edge Middleware com Upstash Redis",
       "Consistência transacional atômica para prevenção de overselling",
       "Autenticação com Supabase Auth PKCE e Server Actions",
-      "Painel administrativo para controle de catálogo, pedidos e cupons",
-      "Validação dupla de CPF e disparo serverless de e-mails transacionais",
+      "Validação dupla de CPF e envio de e-mails transacionais com Resend",
     ],
     stack: [
-      "Next.js App Router",
+      "Next.js 15 (App Router)",
       "TypeScript",
+      "Stripe",
       "Supabase (PostgreSQL / Realtime / Auth)",
+      "Resend",
       "Upstash Redis",
       "Tailwind CSS",
       "Motion",
@@ -308,7 +316,7 @@ export const capabilities: Capability[] = [
     title: "Front-End",
     whatIBuild:
       "Interfaces responsivas com App Router, formulários validados, dashboards e componentes acessíveis.",
-    appliedIn: "Agendra, BONDS AGENCE e este portfólio",
+    appliedIn: "Agendra, Bonds Agence e este portfólio",
     items: [
       "Next.js 15 (App Router & Server Actions)",
       "React 19",
@@ -323,7 +331,7 @@ export const capabilities: Capability[] = [
     title: "Back-End e Dados",
     whatIBuild:
       "Modelagem relacional, isolamento multi-tenant com RLS, transações atômicas, canais realtime e rate limiting na Edge.",
-    appliedIn: "Agendra e BONDS AGENCE",
+    appliedIn: "Agendra e Bonds Agence",
     items: [
       "PostgreSQL",
       "Row Level Security (RLS)",
@@ -337,15 +345,15 @@ export const capabilities: Capability[] = [
     index: "03",
     title: "IA, Integrações e Deploy",
     whatIBuild:
-      "Busca semântica (RAG), fallback entre provedores de LLM, webhooks, OAuth2 e pipeline de publicação.",
-    appliedIn: "Agendra, CI/CD e deploy na Vercel",
+      "Busca semântica (RAG), fallback entre provedores de LLM, pagamentos, webhooks, OAuth2 e e-mails transacionais.",
+    appliedIn: "Agendra, Bonds Agence e deploy na Vercel",
     items: [
       "pgvector (HNSW)",
       "Groq, Gemini & Cerebras (Circuit Breaker)",
-      "WhatsApp Cloud API",
-      "Google Calendar OAuth2",
-      "Git & GitHub Actions",
-      "Vercel",
+      "WhatsApp Cloud API & Google Calendar OAuth2",
+      "Stripe (Checkout & Webhooks)",
+      "Resend (E-mails Transacionais)",
+      "Git, GitHub Actions & Vercel",
     ],
   },
 ];
@@ -396,6 +404,7 @@ export type TimelineItem = {
   org: string;
   place: string;
   detail: string;
+  highlights?: string[];
   tag: string;
 };
 
@@ -456,21 +465,17 @@ export const certificates: CertificateItem[] = [
 
 export const experience: TimelineItem[] = [
   {
-    period: "Set 2026 — Hoje",
-    title: "Auxiliar de Atendimento ao Público, Vendas e Estoque",
-    org: "Loja Física / Varejo (Contratado via Nexa Soluções)",
-    place: "Centro · Indaiatuba, SP",
-    detail:
-      "Atendimento presencial ao público, vendas, operação de caixa, controle de inventário físico e reposição de estoque.",
-    tag: "Presencial · Varejo",
-  },
-  {
     period: "2025 — Hoje",
     title: "Desenvolvedor Full-Stack & Automação",
     org: "Autônomo / Projetos Próprios e Clientes",
     place: "Indaiatuba, SP",
     detail:
       "Desenvolvimento de aplicações web em Next.js e TypeScript, e-commerce com estoque em tempo real, automações de atendimento via WhatsApp e otimização de performance e segurança na Edge.",
+    highlights: [
+      "Arquitetura multi-tenant com PostgreSQL RLS, busca semântica (pgvector/HNSW) e fallback multi-LLM.",
+      "E-commerce full-stack com estoque em tempo real via WebSockets, baixa atômica em SQL e rate limiting na Edge.",
+      "Integrações com WhatsApp Cloud API, Google Calendar OAuth2 e deploy contínuo na Vercel.",
+    ],
     tag: "Full-Stack · Freelance",
   },
 ];
@@ -482,7 +487,7 @@ export const education: TimelineItem[] = [
     org: "E.E. Profª Helena de Campos Camargo",
     place: "Indaiatuba, SP",
     detail:
-      "Cursando no período matutino, conciliando a rotina escolar com trabalho presencial e desenvolvimento de projetos.",
+      "Cursando no período matutino, conciliando a rotina escolar com o desenvolvimento de projetos full-stack e a formação técnica contínua.",
     tag: "Em andamento",
   },
 ];

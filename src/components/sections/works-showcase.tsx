@@ -1,4 +1,4 @@
-import { ArrowUpRight, ExternalLink, Terminal } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, ExternalLink, Terminal } from "lucide-react";
 import Image from "next/image";
 import { Reveal } from "@/components/motion/reveal";
 import { GithubIcon } from "@/components/ui/brand-icons";
@@ -61,7 +61,14 @@ function FlagshipCase({ project }: { project: Project }) {
               <span className="font-bold text-crimson">[{project.index} · DESTAQUE]</span>
               <span>{project.period}</span>
               <span aria-hidden="true" className="h-px w-5 bg-white/15" />
-              <span className="text-bone/90">{project.statusBadge}</span>
+              {project.statusTone === "completed" ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/12 px-2.5 py-0.5 text-emerald-300 font-semibold">
+                  <CheckCircle2 size={11} aria-hidden="true" className="shrink-0" />
+                  {project.statusBadge}
+                </span>
+              ) : (
+                <span className="text-bone/90">{project.statusBadge}</span>
+              )}
             </div>
             <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ash">
               {project.category}
@@ -212,10 +219,17 @@ function ProductionSplitCase({ project }: { project: Project }) {
                   <span className="font-bold text-crimson">[{project.index}]</span>
                   <span>{project.period}</span>
                   <span aria-hidden="true" className="h-px w-5 bg-white/15" />
-                  <span className="inline-flex items-center gap-1.5 text-bone">
-                    <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[#9ec897]" />
-                    {project.statusBadge}
-                  </span>
+                  {project.statusTone === "completed" ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/12 px-2.5 py-0.5 text-emerald-300 font-semibold">
+                      <CheckCircle2 size={11} aria-hidden="true" className="shrink-0" />
+                      {project.statusBadge}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-bone">
+                      <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[#9ec897]" />
+                      {project.statusBadge}
+                    </span>
+                  )}
                 </div>
                 <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ash">
                   {project.category}

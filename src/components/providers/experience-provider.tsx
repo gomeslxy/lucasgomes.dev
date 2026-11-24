@@ -7,10 +7,8 @@ import { ExperienceIntro } from "@/components/experience/experience-intro";
 import { ScrollDirectorProvider } from "@/components/motion/scroll-director";
 
 /**
- * Motion follows the OS reduced-motion preference. Heavier pointer effects
- * (tilt, magnetic, cursor preview, Lenis) still gate themselves through
- * `useEnhancedMotion`, so touch devices only receive cheap transform
- * transitions such as the bottom sheet.
+ * Motion follows the OS reduced-motion preference. Pointer tilt, WebGL backdrop,
+ * and Lenis smooth scrolling are gated by `useEnhancedMotion` on desktop fine-pointer devices.
  */
 export function ExperienceProvider({ children }: { children: ReactNode }) {
   return (

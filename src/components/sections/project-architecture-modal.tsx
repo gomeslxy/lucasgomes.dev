@@ -90,7 +90,15 @@ export function ProjectArchitectureModal({
             <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-ash">
               ARQUITETURA · {project.domain}
             </span>
-            <span className="hidden sm:inline-block rounded-full bg-crimson/20 border border-crimson/40 px-2.5 py-0.5 font-mono text-[9px] text-bone uppercase">
+            <span
+              className={cn(
+                "hidden sm:inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-[9px] uppercase",
+                project.statusTone === "completed"
+                  ? "border-emerald-400/35 bg-emerald-500/15 text-emerald-300"
+                  : "border-crimson/40 bg-crimson/20 text-bone",
+              )}
+            >
+              {project.statusTone === "completed" && <CheckCircle2 size={10} aria-hidden="true" />}
               {project.statusBadge}
             </span>
           </div>

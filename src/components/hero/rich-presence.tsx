@@ -1,9 +1,9 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, CheckCircle2 } from "lucide-react";
 import { AnchorLink } from "@/components/ui/anchor-link";
 import { heroProfile } from "@/lib/hero-profile";
 import styles from "./rich-presence.module.css";
 
-/** Direct, clickable proof index replacing decorative status widget. */
+/** Direct, clickable highlight links for key projects and background. */
 export function RichPresence() {
   return (
     <section className={styles.proofs} aria-label="Destaques">
@@ -20,8 +20,9 @@ export function RichPresence() {
                   <span className={styles.itemTitle}>{item.label}</span>
                   <span
                     className={styles.itemTag}
-                    data-live={item.tag === "Em produção" || undefined}
+                    data-completed={item.tone === "completed" || undefined}
                   >
+                    {item.tone === "completed" && <CheckCircle2 size={10} aria-hidden="true" />}
                     {item.tag}
                   </span>
                 </div>

@@ -101,8 +101,19 @@ export function ContactFooter() {
 
         {/* Bottom Micro Copyright Bar */}
         <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 py-6 text-xs font-mono text-ash sm:flex-row">
-          <span>© 2026 Lucas · Desenvolvedor Full-Stack</span>
-          <AnchorLink href="#hero" className="flex min-h-[44px] items-center gap-2 text-bone/85 hover:text-crimson">
+          <p className="text-center sm:text-left">
+            Desenvolvido por{" "}
+            <a
+              href={profile.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-bone/85 hover:text-crimson-bright underline decoration-white/20 underline-offset-4"
+            >
+              Lucas ({profile.githubHandle})
+            </a>{" "}
+            • {profile.city}
+          </p>
+          <AnchorLink href="#hero" className="flex min-h-[44px] items-center gap-2 text-bone/85 hover:text-crimson-bright">
             <span>Voltar ao topo</span>
             <ArrowUp aria-hidden="true" size={14} />
           </AnchorLink>

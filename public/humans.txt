@@ -1,0 +1,7 @@
+/*
+  Author: Lucas Gomes (@gomeslxy)
+  Location: Indaiatuba, SP — Brazil
+  Contact: la181009@gmail.com
+  GitHub: https://github.com/gomeslxy
+  Stack: Next.js 15, React 19, TypeScript, Tailwind CSS v4, Motion, Lenis
+*/

@@ -1,6 +1,28 @@
-# Portfólio — Lucas
+# Lucas Gomes (@gomeslxy) — Portfólio
 
-Desenvolvedor Full-Stack com foco em interfaces modernas, performance e IA aplicada. O Agendra é apresentado como case pessoal de engenharia e estudo, construído de ponta a ponta.
+Portfólio pessoal desenvolvido com Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS v4, Motion e Lenis. Apresenta decisões de arquitetura, fluxo de dados e trade-offs de projetos full-stack.
+
+## Projetos em destaque
+
+- **Agendra** ([agendra.site](https://www.agendra.site)) — Projeto de estudo full-stack de qualificação de leads e agendamento automatizado via WhatsApp com IA, busca semântica (`pgvector`), isolamento multi-tenant via PostgreSQL RLS, Upstash Redis e WhatsApp Cloud API.
+- **Bonds Agence** ([bonds-agence.vercel.app](https://bonds-agence.vercel.app)) — E-commerce full-stack finalizado com Next.js, Stripe, Supabase (PostgreSQL, Auth PKCE e Realtime), Resend e rate limiting na Edge com Upstash Redis.
+
+## Stack
+
+- **Framework:** Next.js 15 (App Router) & React 19
+- **Linguagem:** TypeScript (`strict: true`)
+- **Estilização:** Tailwind CSS v4 & CSS Modules
+- **Animação & Scroll:** Motion (`motion/react`), Lenis e campo WebGL sob demanda
+- **SEO & Metadados:** Metadata API, `sitemap.ts`, `robots.ts`, `manifest.ts`, Open Graph (`1200x630`) e JSON-LD (`Person` + `WebSite`)
+
+## Estrutura
+
+- `src/app/`: rotas, layout raiz, metadados, `sitemap.ts`, `robots.ts` e `manifest.ts`
+- `src/components/hero/`: card de perfil, profundidade em camadas CSS 3D e canvas WebGL
+- `src/components/sections/`: navegação, vitrine de projetos, modal de arquitetura, trajetória, certificados e contato
+- `src/components/experience/`: abertura inicial não-bloqueante e atmosfera periférica
+- `src/components/motion/`: diretor único de scroll (`ScrollDirector`) e reveals composited-only
+- `src/lib/`: dados do portfólio, políticas de movimento e hooks de acessibilidade/scroll
 
 ## Desenvolvimento
 
@@ -9,43 +31,23 @@ npm install
 npm run dev
 ```
 
-## Validação e produção
+### Variáveis de ambiente
+
+- `NEXT_PUBLIC_SITE_URL` *(opcional)*: URL canônica de produção usada em `metadataBase`, `sitemap.xml`, `robots.txt` e JSON-LD. Padrão: `https://lucasgomes.dev`.
+
+## Validação e build
 
 ```bash
+npm run lint
 npm run typecheck
+npm run test:motion
 npm run build
 npm start
 ```
 
-O projeto usa Next.js App Router, React, TypeScript, Tailwind CSS v4, Motion e Lucide. As fontes são servidas localmente pelo `next/font`; a primeira compilação pode precisar de acesso ao Google Fonts.
+## Contato
 
-Para manter um preview de produção independente de um servidor de desenvolvimento já aberto, `next.config.ts` aceita `NEXT_DIST_DIR`. No PowerShell: `$env:NEXT_DIST_DIR = '.next-cinematic'`, seguido de `npm run build` e `npm start -- --port 3217` no mesmo ambiente. Sem essa variável, o diretório padrão continua sendo `.next`.
-
-## Estrutura da experiência
-
-- `src/components/sections/hero.tsx`: card de perfil com abertura cinematográfica, banner e foto fornecidos, profundidade em CSS 3D, rich presence e saída espacial. Componentes em `src/components/hero/` e dados em `src/lib/hero-profile.ts`.
-- `src/components/sections/works-showcase.tsx`: painéis de projetos com imagens no desktop e mobile, entrada em perspectiva, luz reativa e modal acessível.
-- `src/components/spatial/spatial-section.tsx`: transições curtas entre capítulos, adaptadas ao tipo de ponteiro e à preferência por movimento reduzido.
-- `src/components/experience/experience-intro.tsx`: abertura curta ligada às fontes e imagens essenciais, com saída garantida e controle para pular.
-- `src/components/experience/ambient-environment.tsx`: luz periférica, partículas discretas e malha de fundo com movimento mínimo.
-- `src/lib/experience-config.ts`: tempos da intro, intensidade da luz, limites do ponteiro e quantidade de partículas.
-- `src/components/sections/case-studies.tsx`: contexto, autoria, arquitetura, pontos de atenção e links para os projetos.
-- `src/components/sections/manifesto.tsx`: apresentação profissional compacta e competências contextualizadas.
-- `src/components/sections/contact-footer.tsx`: contato por e-mail, telefone, WhatsApp e cópia com feedback acessível.
-- `src/components/ui/big-name.tsx`: assinatura LUCAS com dimensão por CSS, gradiente por opacidade e deslocamento sutil via MotionValues.
-- `src/lib/use-animation-policy.ts`: efeitos elaborados apenas com tela a partir de 768px, hover, ponteiro preciso e sem preferência por movimento reduzido.
-- `src/lib/data.ts`: perfil, projetos, trajetória e formação.
-
-O scroll usa Lenis somente no desktop com ponteiro preciso e sem preferência por movimento reduzido; no touch, permanece nativo. A Hero não aguarda hidratação para aparecer. Projetos e imagens reservam proporções antes de carregar. O footer não mede nem altera o tamanho da fonte por JavaScript. Não há dependências novas para este redesign.
-
-## Documentação
-
-- [Auditoria de contratação e três propostas de copy](docs/PORTFOLIO-REVIEW.md)
-- [Decisões e validação de performance](PERFORMANCE.md)
-- [Hero de perfil: estrutura, efeito 3D e personalização](docs/PROFILE-HERO.md)
-- [Auditoria de transformação e os três efeitos centrais](docs/TRANSFORMATION-AUDIT.md)
-- [Intro, atmosfera e configuração das interações](docs/ATMOSPHERE-INTRO.md)
-- [Scrollytelling: arquitetura, configuração, reutilização e profiling](docs/SCROLLYTELLING.md)
-- [Auditoria global: diagnóstico, repertório de movimento e validação](docs/PERFORMANCE-VISUAL-AUDIT.md)
-
-As funcionalidades dos cases foram descritas a partir das informações já existentes no portfólio; seus repositórios e resultados externos não foram auditados nesta reformulação. FPS e Core Web Vitals precisam ser medidos em produção e nos dispositivos alvo. CLS 0 é um objetivo de estabilidade, não uma garantia universal; LCP mede tempo e não deve ser prometido como zero.
+- **Nome:** Lucas Gomes (`@gomeslxy`)
+- **E-mail:** `la181009@gmail.com`
+- **Localização:** Indaiatuba, SP — Brasil
+- **GitHub:** [github.com/gomeslxy](https://github.com/gomeslxy)

@@ -1,8 +1,13 @@
-import { ArrowUpRight, FileText } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, FileText } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 import { CertificateModalHost, CertificateTrigger } from "@/components/sections/certificate-modal-host";
+import { AnchorLink } from "@/components/ui/anchor-link";
 import { SectionLabel } from "@/components/ui/section-label";
-import { certificates, education, experience, profile, workingStyle } from "@/lib/data";
+import { certificates, education, experience, profile, projects, workingStyle } from "@/lib/data";
+
+function formatCount(count: number, singular: string, plural: string): string {
+  return `${count.toString().padStart(2, "0")} ${count === 1 ? singular : plural}`;
+}
 
 export function Trajectory() {
   const englishCert = certificates.find((cert) => cert.id === "callan-english");
@@ -28,7 +33,7 @@ export function Trajectory() {
                   Desenvolvo aplicações web com Next.js, TypeScript e PostgreSQL, atuando da interface às regras de banco de dados, autenticação e integrações com APIs externas.
                 </p>
                 <p>
-                  Além dos projetos de software, trabalho presencialmente no varejo com atendimento ao público, vendas e controle de estoque. Essa rotina trouxe disciplina operacional, comunicação objetiva e foco no uso prático dos sistemas.
+                  Estruturo projetos de ponta a ponta com atenção à segurança, concorrência e performance — de isolamento multi-tenant no banco e transações atômicas até automações e interfaces responsivas prontas para uso real.
                 </p>
               </Reveal>
             </div>
@@ -63,7 +68,7 @@ export function Trajectory() {
                     Experiência
                   </span>
                   <span className="label text-smoke text-[0.65rem] font-mono">
-                    {experience.length.toString().padStart(2, "0")} registros
+                    {formatCount(experience.length, "registro", "registros")}
                   </span>
                 </div>
                 <div className="divide-y divide-ink/15">
@@ -85,10 +90,70 @@ export function Trajectory() {
                           {item.org} · {item.place}
                         </p>
                         <p className="pt-1 text-sm text-ink/80 leading-relaxed">{item.detail}</p>
+                        {item.highlights && item.highlights.length > 0 && (
+                          <ul className="mt-4 space-y-2">
+                            {item.highlights.map((highlight) => (
+                              <li key={highlight} className="flex items-start gap-2.5 text-xs sm:text-sm text-ink/80 leading-relaxed">
+                                <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-crimson shrink-0 mt-1.5" />
+                                <span>{highlight}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
                     </Reveal>
                   ))}
                 </div>
+
+                <Reveal pattern="row" delay={0.08}>
+                  <div className="pt-6 border-t border-ink/15">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="label font-bold text-ink text-[0.68rem] tracking-wider uppercase">
+                        Projetos aplicados
+                      </h3>
+                      <span className="label text-smoke text-[0.65rem] font-mono">
+                        {formatCount(projects.length, "case", "cases")}
+                      </span>
+                    </div>
+                    <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+                      {projects.map((project) => (
+                        <li key={project.slug}>
+                          <AnchorLink
+                            href={`#case-${project.slug}`}
+                            className="press group flex h-full flex-col justify-between gap-2 rounded-sm border border-ink/15 bg-black/[0.02] p-4 min-h-[44px] hover:border-crimson-deep hover:bg-black/[0.04] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson-deep focus-visible:border-crimson-deep"
+                          >
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <span className="text-sm font-bold tracking-tight text-ink">
+                                {project.shortTitle}
+                              </span>
+                              <span
+                                className={
+                                  project.statusTone === "completed"
+                                    ? "inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-full border border-emerald-700/25 bg-emerald-700/10 px-2 py-0.5 font-mono text-[0.6rem] font-semibold uppercase tracking-wider text-emerald-900"
+                                    : "inline-flex shrink-0 whitespace-nowrap items-center rounded-full border border-ink/15 bg-ink/5 px-2 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider text-smoke"
+                                }
+                              >
+                                {project.statusTone === "completed" && (
+                                  <CheckCircle2 size={11} aria-hidden="true" />
+                                )}
+                                {project.statusBadge}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-mono text-[0.65rem] text-smoke">
+                                {project.category}
+                              </span>
+                              <ArrowUpRight
+                                className="h-3.5 w-3.5 shrink-0 text-ink/60 group-hover:text-crimson-deep"
+                                aria-hidden="true"
+                              />
+                            </div>
+                          </AnchorLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </Reveal>
               </div>
 
               {/* Formação e Idioma */}
@@ -157,7 +222,7 @@ export function Trajectory() {
                   Certificados
                 </span>
                 <span className="label text-smoke text-[0.65rem] font-mono">
-                  {certificates.length.toString().padStart(2, "0")} documentos
+                  {formatCount(certificates.length, "documento", "documentos")}
                 </span>
               </div>
 

@@ -12,9 +12,9 @@ const NODES: readonly PipelineNode[] = [
     desc: "Supabase Realtime Channels para atualizar estoque e pedidos sem recarregar a página.",
   },
   {
-    k: "Checkout",
-    title: "Validação de checkout",
-    desc: "Validação de CPF no cliente e no servidor, com máscaras de entrada e sanitização de dados.",
+    k: "Stripe",
+    title: "Checkout & Stripe",
+    desc: "Processamento seguro de pagamentos via Stripe com validação server-side de estoque, CPF e cupons.",
   },
   {
     k: "PKCE Auth",
@@ -27,24 +27,24 @@ const NODES: readonly PipelineNode[] = [
     desc: "Rate limiting por IP com Upstash Redis nos endpoints críticos (/login, /signup, /admin, verificação).",
   },
   {
-    k: "Admin & Edge",
-    title: "Admin & Edge Functions",
-    desc: "Painel de controle para estoque, cupons e disparo serverless de e-mails transacionais de pedidos.",
+    k: "Transacional",
+    title: "Admin & Resend",
+    desc: "Painel administrativo para catálogo, pedidos e disparo de e-mails transacionais via Resend.",
   },
 ];
 
 const FOOTNOTES = [
+  "Stripe Checkout & Webhooks",
   "Supabase Realtime Channels",
   "PostgreSQL Row Level Security (RLS)",
   "Upstash Redis Rate Limiting",
-  "Next.js Server Actions SSR",
-  "Supabase Edge Functions",
+  "Resend Transactional Emails",
 ] as const;
 
 export function BondsPipeline() {
   return (
     <ArchitecturePipeline
-      title="BONDS AGENCE · Fluxo da arquitetura"
+      title="Bonds Agence · Fluxo da arquitetura"
       nodes={NODES}
       footnotes={FOOTNOTES}
     />
