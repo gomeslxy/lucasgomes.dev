@@ -1,83 +1,49 @@
-# Portfólio — Lucas Gomes
+# Portfólio — Lucas
 
-> Full-Stack & AI Developer | Criador de SaaS Multi-Tenant & E-Commerce de Alta Performance  
-> Indaiatuba, SP — Brasil
+Desenvolvedor Full-Stack com foco em interfaces modernas, performance e IA aplicada. O Agendra é apresentado como case pessoal de engenharia e estudo, construído de ponta a ponta.
 
-Interface editorial de alto impacto concebida com estética **Editorial Brutalist / High-Contrast Dark & Light** e acento em **Vermelho Carmesim** (`#E11D2A`), inspirada no padrão visual Awwwards Site of the Day / FWA.
+## Desenvolvimento
 
----
-
-## ⚡ Stack Tecnológica
-
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router, Turbopack)
-- **Engine Reativa**: React 19 + TypeScript Estrito
-- **Estilização**: Tailwind CSS v4 com tokens autorais
-- **Física de Movimento**: `motion/react` (`motion` v14) — molas inerciais e curvas cúbicas bezier
-- **Smooth Scroll**: `lenis` integrado ao loop de animação do Motion
-- **Tipografia**: Anton (Display), Instrument Serif (Itálico Editorial), JetBrains Mono (Metadados Técnicos) e Inter Tight (Texto Fluido)
-- **Ícones**: Lucide React + SVGs vetoriais customizados
-
----
-
-## 📂 Arquitetura do Projeto
-
-```
-portfolio/
-├── public/
-│   └── work/               # Imagens cinematográficas dos projetos
-│       ├── agendra.jpg     # Featured SaaS: Agendra Multi-Tenant
-│       └── bonds.jpg       # E-Commerce: BONDS AGENCE V4
-├── src/
-│   ├── app/
-│   │   ├── globals.css     # Design tokens, keyframes e utilitários editoriais
-│   │   ├── layout.tsx      # Fontes Google, Viewport, OpenGraph e SEO Schema.org
-│   │   ├── page.tsx        # Composição das seções com Smooth Scroll
-│   │   └── icon.svg        # Favicon monograma
-│   ├── components/
-│   │   ├── providers/      # Lenis smooth scroll sincronizado com Motion RAF
-│   │   ├── sections/       # Seções modulares da narrativa de scroll:
-│   │   │   ├── nav.tsx                 # Header com inversão e menu drawer mobile
-│   │   │   ├── hero.tsx                # Wordmark responsivo com dispersão em scroll
-│   │   │   ├── marquee-bands.tsx       # Faixas reativas à velocidade da rolagem
-│   │   │   ├── manifesto.tsx           # Revelação palavra a palavra e estatísticas
-│   │   │   ├── works-fan.tsx           # Seção pinada com cards em leque 3D
-│   │   │   ├── case-studies.tsx        # Estudos de caso detalhados + especificações de arquitetura
-│   │   │   ├── agendra-pipeline.tsx    # Diagrama de arquitetura viva do Agendra (Multi-LLM & RAG)
-│   │   │   ├── bonds-pipeline.tsx      # Diagrama de arquitetura do BONDS V4 (Realtime & Edge)
-│   │   │   ├── stack-capabilities.tsx  # Matriz técnica e interesses pessoais
-│   │   │   ├── trajectory.tsx          # Ledger histórico com filtros de experiência/educação
-│   │   │   └── contact-footer.tsx      # Wordmark gigante, cópia rápida e links diretos
-│   │   └── ui/             # Micro-interações autorais:
-│   │       ├── preloader.tsx           # Curtain preloader com contador suave
-│   │       ├── cursor.tsx              # Cursor magnético com modos de hover e label
-│   │       ├── grain.tsx               # Textura de ruído SVG sutil
-│   │       ├── magnetic.tsx            # Efeito magnético atrelado ao ponteiro
-│   │       ├── tilt-card.tsx           # Perspectiva 3D e reflexo dinâmico
-│   │       ├── split-reveal.tsx        # Revelação tipográfica cinética
-│   │       ├── count-up.tsx            # Contadores numéricos em viewport
-│   │       ├── velocity-marquee.tsx    # Marquee com inclinação e aceleração
-│   │       └── scroll-chrome.tsx       # Barra de progresso e indicador de capítulos
-│   └── lib/
-│       ├── data.ts         # Dados reais e tipados sobre Lucas Gomes
-│       ├── utils.ts        # Fórmulas de interpolação e curvas de mola
-│       └── use-fit-text.ts # Hook de ajuste tipográfico milimétrico
-```
-
----
-
-## 🚀 Como Executar
-
-### 1. Pré-requisitos
-Node.js 18+ instalado.
-
-### 2. Desenvolvimento Local
 ```bash
+npm install
 npm run dev
 ```
-Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
 
-### 3. Build de Produção
+## Validação e produção
+
 ```bash
+npm run typecheck
 npm run build
-npm run start
+npm start
 ```
+
+O projeto usa Next.js App Router, React, TypeScript, Tailwind CSS v4, Motion e Lucide. As fontes são servidas localmente pelo `next/font`; a primeira compilação pode precisar de acesso ao Google Fonts.
+
+Para manter um preview de produção independente de um servidor de desenvolvimento já aberto, `next.config.ts` aceita `NEXT_DIST_DIR`. No PowerShell: `$env:NEXT_DIST_DIR = '.next-cinematic'`, seguido de `npm run build` e `npm start -- --port 3217` no mesmo ambiente. Sem essa variável, o diretório padrão continua sendo `.next`.
+
+## Estrutura da experiência
+
+- `src/components/sections/hero.tsx`: card de perfil com abertura cinematográfica, banner e foto fornecidos, profundidade em CSS 3D, rich presence e saída espacial. Componentes em `src/components/hero/` e dados em `src/lib/hero-profile.ts`.
+- `src/components/sections/works-showcase.tsx`: painéis de projetos com imagens no desktop e mobile, entrada em perspectiva, luz reativa e modal acessível.
+- `src/components/spatial/spatial-section.tsx`: transições curtas entre capítulos, adaptadas ao tipo de ponteiro e à preferência por movimento reduzido.
+- `src/components/experience/experience-intro.tsx`: abertura curta ligada às fontes e imagens essenciais, com saída garantida e controle para pular.
+- `src/components/experience/ambient-environment.tsx`: luz periférica, partículas discretas e malha de fundo com movimento mínimo.
+- `src/lib/experience-config.ts`: tempos da intro, intensidade da luz, limites do ponteiro e quantidade de partículas.
+- `src/components/sections/case-studies.tsx`: contexto, autoria, arquitetura, pontos de atenção e links para os projetos.
+- `src/components/sections/manifesto.tsx`: apresentação profissional compacta e competências contextualizadas.
+- `src/components/sections/contact-footer.tsx`: contato por e-mail, telefone, WhatsApp e cópia com feedback acessível.
+- `src/components/ui/big-name.tsx`: assinatura LUCAS com dimensão por CSS, gradiente por opacidade e deslocamento sutil via MotionValues.
+- `src/lib/use-animation-policy.ts`: efeitos elaborados apenas com tela a partir de 768px, hover, ponteiro preciso e sem preferência por movimento reduzido.
+- `src/lib/data.ts`: perfil, projetos, trajetória e formação.
+
+O scroll usa Lenis somente no desktop com ponteiro preciso e sem preferência por movimento reduzido; no touch, permanece nativo. A Hero não aguarda hidratação para aparecer. Projetos e imagens reservam proporções antes de carregar. O footer não mede nem altera o tamanho da fonte por JavaScript. Não há dependências novas para este redesign.
+
+## Documentação
+
+- [Auditoria de contratação e três propostas de copy](docs/PORTFOLIO-REVIEW.md)
+- [Decisões e validação de performance](PERFORMANCE.md)
+- [Hero de perfil: estrutura, efeito 3D e personalização](docs/PROFILE-HERO.md)
+- [Auditoria de transformação e os três efeitos centrais](docs/TRANSFORMATION-AUDIT.md)
+- [Intro, atmosfera e configuração das interações](docs/ATMOSPHERE-INTRO.md)
+
+As funcionalidades dos cases foram descritas a partir das informações já existentes no portfólio; seus repositórios e resultados externos não foram auditados nesta reformulação. FPS e Core Web Vitals precisam ser medidos em produção e nos dispositivos alvo. CLS 0 é um objetivo de estabilidade, não uma garantia universal; LCP mede tempo e não deve ser prometido como zero.

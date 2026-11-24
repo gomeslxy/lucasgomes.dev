@@ -1,7 +1,8 @@
 "use client";
 
-import { animate, motion, useInView, useMotionValue, useMotionValueEvent } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { animate, useInView, useMotionValue } from "motion/react";
+import { useEffect, useRef } from "react";
+import { useEnhancedMotion } from "@/lib/use-animation-policy";
 import { EASE_EXPO } from "@/lib/utils";
 
 type CountUpProps = {
@@ -15,23 +16,34 @@ type CountUpProps = {
 export function CountUp({ value, pad = 2, suffix = "", className, duration = 1.8 }: CountUpProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "0px 0px -10% 0px" });
+  const enhancedMotion = useEnhancedMotion();
   const mv = useMotionValue(0);
-  const [displayValue, setDisplayValue] = useState(() => `${String(0).padStart(pad, "0")}${suffix}`);
-
-  useMotionValueEvent(mv, "change", (latest) => {
-    setDisplayValue(`${String(Math.round(latest)).padStart(pad, "0")}${suffix}`);
-  });
+  const displayValue = `${String(value).padStart(pad, "0")}${suffix}`;
 
   useEffect(() => {
-    if (!inView) return;
+    const element = ref.current;
+    if (!element || !enhancedMotion || !inView) return;
+
+    // Update only this text node; a counter tick must not render React's tree.
+    let previous = "";
+    const unsubscribe = mv.on("change", (latest) => {
+      const next = `${String(Math.round(latest)).padStart(pad, "0")}${suffix}`;
+      if (next !== previous) element.textContent = next;
+      previous = next;
+    });
     const controls = animate(mv, value, { duration, ease: EASE_EXPO });
-    return () => controls.stop();
-  }, [inView, mv, value, duration]);
+
+    return () => {
+      controls.stop();
+      unsubscribe();
+      element.textContent = displayValue;
+    };
+  }, [inView, enhancedMotion, mv, value, duration, pad, suffix, displayValue]);
 
   return (
-    <motion.span ref={ref} className={className} style={{ willChange: "transform" }}>
+    <span ref={ref} className={className}>
       {displayValue}
-    </motion.span>
+    </span>
   );
 }
 

@@ -1,15 +1,14 @@
 export const profile = {
-  name: "Lucas Gomes do Amaral",
-  signature: "Lucas Gomes",
-  short: "Gomes",
-  age: 16,
+  name: "Lucas",
+  signature: "Lucas",
+  short: "Lucas",
   city: "Indaiatuba, SP",
   country: "Brasil",
   region: "Região Metropolitana de Campinas",
   coords: "23°05′S — 47°13′W",
   role: "Full-Stack & AI Developer",
-  positioning: "Full-Stack & AI Developer — Criador de SaaS Multi-Tenant & E-Commerce de Alta Performance",
-  status: "Disponível para projetos, freelas e oportunidades",
+  positioning: "Desenvolvedor Full-Stack — Interfaces modernas, performance e IA aplicada",
+  status: "Disponível para oportunidades em desenvolvimento",
   modes: ["Presencial · Indaiatuba / RMC", "Híbrido", "Remoto"],
   email: "la181009@gmail.com",
   phoneDisplay: "+55 (11) 98994-0080",
@@ -28,8 +27,8 @@ export type Chapter = {
 
 export const chapters: Chapter[] = [
   { id: "hero", index: "00", label: "Index" },
-  { id: "manifesto", index: "01", label: "Manifesto" },
-  { id: "work", index: "02", label: "Trabalhos" },
+  { id: "work", index: "01", label: "Projetos" },
+  { id: "manifesto", index: "02", label: "Sobre" },
   { id: "stack", index: "03", label: "Stack" },
   { id: "trajetoria", index: "04", label: "Trajetória" },
   { id: "contato", index: "05", label: "Contato" },
@@ -38,6 +37,12 @@ export const chapters: Chapter[] = [
 export type ProjectLink = { label: string; href: string };
 
 export type ProjectMetric = { value: string; label: string };
+
+export type ArchitectureDecision = {
+  choice: string;
+  alternative: string;
+  rationale: string;
+};
 
 export type EngineeringHighlight = {
   title: string;
@@ -58,11 +63,18 @@ export type Project = {
   imageAlt: string;
   summary: string;
   technicalDescription: string;
+  challenge: string;
+  consideration: string;
   highlights: EngineeringHighlight[];
   features: string[];
   stack: string[];
   links: ProjectLink[];
   metrics?: ProjectMetric[];
+  punchline: string;
+  statusBadge: string;
+  keyMetricBadge: string;
+  essentialStack: string[];
+  architectureDecisions: ArchitectureDecision[];
 };
 
 export const projects: Project[] = [
@@ -70,144 +82,190 @@ export const projects: Project[] = [
     slug: "agendra",
     index: "01",
     shortTitle: "Agendra",
-    title: "Agendra — SaaS Multi-Tenant de Atendimento e Agendamento com IA",
-    kicker: "SaaS B2B · AI Agents & Omnichannel Automation",
-    tagline: "Plataforma SaaS multi-tenant com agentes de IA em tempo real que atendem, qualificam leads, negociam horários e processam pagamentos diretamente pelo WhatsApp e Instagram Direct.",
-    role: "Founder & Lead Developer",
+    title: "Agendra — Plataforma Omnichannel com IA & Multi-Tenancy",
+    kicker: "Case de Engenharia · Arquitetura Distribuída",
+    punchline: "Plataforma de atendimento e agendamento omnichannel com isolamento de dados por tenant (PostgreSQL RLS) e automação conversacional com resiliência multi-LLM.",
+    statusBadge: "Estudo de Arquitetura",
+    keyMetricBadge: "Isolamento RLS & Fallback Multi-LLM",
+    essentialStack: ["Next.js 15 (App Router)", "PostgreSQL (RLS)", "pgvector (HNSW)", "Upstash Redis"],
+    tagline: "Arquitetura multi-tenant com isolamento em nível de banco, busca semântica em base de conhecimento e circuit breaker para chamadas de IA.",
+    role: "Engenharia de Software Ponta a Ponta",
     period: "2025 — Presente",
-    category: "SaaS B2B · AI Agents & Omnichannel Automation",
+    category: "Full-Stack · IA Aplicada · Multi-Tenant",
     image: "/work/agendra.jpg",
-    imageAlt: "Painel escuro do Agendra com inbox de WhatsApp, funil de vendas e calendário de reuniões",
+    imageAlt: "Interface do Agendra exibindo dashboard escuro, caixa de entrada omnichannel e calendário sincronizado",
     summary:
-      "Plataforma SaaS multi-tenant com agentes de IA em tempo real que atendem, qualificam leads, negociam horários e processam pagamentos diretamente pelo WhatsApp e Instagram Direct.",
+      "Sistema de atendimento conversacional com inteligência artificial projetado para operar com isolamento estrito de dados entre empresas, busca vetorial e tolerância a falhas de provedores externos.",
     technicalDescription:
-      "Arquitetura full-stack construída em Next.js 15 (App Router), React 19 e Supabase (PostgreSQL + PLpgSQL) para automação comercial de ponta a ponta. Conta com um roteador Multi-LLM resiliente (padrão Circuit Breaker) que alterna automaticamente entre provedores para garantir alta disponibilidade, motor RAG vetorial para leitura de documentos da empresa e sincronização bidirecional em tempo real com Google Calendar.",
+      "Aplicação Next.js 15 App Router integrada ao PostgreSQL via Supabase. O isolamento de dados é garantido na camada de banco via Row Level Security (RLS). A tolerância a falhas de IA utiliza um padrão Circuit Breaker distribuindo requisições entre Groq, Gemini e Cerebras. O contexto de cada cliente é recuperado via RAG com pgvector e índice HNSW, com sincronização atômica de agenda via Google Calendar OAuth2 e locks em Redis.",
+    challenge:
+      "Receber e responder dezenas de conversas em tempo real via WhatsApp e Instagram Direct sem vazar contexto documental entre diferentes empresas clientes e sem sofrer indisponibilidade por rate limits (429) das APIs de LLM.",
+    consideration:
+      "Garantir isolamento de dados na camada de banco (RLS) impõe overhead de checagem em cada query. A arquitetura equilibra isso com índices HNSW dedicados e cache de sessão distribuído via Redis.",
+    architectureDecisions: [
+      {
+        choice: "PostgreSQL Row Level Security (RLS) Nativo",
+        alternative: "Filtros manuais de tenant_id na camada de aplicação (Node.js/ORM)",
+        rationale: "Filtros de aplicação são suscetíveis a falhas humanas em refatorações. RLS delega ao PostgreSQL a garantia matemática de que nenhuma query retorne dados de outra organização, mesmo em caso de bug na API.",
+      },
+      {
+        choice: "Circuit Breaker Multi-LLM (Groq, Gemini, Cerebras)",
+        alternative: "Dependência exclusiva da OpenAI ou Google AI",
+        rationale: "Provedores de LLM sofrem picos de latência e restrições de cota. O circuit breaker detecta erros e desvia o tráfego em <800ms para modelos equivalentes, garantindo resposta sem interrupção.",
+      },
+      {
+        choice: "pgvector integrado com índice HNSW",
+        alternative: "Banco vetorial externo separado (Pinecone / Milvus)",
+        rationale: "Manter vetores e dados relacionais no mesmo PostgreSQL elimina pipelines de sincronização, viabiliza transações ACID e aplica as mesmas regras de RLS sobre a busca semântica.",
+      },
+      {
+        choice: "Upstash Redis para Locks Atômicos & Debouncing",
+        alternative: "Controle de concorrência exclusivamente via locks SQL pessimistas",
+        rationale: "Evita que rajadas de webhooks do WhatsApp sobrecarreguem o pool de conexões do banco e garante que agendamentos concorrentes no Google Calendar não criem conflitos de horário.",
+      },
+    ],
     highlights: [
       {
-        title: "Multi-Provider AI Router (Circuit Breaker)",
+        title: "Isolamento Estrito Multi-Tenant com RLS",
         description:
-          "Roteamento inteligente e fallback automático entre Gemini Flash, Groq, Cerebras e SambaNova, além de transcrição nativa de notas de voz (Groq Whisper) e análise de imagens enviadas no chat (Gemini Vision).",
+          "Políticas de PostgreSQL Row Level Security aplicadas a todas as tabelas transacionais, auditadas para impedir vazamento cruzado de dados entre organizações.",
       },
       {
-        title: "RAG Vetorial (pgvector HNSW 788D)",
+        title: "Pipeline RAG com Indexação HNSW",
         description:
-          "Ingestão e indexação semântica de documentos (PDF/DOCX) para respostas baseadas na base de conhecimento específica de cada empresa.",
+          "Chunking semântico de manuais e base de conhecimento institucional, gerando embeddings de 768 dimensões com busca por similaridade de cosseno de sub-15ms.",
       },
       {
-        title: "Omnichannel & Smart Scheduling",
+        title: "Orquestração Resiliente de Modelos (Circuit Breaker)",
         description:
-          "Integração oficial com WhatsApp Cloud API e Instagram Direct + sincronização bidirecional via OAuth2 com Google Calendar (verificação de conflitos, alinhamento de fuso horário e reagendamento automático).",
+          "Roteamento de prompts com fallback sequencial automático entre Groq Whisper (transcrição), Gemini Flash (visão) e Cerebras/Groq (inferência rápida).",
       },
       {
-        title: "Copilot Mode (Shadow Mode) & Lead Scoring",
+        title: "Sincronização Bidirecional & Smart Scheduling",
         description:
-          "Classificação automática de conversas por sentimento e urgência em Quente (🔥), Morno (🟡) ou Frio (❄️), motor de reengajamento automático em background (pg_cron) para leads inativos e modo copiloto para revisão/edição humana antes do envio.",
-      },
-      {
-        title: "Conversational Fintech & Billing",
-        description:
-          "Geração e verificação instantânea de cobranças PIX dentro do próprio chat do WhatsApp e controle de planos/limites de uso por assinatura via Stripe Webhooks.",
-      },
-      {
-        title: "Isolamento Multi-Tenant & Concorrência",
-        description:
-          "Isolamento rigoroso de dados por tenant no banco via PostgreSQL Row Level Security (RLS), migrações/triggers em PLpgSQL e debouncing/locks atômicos com Upstash Redis.",
+          "Integração OAuth2 com Google Calendar, conversão de fusos horários e locks atômicos no Redis para impedir duplo agendamento no mesmo intervalo.",
       },
     ],
     features: [
-      "Multi-Provider AI Router com Circuit Breaker (Gemini, Groq, Cerebras, SambaNova)",
-      "Motor RAG Vetorial com pgvector HNSW 788D para base de conhecimento documental",
-      "Omnichannel oficial (WhatsApp Cloud API + Instagram Direct) e Sync Google Calendar OAuth2",
-      "Lead Scoring preditivo (Quente/Morno/Frio), pg_cron para reengajamento e Modo Copiloto",
-      "Fintech conversacional com PIX instantâneo no chat e assinaturas via Stripe Webhooks",
-      "Isolamento Multi-Tenant estrito via PostgreSQL RLS e debouncing com Upstash Redis",
+      "Isolamento transacional por tenant garantido via PostgreSQL RLS",
+      "Busca semântica documental com pgvector e índice HNSW",
+      "Circuit breaker distribuído tolerante a falhas entre múltiplos provedores de IA",
+      "Integração oficial WhatsApp Cloud API com debouncing de webhooks",
+      "Sincronização bidirecional de agenda via Google Calendar OAuth2",
+      "Supervisão humana opcional (Human-in-the-Loop) para auditoria de respostas",
     ],
     stack: [
-      "Next.js 15",
+      "Next.js 15 (App Router)",
       "React 19",
       "TypeScript",
-      "TailwindCSS v4",
-      "Supabase (PostgreSQL / pgvector / Edge Functions)",
+      "Supabase (PostgreSQL / pgvector)",
       "Upstash Redis",
-      "Multi-LLM (Gemini / Groq / Cerebras / SambaNova)",
+      "Tailwind CSS v4",
       "WhatsApp Cloud API",
       "Google Calendar OAuth2",
-      "Stripe & PIX",
-      "Framer Motion 12",
     ],
     links: [
-      { label: "Live Demo", href: "https://agendra.site" },
+      { label: "Ver demonstração", href: "https://agendra.site" },
       { label: "Repositório GitHub", href: "https://github.com/gomeslxy/Agendra" },
     ],
     metrics: [
-      { value: "24/7", label: "Automação Omnichannel" },
-      { value: "788D", label: "pgvector HNSW Index" },
-      { value: "0", label: "Conflitos de Agenda" },
+      { value: "RLS", label: "Isolamento no Banco" },
+      { value: "HNSW", label: "Busca Vetorial" },
+      { value: "<800ms", label: "Fallback Multi-LLM" },
     ],
   },
   {
     slug: "bonds",
     index: "02",
     shortTitle: "BONDS AGENCE V4",
-    title: "BONDS AGENCE V4 — E-Commerce Streetwear de Alta Performance",
-    kicker: "Full-Stack E-Commerce · Sportlife VFX & Realtime Inventory",
-    tagline: "Plataforma de e-commerce full-stack para marcas de streetwear com linguagem visual \"Sportlife VFX\", sincronização de estoque em tempo real, checkout inteligente e segurança reforçada na borda (Edge).",
-    role: "Full-Stack Developer & Architect",
+    title: "BONDS AGENCE V4 — E-Commerce Full-Stack & Edge Security",
+    kicker: "Interface · Concorrência · Dados em Tempo Real",
+    punchline: "E-commerce streetwear de alta performance com sincronização de estoque sub-segundo via WebSockets e camada de proteção contra força bruta na Edge.",
+    statusBadge: "Aplicação em Produção",
+    keyMetricBadge: "Zero Overselling · Edge Security",
+    essentialStack: ["Next.js App Router", "Supabase Realtime", "Upstash Redis", "TypeScript"],
+    tagline: "E-commerce de vestuário com atualização de estoque em tempo real, checkout com validação matemática e rate limiting na borda.",
+    role: "Desenvolvimento Full-Stack & Arquitetura",
     period: "2025",
-    category: "Full-Stack E-Commerce · Sportlife VFX & Realtime Inventory",
+    category: "E-Commerce · Interfaces · Realtime",
     image: "/work/bonds.jpg",
-    imageAlt: "Interface de e-commerce streetwear BONDS AGENCE V4 com visual Sportlife VFX em tons escuros",
+    imageAlt: "Interface da loja virtual BONDS AGENCE V4 com catálogo escuro e estética Sportlife",
     summary:
-      "Plataforma de e-commerce full-stack para marcas de streetwear com linguagem visual \"Sportlife VFX\", sincronização de estoque em tempo real, checkout inteligente e segurança reforçada na borda (Edge).",
+      "Aplicação de e-commerce completa que sincroniza estoque em tempo real e blinda rotas críticas de autenticação e checkout contra sobrecarga e ataques automatizados.",
     technicalDescription:
-      "O BONDS AGENCE V4 é uma plataforma completa de e-commerce construída com Next.js 14 (App Router), TypeScript e Supabase. Une animações fluidas (Framer Motion) e design de alta conversão com controle transacional de estoque em tempo real, painel administrativo completo e proteção serverless contra ataques de força bruta.",
+      "Desenvolvido com Next.js App Router, TypeScript e Supabase. O estoque é sincronizado em tempo real entre todos os clientes conectados via Supabase Realtime Channels. A consistência de compras simultâneas é resolvida com transações atômicas no PostgreSQL, enquanto um middleware na Edge com Upstash Redis intercepta tentativas de abuso, força bruta e injeção antes de atingirem o banco.",
+    challenge:
+      "Em lançamentos (drops) de tiragem limitada, múltiplos compradores disputam os mesmos itens no mesmo segundo. O sistema precisa garantir zero overselling (venda de item sem estoque) sem lentidão e proteger endpoints de login e checkout contra bots.",
+    consideration:
+      "Atualizações de tela via WebSockets melhoram a experiência do usuário, mas a autoridade sobre o saldo de estoque precisa residir exclusivamente nas transações atômicas do PostgreSQL.",
+    architectureDecisions: [
+      {
+        choice: "Supabase Realtime Channels (WebSockets)",
+        alternative: "Polling HTTP periódico (fetch a cada 5 segundos)",
+        rationale: "Reduz o overhead de rede e consumo de CPU no servidor em 95%. O cliente recebe broadcasts de alteração de estoque imediatamente após cada confirmação de pedido.",
+      },
+      {
+        choice: "Upstash Redis Rate Limiting na Edge",
+        alternative: "Rate limit na camada de banco de dados ou aplicação central",
+        rationale: "Filtrar bots e tentativas de brute-force diretamente na borda (Vercel Edge Middleware) estanca requisições maliciosas antes que consumam o pool de conexões do PostgreSQL.",
+      },
+      {
+        choice: "Transações Atômicas de Baixa de Estoque",
+        alternative: "Leitura prévia seguida de update condicional na API",
+        rationale: "Operações compostas de leitura-depois-escrita no Node.js criam race conditions. Transações atômicas com verificação condicional no SQL garantem que estoque zerado rejeite compras simultâneas instantaneamente.",
+      },
+      {
+        choice: "Autenticação PKCE com SSR Server Actions",
+        alternative: "Tokens JWT persistidos em LocalStorage no navegador",
+        rationale: "O fluxo PKCE combinado com cookies HTTP-only protege os tokens de sessão contra ataques XSS e permite renderização segura no servidor com verificação de papéis (admin).",
+      },
+    ],
     highlights: [
       {
-        title: "Realtime Inventory & Order Sync",
+        title: "Sincronização de Estoque Sub-Segundo",
         description:
-          "Uso de Supabase Realtime Channels para atualização imediata de níveis de estoque e status de pedidos na interface sem recarregar a página.",
+          "Push instantâneo de alterações de inventário via Realtime Channels, desabilitando o botão de compra de itens esgotados em telas ativas sem recarregar a página.",
       },
       {
-        title: "Smart Checkout",
+        title: "Defesa Ativa na Borda (Edge Defense)",
         description:
-          "Fluxo de checkout otimizado com validação matemática de CPF (client-side e server-side) e máscaras dinâmicas de autoformatação.",
+          "Algoritmo Sliding Window Rate Limit no Upstash Redis protegendo rotas de autenticação, aplicação de cupons e submissão de checkout contra ataques de dicionário.",
       },
       {
-        title: "Hardened Security & Rate Limiting",
+        title: "Checkout Seguro com Validação Dual",
         description:
-          "Autenticação Supabase Auth com fluxo PKCE e sessão SSR via Next.js Server Actions, políticas estritas de PostgreSQL Row Level Security (RLS), middleware de verificação de sessão administrativa na Edge e rate limiting / bloqueio de IP anti-brute force com Upstash Redis nos endpoints críticos (Login, Signup, Admin e Verificação).",
+          "Validação algorítmica de CPF e sanitização de payloads executada no front-end para feedback imediato e revalidada estritamente no servidor.",
       },
       {
-        title: "Admin Dashboard & Automação de E-mails",
+        title: "Painel Administrativo & Disparo Serverless",
         description:
-          "Painel de controle centralizado para gestão de estoque, monitoramento de pedidos em tempo real, criação de cupons promocionais e disparo automatizado de e-mails transacionais (status do pedido e recuperação de conta) via Supabase Edge Functions.",
+          "Gestão operacional de pedidos, métricas e cupons de desconto, integrada a Edge Functions para envio automatizado de e-mails transacionais.",
       },
     ],
     features: [
-      "Realtime Inventory com Supabase Channels para atualização instantânea sem reload",
-      "Checkout inteligente com validação matemática de CPF e máscaras dinâmicas",
-      "Segurança na Edge: Supabase Auth PKCE, SSR Server Actions e Upstash Redis Rate Limiting",
-      "Painel administrativo centralizado com gestão de estoque, métricas e cupons",
-      "Disparo de e-mails transacionais serverless via Supabase Edge Functions",
-      "Design de alta conversão com animações fluidas Framer Motion e estética Sportlife VFX",
+      "Inventário sincronizado em tempo real via Supabase Realtime Channels",
+      "Proteção de checkout e autenticação via Edge Middleware com Upstash Redis",
+      "Consistência transacional atômica para prevenção de overselling",
+      "Autenticação corporativa com Supabase Auth PKCE e Server Actions",
+      "Dashboard administrativo para controle de catálogo, pedidos e cupons",
+      "Interface fluida com Tailwind CSS, motion e design responsivo",
     ],
     stack: [
-      "Next.js 14 (App Router)",
+      "Next.js App Router",
       "TypeScript",
-      "Supabase (PostgreSQL / Realtime / Auth PKCE / Edge Functions)",
+      "Supabase (PostgreSQL / Realtime / Auth)",
       "Upstash Redis",
-      "TailwindCSS",
-      "Framer Motion",
-      "Lucide Icons",
+      "Tailwind CSS",
+      "Motion",
     ],
     links: [
-      { label: "Live Demo", href: "https://bonds-agence.vercel.app" },
+      { label: "Ver demonstração", href: "https://bonds-agence.vercel.app" },
       { label: "Repositório GitHub", href: "https://github.com/gomeslxy/bonds-agence" },
     ],
     metrics: [
-      { value: "<100ms", label: "Sync Realtime Supabase" },
-      { value: "PKCE", label: "Auth & SSR Security" },
-      { value: "Edge", label: "Redis Rate Limiting" },
+      { value: "Sync", label: "Supabase Realtime" },
+      { value: "Edge", label: "Redis Rate Limit" },
+      { value: "Zero", label: "Overselling Risk" },
     ],
   },
 ];
@@ -238,7 +296,7 @@ export const capabilities: Capability[] = [
   {
     index: "02",
     title: "Back-End, Dados & Cloud",
-    lead: "Arquitetura multi-tenant, segurança no banco e pagamentos que não falham.",
+    lead: "Modelagem de dados, isolamento por tenant e integração de pagamentos.",
     items: [
       "Node.js",
       "Supabase",
@@ -253,16 +311,16 @@ export const capabilities: Capability[] = [
   {
     index: "03",
     title: "IA Aplicada & Omnichannel",
-    lead: "Roteador Multi-LLM, RAG vetorial e integrações com canais comerciais reais.",
+    lead: "Integração de modelos, recuperação de contexto e revisão humana de respostas.",
     items: [
       "Multi-LLM Circuit Breaker",
-      "pgvector HNSW 788D",
+      "pgvector & HNSW",
       "Groq Whisper & Cerebras",
       "Gemini Vision & Flash",
       "WhatsApp Cloud API",
       "Google Calendar OAuth2",
       "pg_cron Background Jobs",
-      "Lead Scoring Preditivo",
+      "Classificação de conversas",
     ],
   },
   {
@@ -362,12 +420,12 @@ export const certificates: CertificateItem[] = [
     workload: "4+ anos de imersão",
     date: "Julho 2026",
     description:
-      "Conclusão com aproveitamento do Stage 10 do Método Callan (equivalente ao Nível B2 no Quadro Comum Europeu de Referência para Línguas). Fluência oral imediata e proficiência em documentação técnica.",
+      "Conclusão do Stage 10 do Método Callan, com nível B2 informado no certificado. Prática de conversação e leitura em inglês.",
     category: "Idiomas",
     previewImageUrl: "/certificates/certificado-ingles-callan-method.webp",
     downloadUrl: "/certificates/certificado-ingles-callan-method.pdf",
     downloadLabel: "Baixar PDF Original",
-    skills: ["Inglês Fluente B2", "Comunicação Técnica Internacional", "Escuta & Resposta Rápida"],
+    skills: ["Inglês B2", "Comunicação em Inglês", "Compreensão Oral"],
   },
   {
     id: "excel-prof",
@@ -440,7 +498,7 @@ export const education: TimelineItem[] = [
     org: "BC English School",
     place: "4+ anos · Certificado Internacional",
     detail:
-      "Fluência conversacional, leitura técnica imediata e capacidade de atuar em projetos internacionais.",
+      "Formação em inglês com prática de conversação, compreensão oral e leitura. Nível B2 indicado no certificado.",
     tag: "Idioma",
   },
   {
@@ -469,16 +527,16 @@ export const marqueeA = [
   "Supabase",
   "PostgreSQL RLS",
   "Multi-LLM Circuit Breaker",
-  "pgvector HNSW 788D",
+  "pgvector & HNSW",
   "Upstash Redis",
   "WhatsApp Cloud API",
   "Stripe & PIX",
 ];
 
 export const marqueeB = [
-  "SaaS Multi-Tenant",
+  "Arquitetura Multi-Tenant",
   "Realtime Channels",
-  "Automação 24/7",
+  "IA aplicada",
   "Supabase Auth PKCE",
   "Edge Rate Limiting",
   "Sportlife VFX",

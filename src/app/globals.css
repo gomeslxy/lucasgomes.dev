@@ -20,14 +20,13 @@
 
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-sine: cubic-bezier(0.37, 0, 0.63, 1);
 
   --tracking-display: -0.045em;
   --tracking-label: 0.2em;
 
   --animate-marquee: marquee var(--marquee-duration, 30s) linear infinite;
-  --animate-grain: grain 1.2s steps(6) infinite;
   --animate-pulse-dot: pulse-dot 1.8s var(--ease-expo) infinite;
-  --animate-travel: travel 3.2s var(--ease-quart) infinite;
 
   @keyframes marquee {
     from {
@@ -35,27 +34,6 @@
     }
     to {
       transform: translate3d(-50%, 0, 0);
-    }
-  }
-
-  @keyframes grain {
-    0% {
-      transform: translate3d(0, 0, 0);
-    }
-    20% {
-      transform: translate3d(-4%, 3%, 0);
-    }
-    40% {
-      transform: translate3d(3%, -5%, 0);
-    }
-    60% {
-      transform: translate3d(-6%, -2%, 0);
-    }
-    80% {
-      transform: translate3d(5%, 4%, 0);
-    }
-    100% {
-      transform: translate3d(0, 0, 0);
     }
   }
 
@@ -73,29 +51,14 @@
       opacity: 0;
     }
   }
-
-  @keyframes travel {
-    0% {
-      transform: translate3d(0, 0, 0);
-      opacity: 0;
-    }
-    10% {
-      opacity: 1;
-    }
-    90% {
-      opacity: 1;
-    }
-    100% {
-      transform: translate3d(var(--travel-distance, 100%), 0, 0);
-      opacity: 0;
-    }
-  }
 }
 
 @layer base {
   :root {
     color-scheme: dark;
     --gutter: clamp(1rem, 2.4vw, 2.5rem);
+    /* Shared grid cell: hero field, lens and guides stay aligned on one lattice. */
+    --cell: 72px;
   }
 
   html {
@@ -104,6 +67,7 @@
     text-rendering: optimizeLegibility;
     overflow-x: clip;
     scroll-behavior: auto;
+    scrollbar-gutter: stable;
   }
 
   body {
@@ -134,6 +98,28 @@
   img {
     user-select: none;
     -webkit-user-drag: none;
+  }
+
+  [id] {
+    scroll-margin-top: 6rem;
+  }
+
+  /* Lenis runtime rules (desktop only — mobile keeps native scrolling). */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis:not(.lenis-autoToggle).lenis-stopped {
+    overflow: clip;
+  }
+
+  .lenis [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  .lenis.lenis-smooth iframe {
+    pointer-events: none;
   }
 }
 
@@ -180,6 +166,325 @@
     background-image: linear-gradient(to right, rgb(234 234 234 / 0.04) 1px, transparent 1px);
     background-size: calc((100% - 2 * var(--gutter)) / 12) 100%;
     background-position: var(--gutter) 0;
+  }
+
+  .hero-ambient {
+    background:
+      radial-gradient(ellipse at 85% 25%, rgb(225 29 42 / 0.07), transparent 55%),
+      radial-gradient(ellipse at 10% 95%, rgb(255 255 255 / 0.025), transparent 50%);
+  }
+
+  .velocity-marquee-track {
+    animation: var(--animate-marquee);
+    animation-play-state: paused;
+  }
+
+  /* ───────────────────────── Tactile press ─────────────────────────
+     Immediate compression on pointer-down; a slower expo release. */
+  .press {
+    transition: transform 0.45s var(--ease-expo);
+  }
+
+  .press:active {
+    transform: scale(0.965);
+    transition-duration: 0.08s;
+  }
+
+  /* ───────────────────────── Hero field ─────────────────────────
+     Static lattice painted once. The lens is a fixed-size layer moved only
+     through transform; its inner lattice is counter-translated so lines stay
+     registered with the base grid. No mask/paint work happens per frame. */
+  .hero-grid {
+    background-image:
+      linear-gradient(to right, rgb(234 234 234 / 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(234 234 234 / 0.045) 1px, transparent 1px);
+    background-size: var(--cell) var(--cell);
+    mask-image: radial-gradient(ellipse 85% 75% at 62% 38%, #000 25%, transparent 88%);
+  }
+
+  .hero-lens {
+    --lens: min(36rem, 120vw);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--lens);
+    height: var(--lens);
+    margin-left: calc(var(--lens) / -2);
+    margin-top: calc(var(--lens) / -2);
+    border-radius: 9999px;
+    overflow: hidden;
+    contain: strict;
+    pointer-events: none;
+    mask-image: radial-gradient(circle closest-side, #000 0%, rgb(0 0 0 / 0.55) 52%, transparent 100%);
+    transform: translate3d(68vw, 42svh, 0);
+  }
+
+  .hero-lens-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle closest-side, rgb(225 29 42 / 0.2), rgb(225 29 42 / 0.05) 55%, transparent 100%);
+  }
+
+  .hero-lens-grid {
+    /* Pad is a multiple of --cell, so the counter-translated lattice re-aligns. */
+    --pad: calc(var(--cell) * 12);
+    position: absolute;
+    left: calc(var(--lens) / 2 - var(--pad));
+    top: calc(var(--lens) / 2 - var(--pad));
+    width: calc(100vw + var(--pad) * 2);
+    height: calc(160svh + var(--pad) * 2);
+    background-image:
+      radial-gradient(circle, rgb(225 29 42) 0 1.6px, transparent 2.4px),
+      linear-gradient(to right, rgb(234 234 234 / 0.2) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(234 234 234 / 0.2) 1px, transparent 1px);
+    background-size: var(--cell) var(--cell);
+    background-position:
+      calc(var(--cell) / -2 + 0.5px) calc(var(--cell) / -2 + 0.5px),
+      0 0,
+      0 0;
+    transform: translate3d(-68vw, -42svh, 0);
+  }
+
+  /* ───────────────────────── Kinetic reveal ───────────────────────── */
+  .reveal-mask {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.08em;
+    margin-bottom: -0.08em;
+  }
+
+  .reveal-inner {
+    display: block;
+  }
+
+  /* ───────────────────────── Scroll cue ───────────────────────── */
+  .scroll-cue {
+    position: relative;
+    display: block;
+    width: 1px;
+    height: 3rem;
+    overflow: hidden;
+    background: rgb(234 234 234 / 0.12);
+  }
+
+  .scroll-cue::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--color-crimson);
+    transform: translate3d(0, -100%, 0);
+  }
+
+  /* ───────────────────────── Reactive border ─────────────────────────
+     Border-only gradient (mask-composite) whose focal point follows the
+     pointer through two custom properties on a small element. */
+  .glow-card {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .glow-card::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: 1;
+    border-radius: inherit;
+    padding: 1px;
+    pointer-events: none;
+    background: radial-gradient(
+      18rem circle at var(--gx, 50%) var(--gy, 0%),
+      rgb(225 29 42 / 0.9),
+      rgb(234 234 234 / 0.14) 42%,
+      transparent 72%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    opacity: 0.45;
+    transition: opacity 0.5s var(--ease-expo);
+  }
+
+  .glow-card:hover::before,
+  .glow-card:focus-within::before {
+    opacity: 1;
+  }
+
+  /* ───────────────────────── Project index ───────────────────────── */
+  @media (hover: hover) and (pointer: fine) {
+    .project-list > li {
+      transition: opacity 0.5s var(--ease-expo);
+    }
+
+    .project-list:has(a:hover) > li:not(:hover) {
+      opacity: 0.28;
+    }
+  }
+
+  /* ───────────────────────── Signature ─────────────────────────
+     Outline layer + filled layer. The fill rises through two opposing
+     transforms (clip wrapper / inner text) on a CSS view timeline. */
+  .sig {
+    view-timeline-name: --sig;
+    view-timeline-axis: block;
+  }
+
+  .sig-outline {
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(234 234 234 / 0.3);
+  }
+
+  .sig-clip {
+    position: relative;
+    display: block;
+    overflow: hidden;
+  }
+
+  .sig-inner {
+    display: block;
+  }
+}
+
+/* ───────────────────────── Motion layer ─────────────────────────
+   Every animation below is transform/opacity only and opt-in through
+   prefers-reduced-motion: no-preference. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-inner {
+    animation: reveal-rise 1.2s var(--ease-expo) both;
+    animation-delay: calc(var(--d, 0) * 1ms + 60ms);
+  }
+
+  .reveal-fade {
+    animation: reveal-fade 1s var(--ease-expo) both;
+    animation-delay: calc(var(--d, 0) * 1ms + 60ms);
+  }
+
+  .scroll-cue::after {
+    animation: cue-run 2.6s var(--ease-quart) infinite;
+  }
+
+  /* Touch / coarse pointers: the lens drifts on its own (no cursor). */
+  @media (hover: none), (pointer: coarse) {
+    .hero-lens {
+      animation: lens-drift 26s var(--ease-sine) infinite alternate;
+    }
+
+    .hero-lens-grid {
+      animation: lens-drift-inverse 26s var(--ease-sine) infinite alternate;
+    }
+
+    [data-hero-paused="true"] .hero-lens,
+    [data-hero-paused="true"] .hero-lens-grid {
+      animation-play-state: paused;
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    .sig-clip {
+      animation: sig-clip linear both;
+      animation-timeline: --sig;
+      animation-range: entry 10% entry 100%;
+    }
+
+    .sig-inner {
+      animation: sig-inner linear both;
+      animation-timeline: --sig;
+      animation-range: entry 10% entry 100%;
+    }
+  }
+}
+
+@keyframes reveal-rise {
+  from {
+    transform: translate3d(0, 110%, 0) rotate(2.5deg);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes reveal-fade {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cue-run {
+  0% {
+    transform: translate3d(0, -100%, 0);
+  }
+  55% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 100%, 0);
+  }
+}
+
+@keyframes lens-drift {
+  0% {
+    transform: translate3d(72vw, 26svh, 0);
+  }
+  35% {
+    transform: translate3d(38vw, 44svh, 0);
+  }
+  70% {
+    transform: translate3d(62vw, 64svh, 0);
+  }
+  100% {
+    transform: translate3d(24vw, 30svh, 0);
+  }
+}
+
+@keyframes lens-drift-inverse {
+  0% {
+    transform: translate3d(-72vw, -26svh, 0);
+  }
+  35% {
+    transform: translate3d(-38vw, -44svh, 0);
+  }
+  70% {
+    transform: translate3d(-62vw, -64svh, 0);
+  }
+  100% {
+    transform: translate3d(-24vw, -30svh, 0);
+  }
+}
+
+@keyframes sig-clip {
+  from {
+    transform: translate3d(0, 100%, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes sig-inner {
+  from {
+    transform: translate3d(0, -100%, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@media (max-width: 767px), (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) {
+  .velocity-marquee-track {
+    animation: none;
+    transform: none;
+  }
+
+  .animate-pulse-dot {
+    animation: none;
   }
 }
 

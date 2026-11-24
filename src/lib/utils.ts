@@ -1,5 +1,4 @@
 import { clsx, type ClassValue } from "clsx";
-import { useEffect, useState } from "react";
 
 export function cn(...inputs: ClassValue[]): string {
   return clsx(inputs);
@@ -9,13 +8,6 @@ export const EASE_EXPO = [0.16, 1, 0.3, 1] as const;
 export const EASE_QUART = [0.76, 0, 0.24, 1] as const;
 
 export const SPRING = {
-  type: "spring",
-  damping: 24,
-  stiffness: 260,
-  mass: 0.9,
-} as const;
-
-export const SPRING_TACTILE = {
   type: "spring",
   damping: 24,
   stiffness: 260,
@@ -36,48 +28,20 @@ export const SPRING_CARD = {
   mass: 0.85,
 } as const;
 
-export const SPRING_SOFT = {
+/** Reference spring for UI chrome (dock pill, sheets). */
+export const SPRING_UI = {
   type: "spring",
-  damping: 30,
-  stiffness: 160,
-  mass: 0.9,
+  damping: 25,
+  stiffness: 280,
+  mass: 0.8,
 } as const;
 
-export function useMediaQuery(query: string, fallback = false): boolean {
-  const [matches, setMatches] = useState<boolean>(fallback);
+/** Loose follower for cursor-bound layers (lens, project preview). */
+export const SPRING_FOLLOW = {
+  damping: 26,
+  stiffness: 170,
+  mass: 0.7,
+} as const;
 
-  useEffect(() => {
-    const mql = window.matchMedia(query);
-    const onChange = () => setMatches(mql.matches);
-    onChange();
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
-  }, [query]);
-
-  return matches;
-}
-
-export function useLocalTime(timeZone = "America/Sao_Paulo"): string {
-  const [time, setTime] = useState<string>("--:--:--");
-
-  useEffect(() => {
-    const formatter = new Intl.DateTimeFormat("pt-BR", {
-      timeZone,
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    });
-    const tick = () => setTime(formatter.format(new Date()));
-    tick();
-    const id = window.setInterval(tick, 1000);
-    return () => window.clearInterval(id);
-  }, [timeZone]);
-
-  return time;
-}
-
-export function wrap(min: number, max: number, value: number): number {
-  const range = max - min;
-  return ((((value - min) % range) + range) % range) + min;
-}
+/** easeOutExpo as a function, for imperative APIs such as Lenis.scrollTo. */
+export const EASE_EXPO_FN = (t: number): number => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));

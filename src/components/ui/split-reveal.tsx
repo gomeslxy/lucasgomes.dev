@@ -3,6 +3,7 @@
 import { motion, useInView, type Variants } from "motion/react";
 import { useRef, type ElementType } from "react";
 import { cn, EASE_EXPO } from "@/lib/utils";
+import { useEnhancedMotion } from "@/lib/use-animation-policy";
 
 type SplitRevealProps = {
   text: string;
@@ -29,6 +30,35 @@ const piece: Variants = {
 };
 
 export function SplitReveal({
+  text,
+  as: Tag = "span",
+  className,
+  charClassName,
+  delay = 0,
+  stagger = 0.03,
+  by = "char",
+  once = true,
+  trigger,
+}: SplitRevealProps) {
+  const enhancedMotion = useEnhancedMotion();
+  if (!enhancedMotion) return <Tag className={className}>{text}</Tag>;
+
+  return (
+    <AnimatedSplitReveal
+      text={text}
+      as={Tag}
+      className={className}
+      charClassName={charClassName}
+      delay={delay}
+      stagger={stagger}
+      by={by}
+      once={once}
+      trigger={trigger}
+    />
+  );
+}
+
+function AnimatedSplitReveal({
   text,
   as: Tag = "span",
   className,
