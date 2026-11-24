@@ -1,74 +1,61 @@
 import { SectionLabel } from "@/components/ui/section-label";
-import { GlowSurface } from "@/components/ui/glow-surface";
-import { capabilities, interests } from "@/lib/data";
-import styles from "@/components/spatial/living-surface.module.css";
+import { capabilities } from "@/lib/data";
 import { Reveal } from "@/components/motion/reveal";
 
 export function StackCapabilities() {
   return (
     <section id="stack" aria-labelledby="stack-title" className="relative bg-ink text-bone border-t border-white/10 py-[clamp(6rem,11vw,10rem)]">
-      <div className="gutter">
-        <SectionLabel index="03" title="Stack & Competências" aside="Engenharia de Ponta a Ponta" tone="dark" />
+      <div className="gutter mx-auto max-w-[1600px]">
+        <SectionLabel index="03" title="Stack" aside="Tecnologias" tone="dark" />
 
-        <div className="mt-14 md:mt-20 grid gap-12 lg:grid-cols-12">
-          {/* Header & Subtitle */}
-          <div className="lg:col-span-5 flex flex-col justify-between">
-            <div>
-              <h2 id="stack-title" className="display text-[clamp(2.6rem,7vw,6rem)] leading-[0.85]">
-                <Reveal as="span" pattern="heading">Tecnologias</Reveal>
-                <Reveal as="span" pattern="heading" delay={.08}><span className="font-serif italic text-crimson text-[0.85em] normal-case tracking-normal">em</span></Reveal>
-                <Reveal as="span" pattern="heading" delay={.16}>prática.</Reveal>
-              </h2>
-              <Reveal pattern="body" delay={.1} className="mt-8 max-w-md"><p className="text-base text-bone/75 leading-relaxed">
-                Minha stack conecta interfaces, APIs e dados. Uso os projetos para aprofundar decisões de arquitetura, testar integrações e entender os limites de cada ferramenta.
-              </p></Reveal>
-            </div>
+        <div className="mt-14 md:mt-20 flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-10">
+          <h2 id="stack-title" className="display text-[clamp(2.6rem,7vw,6rem)] leading-[0.85]">
+            <Reveal as="span" pattern="heading">Stack</Reveal>{" "}
+            <Reveal as="span" pattern="heading" delay={0.08}>
+              <span className="font-serif italic text-crimson text-[0.85em] normal-case tracking-normal">técnica</span>
+            </Reveal>
+          </h2>
+          <Reveal pattern="body" delay={0.1} className="max-w-md">
+            <p className="text-base text-bone/75 leading-relaxed">
+              Tecnologias utilizadas nos projetos acima, organizadas por camada.
+            </p>
+          </Reveal>
+        </div>
 
-            {/* Lifestyle / Personal interests */}
-            <div className="mt-12 pt-8 border-t border-white/10">
-              <span className="label text-ash text-xs">Interesses</span>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {interests.map((item, index) => (
-                  <Reveal as="span" pattern="meta" delay={index * .035}
-                    key={item}
-                    className="label rounded-full border border-white/15 px-3 py-1.5 text-[0.65rem] text-bone/80 hover:border-crimson hover:text-bone select-none"
-                  >
-                    {item}
-                  </Reveal>
-                ))}
+        <div className="mt-4 divide-y divide-white/10 border-y border-white/10">
+          {capabilities.map((cap, index) => (
+            <Reveal key={cap.index} pattern="row" delay={index * 0.04}>
+              <div className="py-8 md:py-10 grid gap-6 lg:grid-cols-12 items-start">
+                <div className="lg:col-span-4">
+                  <span className="font-mono text-xs font-bold text-crimson tabular-nums">[{cap.index}]</span>
+                  <h3 className="display mt-2 text-[clamp(1.6rem,2.8vw,2.3rem)] tracking-tight text-bone">
+                    {cap.title}
+                  </h3>
+                  <p className="mt-3 max-w-sm text-sm leading-relaxed text-bone/75">
+                    {cap.whatIBuild}
+                  </p>
+                </div>
+
+                <ul className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 pt-1">
+                  {cap.items.map((tech) => (
+                    <li key={tech} className="flex items-start gap-2.5 font-mono text-xs leading-relaxed text-bone/90">
+                      <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-crimson" />
+                      <span>{tech}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="lg:col-span-3 lg:border-l lg:border-white/10 lg:pl-6">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash block">
+                    Aplicado em
+                  </span>
+                  <p className="mt-2 text-xs sm:text-sm leading-relaxed text-bone/80">
+                    {cap.appliedIn}
+                  </p>
+                </div>
               </div>
-            </div>
-          </div>
-
-          {/* Native disclosure avoids hover-driven state and animated layout. */}
-          <div className="lg:col-span-7 flex flex-col gap-4">
-            {capabilities.map((cap, index) => (
-              <Reveal key={cap.index} pattern="row" delay={index * .035}><GlowSurface className={styles.capabilitySurface}>
-                <details name="capabilities" open={index === 0} className={styles.capability}>
-                  <summary>
-                    <span className={styles.moduleHeader}>
-                      <span className={styles.moduleTitle}>
-                        <span className={styles.moduleIndex}>
-                          {cap.index}
-                        </span>
-                        <span className="display text-[clamp(1.5rem,3vw,2.2rem)] tracking-tight">{cap.title}</span>
-                      </span>
-                      <span aria-hidden="true" className={styles.moduleToggle}><span>+</span></span>
-                    </span>
-                    <span className="mt-3.5 block max-w-xl text-sm leading-relaxed text-bone/70">{cap.lead}</span>
-                  </summary>
-                  <ul className="mt-6 grid grid-cols-2 gap-2.5 border-t border-white/10 pt-6 sm:grid-cols-3">
-                    {cap.items.map((tech) => (
-                      <li key={tech} className={`${styles.technology} flex items-start gap-2 font-mono text-xs leading-relaxed tracking-tight text-bone/90`}>
-                        <span aria-hidden="true" className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-crimson" />
-                        {tech}
-                      </li>
-                    ))}
-                  </ul>
-                </details>
-              </GlowSurface></Reveal>
-            ))}
-          </div>
+            </Reveal>
+          ))}
         </div>
       </div>
     </section>

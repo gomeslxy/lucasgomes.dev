@@ -4,22 +4,25 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import { useRef } from "react";
 import { Download, FileCheck, X } from "lucide-react";
-import { type CertificateItem } from "@/lib/data";
+import { certificates } from "@/lib/data";
 import { useEnhancedMotion } from "@/lib/use-animation-policy";
 import { useDialogA11y } from "@/lib/use-dialog-a11y";
 import { EASE_EXPO } from "@/lib/utils";
 
 export function CertificateLightbox({
-  certificate,
+  certificateId,
   onClose,
 }: {
-  certificate: CertificateItem;
+  certificateId: string;
   onClose: () => void;
 }) {
   const enhancedMotion = useEnhancedMotion();
   const dialogRef = useRef<HTMLDivElement>(null);
+  const certificate = certificates.find((item) => item.id === certificateId);
 
-  useDialogA11y({ open: true, dialogRef, onClose });
+  useDialogA11y({ open: !!certificate, dialogRef, onClose });
+
+  if (!certificate) return null;
 
   return (
     <div
@@ -44,7 +47,7 @@ export function CertificateLightbox({
           <div className="min-w-0 flex-1 basis-48">
             <span className="font-mono text-[0.65rem] text-crimson-deep font-bold uppercase tracking-widest flex items-center gap-1.5">
               <FileCheck className="h-3.5 w-3.5" aria-hidden="true" />
-              Certificado (ESC para fechar)
+              Certificado
             </span>
             <h4 id="cert-modal-title" className="break-words text-lg font-bold text-ink tracking-tight mt-0.5">
               {certificate.title}

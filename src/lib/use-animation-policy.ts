@@ -5,9 +5,6 @@ import { useSyncExternalStore } from "react";
 export const ENHANCED_MOTION_QUERY =
   "(min-width: 768px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)";
 
-export const SCROLL_STORY_QUERY =
-  "(min-width: 768px) and (min-height: 640px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)";
-
 export const SPATIAL_HERO_QUERY =
   "(min-width: 900px) and (min-height: 880px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)";
 
@@ -44,5 +41,4 @@ export function createMediaQueryHook(query: string) {
 }
 
 export const useEnhancedMotion = createMediaQueryHook(ENHANCED_MOTION_QUERY);
-export const useScrollStoryPolicy = createMediaQueryHook(SCROLL_STORY_QUERY);
 export const useSpatialHeroPolicy = createMediaQueryHook(SPATIAL_HERO_QUERY);

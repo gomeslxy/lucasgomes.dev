@@ -25,17 +25,7 @@
   --tracking-display: -0.045em;
   --tracking-label: 0.2em;
 
-  --animate-marquee: marquee var(--marquee-duration, 30s) linear infinite;
   --animate-pulse-dot: pulse-dot 1.8s var(--ease-expo) infinite;
-
-  @keyframes marquee {
-    from {
-      transform: translate3d(0, 0, 0);
-    }
-    to {
-      transform: translate3d(-50%, 0, 0);
-    }
-  }
 
   @keyframes pulse-dot {
     0% {
@@ -151,11 +141,6 @@
     opacity: 0.25;
   }
 
-  .velocity-marquee-track {
-    animation: var(--animate-marquee);
-    animation-play-state: paused;
-  }
-
   /* ───────────────────────── Tactile press ─────────────────────────
      Immediate compression on pointer-down; a slower expo release. */
   .press {
@@ -174,16 +159,7 @@
   }
 }
 
-html[data-intro-phase="loading"] .velocity-marquee-track {
-  animation-play-state: paused !important;
-}
-
 @media (max-width: 767px), (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) {
-  .velocity-marquee-track {
-    animation: none;
-    transform: none;
-  }
-
   .animate-pulse-dot {
     animation: none;
   }

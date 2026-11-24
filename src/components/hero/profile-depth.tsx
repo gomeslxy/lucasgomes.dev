@@ -12,6 +12,7 @@ const { pointer, spring } = experienceConfig;
 export function ProfileDepth({ children }: { children: ReactNode }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const boundsStorage = useRef({ left: 0, top: 0, width: 0, height: 0 });
   const bounds = useRef<{ left: number; top: number; width: number; height: number } | null>(null);
   const boundsDirty = useRef(true);
   const pointerInside = useRef(false);
@@ -33,8 +34,15 @@ export function ProfileDepth({ children }: { children: ReactNode }) {
   const reflectionX = useTransform(rotateY, [-pointer.maxTiltY, pointer.maxTiltY], ["-2%", "2%"]);
   const reflectionAngle = useTransform(rotateY, [-pointer.maxTiltY, pointer.maxTiltY], [-.5, .5]);
 
-  function showActive(active: boolean) {
-    if (hostRef.current) hostRef.current.dataset.depthActive = String(active);
+  function writeBounds(element: HTMLElement) {
+    const rect = element.getBoundingClientRect();
+    const target = boundsStorage.current;
+    target.left = rect.left + window.scrollX;
+    target.top = rect.top + window.scrollY;
+    target.width = rect.width;
+    target.height = rect.height;
+    bounds.current = target;
+    boundsDirty.current = false;
   }
 
   function returnToRest() {
@@ -45,31 +53,24 @@ export function ProfileDepth({ children }: { children: ReactNode }) {
     yTarget.set(0);
     pressTarget.set(0);
     lightTarget.set(keyboardFocus.current && enhanced && !reduced ? pointer.lightOpacity * .5 : 0);
-    showActive(keyboardFocus.current);
   }
 
   function pointerEnter(event: PointerEvent<HTMLDivElement>) {
     if (!enhanced || event.pointerType !== "mouse") return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    bounds.current = { left: rect.left + window.scrollX, top: rect.top + window.scrollY, width: rect.width, height: rect.height };
-    boundsDirty.current = false;
+    writeBounds(event.currentTarget);
     pointerInside.current = true;
     lightTarget.set(pointer.lightOpacity);
-    showActive(true);
   }
 
   function pointerMove(event: PointerEvent<HTMLDivElement>) {
     if (!enhanced || event.pointerType !== "mouse" || !pointerInside.current) return;
     // Sticky scroll invalidates page coordinates; measure once on the next move.
     if (boundsDirty.current || !bounds.current) {
-      const rect = event.currentTarget.getBoundingClientRect();
-      bounds.current = { left: rect.left + window.scrollX, top: rect.top + window.scrollY, width: rect.width, height: rect.height };
-      boundsDirty.current = false;
+      writeBounds(event.currentTarget);
       lightTarget.set(pointer.lightOpacity);
-      showActive(true);
     }
     const rect = bounds.current;
-    if (!rect.width || !rect.height) return;
+    if (!rect || !rect.width || !rect.height) return;
     const px = Math.max(-.5, Math.min(.5, (event.pageX - rect.left) / rect.width - .5));
     const py = Math.max(-.5, Math.min(.5, (event.pageY - rect.top) / rect.height - .5));
     xTarget.set(-py * pointer.maxTiltX * 2);
@@ -80,7 +81,6 @@ export function ProfileDepth({ children }: { children: ReactNode }) {
     if (!enhanced || reduced || event.pointerType !== "mouse" || !event.isPrimary) return;
     // No preventDefault/capture: vertical touch scrolling and native links stay intact.
     keyboardFocus.current = false;
-    showActive(pointerInside.current);
     pressTarget.set(1);
   }
 
@@ -93,13 +93,12 @@ export function ProfileDepth({ children }: { children: ReactNode }) {
     keyboardFocus.current = event.target.matches(":focus-visible");
     if (!keyboardFocus.current || !enhanced || reduced) return;
     lightTarget.set(pointer.lightOpacity * .5);
-    showActive(true);
   }
 
   function blur(event: FocusEvent<HTMLDivElement>) {
     if (event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget)) return;
     keyboardFocus.current = false;
-    if (!pointerInside.current) { lightTarget.set(0); showActive(false); }
+    if (!pointerInside.current) lightTarget.set(0);
   }
 
   useEffect(() => {
@@ -128,27 +127,34 @@ export function ProfileDepth({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!enhanced) return;
     const invalidate = () => {
+      if (
+        !pointerInside.current &&
+        !bounds.current &&
+        boundsDirty.current &&
+        xTarget.get() === 0 &&
+        yTarget.get() === 0 &&
+        pressTarget.get() === 0
+      ) {
+        return;
+      }
       bounds.current = null;
       boundsDirty.current = true;
       if (xTarget.get() !== 0) xTarget.set(0);
       if (yTarget.get() !== 0) yTarget.set(0);
       if (pressTarget.get() !== 0) pressTarget.set(0);
       lightTarget.set(keyboardFocus.current ? pointer.lightOpacity * .5 : 0);
-      showActive(keyboardFocus.current);
     };
     window.addEventListener("scroll", invalidate, { passive: true });
     window.addEventListener("resize", invalidate, { passive: true });
-    document.addEventListener("toggle", invalidate, true);
     return () => {
       window.removeEventListener("scroll", invalidate);
       window.removeEventListener("resize", invalidate);
-      document.removeEventListener("toggle", invalidate, true);
     };
   }, [enhanced, lightTarget, pressTarget, xTarget, yTarget]);
 
   useEffect(() => {
     const release = () => {
-      pressTarget.set(0);
+      if (pressTarget.get() !== 0) pressTarget.set(0);
       if (!pointerInside.current) lightTarget.set(keyboardFocus.current && enhanced && !reduced ? pointer.lightOpacity * .5 : 0);
     };
     const suspend = () => {
@@ -180,7 +186,6 @@ export function ProfileDepth({ children }: { children: ReactNode }) {
     pointerInside.current = false;
     bounds.current = null;
     boundsDirty.current = true;
-    showActive(false);
   }, [enhanced, reduced, xTarget, yTarget, lightTarget, pressTarget]);
 
   return (

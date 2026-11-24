@@ -3,7 +3,7 @@ import { ArchitecturePipeline, type PipelineNode } from "@/components/sections/a
 const NODES: readonly PipelineNode[] = [
   {
     k: "Omnichannel",
-    title: "Ingestão Omnichannel",
+    title: "Entrada omnichannel",
     desc: "Mensagens de WhatsApp Cloud API e Instagram Direct recebidas por webhooks.",
   },
   {
@@ -18,7 +18,7 @@ const NODES: readonly PipelineNode[] = [
   },
   {
     k: "Calendar",
-    title: "Smart Scheduling OAuth2",
+    title: "Agendamento OAuth2",
     desc: "Google Calendar com sincronização, verificação de conflitos e tratamento de fusos horários.",
   },
   {
@@ -44,7 +44,7 @@ const FOOTNOTES = [
 export function AgendraPipeline() {
   return (
     <ArchitecturePipeline
-      title="Agendra · Mapa da arquitetura estudada"
+      title="Agendra · Fluxo da arquitetura"
       nodes={NODES}
       footnotes={FOOTNOTES}
     />

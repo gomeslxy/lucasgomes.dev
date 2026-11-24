@@ -8,8 +8,8 @@ export function Hero() {
   return (
     <ProfileStage>
       <div className={styles.stageMeta}>
-        <span><span className={styles.tinyCross}>+</span> UM POUCO DE MIM, EM CÓDIGO.</span>
-        <span className={styles.localTime}>BR / SP <span className={styles.metaDivider}>—</span> <LocalTime /></span>
+        <span><span className={styles.tinyCross}>+</span> LUCAS · DESENVOLVEDOR FULL-STACK</span>
+        <span className={styles.localTime}>INDAIATUBA, SP <span className={styles.metaDivider}>—</span> <LocalTime /></span>
       </div>
       <ProfileCard />
     </ProfileStage>

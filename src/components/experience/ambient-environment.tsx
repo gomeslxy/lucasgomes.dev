@@ -27,7 +27,7 @@ export function AmbientEnvironment() {
     const lightSection = document.getElementById("trajetoria");
     const observer = new IntersectionObserver(([entry]) => {
       element.dataset.light = String(!!entry?.isIntersecting);
-    }, { threshold: 0 });
+    }, { rootMargin: "-35% 0px -35% 0px", threshold: 0 });
     if (lightSection) observer.observe(lightSection);
     return () => { observer.disconnect(); document.removeEventListener("visibilitychange", visibility); };
   }, []);

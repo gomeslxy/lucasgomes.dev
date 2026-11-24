@@ -8,7 +8,6 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:story": "node scripts/test-scrollytelling.cjs",
     "test:motion": "node scripts/test-motion-system.cjs && node scripts/test-scroll-lock.cjs && node scripts/check-motion.cjs",
     "audit:serve": "node scripts/serve-motion-audit.cjs"
   },

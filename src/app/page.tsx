@@ -1,7 +1,5 @@
 import { ContactFooter } from "@/components/sections/contact-footer";
 import { Hero } from "@/components/sections/hero";
-import { Manifesto } from "@/components/sections/manifesto";
-import { MarqueeBands } from "@/components/sections/marquee-bands";
 import { Nav } from "@/components/sections/nav";
 import { StackCapabilities } from "@/components/sections/stack-capabilities";
 import { Trajectory } from "@/components/sections/trajectory";
@@ -29,13 +27,11 @@ export default function Home() {
       <main id="main-content" tabIndex={-1} className="relative flex flex-col w-full max-w-full overflow-x-clip outline-none">
         <Hero />
         <SpatialSection index="01" label="PROJETOS"><WorksShowcase /></SpatialSection>
-        <SpatialSection index="02" label="SOBRE" fold={false}><Manifesto /></SpatialSection>
-        <SpatialSection index="—" label="CONEXÕES" fold={false}><MarqueeBands /></SpatialSection>
+        <SpatialSection index="02" label="TRAJETÓRIA" fold={false} light><Trajectory /></SpatialSection>
         <SpatialSection index="03" label="STACK"><StackCapabilities /></SpatialSection>
-        <SpatialSection index="04" label="TRAJETÓRIA" fold={false} light><Trajectory /></SpatialSection>
       </main>
 
-      <SpatialSection index="05" label="CONTATO" fold={false}><ContactFooter /></SpatialSection>
+      <SpatialSection index="04" label="CONTATO" fold={false}><ContactFooter /></SpatialSection>
     </ExperienceProvider>
   );
 }

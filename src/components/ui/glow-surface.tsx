@@ -23,7 +23,6 @@ function registerSurface(element: Element, invalidate: () => void) {
     window.addEventListener("scroll", invalidateSurfaces, { passive: true });
     window.addEventListener("resize", invalidateSurfaces, { passive: true });
     window.addEventListener("blur", invalidateSurfaces);
-    document.addEventListener("toggle", invalidateSurfaces, true);
     document.addEventListener("visibilitychange", invalidateSurfaces);
     surfaceObserver = new ResizeObserver((entries) => entries.forEach((entry) => surfaces.get(entry.target)?.()));
   }
@@ -38,7 +37,6 @@ function registerSurface(element: Element, invalidate: () => void) {
     window.removeEventListener("scroll", invalidateSurfaces);
     window.removeEventListener("resize", invalidateSurfaces);
     window.removeEventListener("blur", invalidateSurfaces);
-    document.removeEventListener("toggle", invalidateSurfaces, true);
     document.removeEventListener("visibilitychange", invalidateSurfaces);
   };
 }
@@ -47,6 +45,7 @@ function registerSurface(element: Element, invalidate: () => void) {
 export function GlowSurface({ children, className }: GlowSurfaceProps) {
   const ref = useRef<HTMLDivElement>(null);
   const enhanced = useEnhancedMotion();
+  const boundsStorage = useRef({ left: 0, top: 0 });
   const bounds = useRef<{ left: number; top: number } | null>(null);
   const boundsDirty = useRef(true);
   const pointerInside = useRef(false);
@@ -74,6 +73,15 @@ export function GlowSurface({ children, className }: GlowSurfaceProps) {
     const element = ref.current;
     if (!enhanced || !element) return;
     const invalidate = () => {
+      if (
+        !pointerInside.current &&
+        !bounds.current &&
+        boundsDirty.current &&
+        light.get() === 0 &&
+        opacity.get() === 0
+      ) {
+        return;
+      }
       bounds.current = null;
       boundsDirty.current = true;
       light.jump(0);
@@ -84,27 +92,34 @@ export function GlowSurface({ children, className }: GlowSurfaceProps) {
     return registerSurface(element, invalidate);
   }, [enhanced, light, opacity, sx, sy]);
 
+  const measureBounds = (element: HTMLElement) => {
+    const rect = element.getBoundingClientRect();
+    const target = boundsStorage.current;
+    target.left = rect.left + window.scrollX;
+    target.top = rect.top + window.scrollY;
+    bounds.current = target;
+    boundsDirty.current = false;
+    return target;
+  };
+
   const onPointerEnter = (event: PointerEvent<HTMLDivElement>) => {
     if (!enhanced || event.pointerType !== "mouse") return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    bounds.current = { left: rect.left + window.scrollX, top: rect.top + window.scrollY };
-    boundsDirty.current = false;
+    const target = measureBounds(event.currentTarget);
     pointerInside.current = true;
-    x.jump(event.pageX - bounds.current.left - 200);
-    y.jump(event.pageY - bounds.current.top - 200);
+    x.jump(event.pageX - target.left - 200);
+    y.jump(event.pageY - target.top - 200);
     light.set(experienceConfig.pointer.lightOpacity);
   };
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (!enhanced || event.pointerType !== "mouse" || !pointerInside.current) return;
-    if (boundsDirty.current || !bounds.current) {
-      const rect = event.currentTarget.getBoundingClientRect();
-      bounds.current = { left: rect.left + window.scrollX, top: rect.top + window.scrollY };
-      boundsDirty.current = false;
+    let target = bounds.current;
+    if (boundsDirty.current || !target) {
+      target = measureBounds(event.currentTarget);
       light.set(experienceConfig.pointer.lightOpacity);
     }
-    x.set(event.pageX - bounds.current.left - 200);
-    y.set(event.pageY - bounds.current.top - 200);
+    x.set(event.pageX - target.left - 200);
+    y.set(event.pageY - target.top - 200);
   };
 
   const onPointerLeave = () => {

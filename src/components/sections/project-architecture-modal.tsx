@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Cpu,
   Layers,
-  ShieldCheck,
   Terminal,
   Workflow,
   X,
@@ -14,32 +13,34 @@ import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { useId, useRef, useState, type KeyboardEvent } from "react";
 import { AgendraPipeline } from "@/components/sections/agendra-pipeline";
 import { BondsPipeline } from "@/components/sections/bonds-pipeline";
-import { type Project } from "@/lib/data";
+import { projects } from "@/lib/data";
 import { useDialogA11y } from "@/lib/use-dialog-a11y";
 import { cn, EASE_EXPO, SPRING_UI } from "@/lib/utils";
 
-type ModalTab = "decisions" | "highlights" | "pipeline" | "specs";
+type ModalTab = "decisions" | "pipeline" | "specs";
 
 const MODAL_TABS: ReadonlyArray<{ id: ModalTab; label: string; icon: typeof Cpu }> = [
-  { id: "decisions", label: "01. Desafio & Decisões", icon: Cpu },
-  { id: "highlights", label: "02. Destaques Técnicos", icon: ShieldCheck },
-  { id: "pipeline", label: "03. Pipeline Interativo", icon: Workflow },
-  { id: "specs", label: "04. Stack & Acessos", icon: Layers },
+  { id: "decisions", label: "01. Decisões", icon: Cpu },
+  { id: "pipeline", label: "02. Fluxo", icon: Workflow },
+  { id: "specs", label: "03. Stack e recursos", icon: Layers },
 ];
 
 export function ProjectArchitectureModal({
-  project,
+  projectSlug,
   onClose,
 }: {
-  project: Project;
+  projectSlug: string;
   onClose: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<ModalTab>("decisions");
   const dialogRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const idBase = useId();
+  const project = projects.find((item) => item.slug === projectSlug);
 
-  useDialogA11y({ open: true, dialogRef, onClose });
+  useDialogA11y({ open: !!project, dialogRef, onClose });
+
+  if (!project) return null;
 
   const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, currentIndex: number) => {
     let nextIndex: number | null = null;
@@ -87,7 +88,7 @@ export function ProjectArchitectureModal({
           <div className="flex items-center gap-3">
             <span className="font-mono text-crimson font-bold text-xs">[{project.index}]</span>
             <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-ash">
-              blueprint://{project.slug}.architecture/spec
+              ARQUITETURA · {project.domain}
             </span>
             <span className="hidden sm:inline-block rounded-full bg-crimson/20 border border-crimson/40 px-2.5 py-0.5 font-mono text-[9px] text-bone uppercase">
               {project.statusBadge}
@@ -111,7 +112,7 @@ export function ProjectArchitectureModal({
             <button
               type="button"
               onClick={onClose}
-              aria-label="Fechar blueprint de arquitetura"
+              aria-label="Fechar detalhes do projeto"
               className="press grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/20 text-bone/80 hover:border-crimson hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson"
             >
               <X size={17} aria-hidden="true" />
@@ -201,25 +202,22 @@ export function ProjectArchitectureModal({
               {activeTab === "decisions" && (
                 <div className="space-y-8">
                   <div className="rounded-xl border border-white/10 bg-white/2 p-5 sm:p-6">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-crimson font-bold flex items-center gap-2 mb-2">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-crimson font-bold flex items-center gap-2 mb-3">
                       <Terminal size={14} aria-hidden="true" />
-                      O Gargalo Técnico
+                      Problema
                     </span>
-                    <h4 className="text-base sm:text-lg font-semibold text-bone mb-2">
-                      Qual problema motivou a arquitetura?
-                    </h4>
-                    <p className="text-sm sm:text-base leading-relaxed text-bone/80">
+                    <p className="text-sm sm:text-base leading-relaxed text-bone/85">
                       {project.challenge}
                     </p>
                     <div className="mt-4 rounded-lg border border-white/10 bg-black/40 p-3.5 font-mono text-xs text-bone/75">
-                      <span className="text-crimson font-bold">Compromisso de Engenharia: </span>
+                      <span className="text-crimson font-bold">Trade-off: </span>
                       {project.consideration}
                     </div>
                   </div>
 
                   <div>
                     <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash font-bold block mb-4">
-                      Decisões de Arquitetura & Escolhas de Stack
+                      Decisões de arquitetura
                     </span>
 
                     <div className="grid gap-4 sm:grid-cols-2">
@@ -243,7 +241,7 @@ export function ProjectArchitectureModal({
                           </div>
 
                           <div className="mt-4 pt-3 border-t border-white/8 font-mono text-[10px] text-ash">
-                            <span className="text-bone/60">Alternativa Descartada: </span>
+                            <span className="text-bone/60">Alternativa considerada: </span>
                             {dec.alternative}
                           </div>
                         </div>
@@ -253,48 +251,11 @@ export function ProjectArchitectureModal({
                 </div>
               )}
 
-              {activeTab === "highlights" && (
-                <div className="space-y-6">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash font-bold block">
-                    Implementação Profunda de Engenharia
-                  </span>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {project.highlights.map((highlight, index) => (
-                      <div
-                        key={highlight.title}
-                        className="rounded-xl border border-white/10 bg-white/2 p-5 hover:border-white/20"
-                      >
-                        <div className="flex items-center gap-2 font-mono text-[10px] text-crimson font-bold mb-2">
-                          <span>ESPECIFICAÇÃO [0{index + 1}]</span>
-                        </div>
-                        <h5 className="text-sm font-semibold text-bone">{highlight.title}</h5>
-                        <p className="mt-2 text-xs leading-relaxed text-bone/75">{highlight.description}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 rounded-xl border border-white/10 bg-white/2 p-5">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash font-bold block mb-3">
-                      Checklist de Engenharia & Confiabilidade
-                    </span>
-                    <ul className="grid gap-2 sm:grid-cols-2">
-                      {project.features.map((feat) => (
-                        <li key={feat} className="flex items-start gap-2 text-xs text-bone/85">
-                          <span className="h-1.5 w-1.5 rounded-full bg-crimson mt-1.5 shrink-0" aria-hidden="true" />
-                          <span>{feat}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-
               {activeTab === "pipeline" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between font-mono text-[10px] uppercase text-ash tracking-widest">
-                    <span>Diagrama de Fluxo & Nós de Execução</span>
-                    <span className="text-crimson font-bold">INTERACTIVE_MAP</span>
+                    <span>Fluxo de execução</span>
+                    <span className="text-crimson font-bold">ARQUITETURA</span>
                   </div>
 
                   {project.slug === "agendra" && <AgendraPipeline />}
@@ -317,9 +278,23 @@ export function ProjectArchitectureModal({
                     </div>
                   )}
 
+                  <div className="rounded-xl border border-white/10 bg-white/2 p-5">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash font-bold block mb-3">
+                      Principais recursos
+                    </span>
+                    <ul className="grid gap-2.5 sm:grid-cols-2">
+                      {project.features.map((feat) => (
+                        <li key={feat} className="flex items-start gap-2 text-xs text-bone/85 leading-relaxed">
+                          <span className="h-1.5 w-1.5 rounded-full bg-crimson mt-1.5 shrink-0" aria-hidden="true" />
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
                   <div>
                     <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash font-bold block mb-3">
-                      Inventário Completo de Tecnologias
+                      Stack completa
                     </span>
                     <ul className="flex flex-wrap gap-2">
                       {project.stack.map((tech) => (
@@ -355,7 +330,7 @@ export function ProjectArchitectureModal({
 
         {/* Modal Footer Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-[#121214] px-5 py-3 sm:px-8 font-mono text-[10px] text-ash">
-          <span>SPEC_VERSION // 2026.4</span>
+          <span>{project.shortTitle.toUpperCase()} · {project.period}</span>
           <span>PRESSIONE ESC PARA FECHAR</span>
         </div>
       </motion.div>

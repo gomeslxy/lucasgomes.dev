@@ -34,19 +34,19 @@ export function ContactCard() {
       await navigator.clipboard.writeText(value);
       if (!alive.current) return;
       setCopied(kind);
-      setAnnouncement(kind === "email" ? "E-mail copiado com sucesso!" : "Telefone copiado com sucesso!");
+      setAnnouncement(kind === "email" ? "E-mail copiado." : "Telefone copiado.");
       timer.current = setTimeout(() => { setCopied(null); setAnnouncement(""); }, 3000);
     } catch {
       if (!alive.current) return;
       setCopyFailed(true);
-      setAnnouncement("Não foi possível copiar. Use os links de e-mail ou telefone acima.");
+      setAnnouncement("Não foi possível copiar. Use os links diretos acima.");
     }
   }
 
   return (
     <GlowSurface className="min-w-0 rounded-2xl border border-white/10 bg-[#101011] p-6 sm:p-8">
       <p className="font-mono text-[0.6875rem] uppercase tracking-widest text-ash">
-        Canal Direto de Comunicação
+        Canais diretos
       </p>
 
       <Magnetic strength={0.15} className="w-full">
@@ -56,7 +56,7 @@ export function ContactCard() {
         >
           <span className="flex items-center gap-3">
             <Mail aria-hidden="true" className="h-4 w-4 text-crimson" />
-            <span>Enviar E-mail Direto</span>
+            <span>Enviar e-mail</span>
           </span>
           <ArrowUpRight aria-hidden="true" className="h-4 w-4 motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5 motion-safe:group-hover:-translate-y-0.5" />
         </a>
@@ -74,9 +74,19 @@ export function ContactCard() {
             type="button"
             onClick={() => copyContact(profile.email, "email")}
             aria-label={copied === "email" ? "E-mail copiado" : "Copiar e-mail"}
-            className="press flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 text-ash hover:border-crimson hover:text-bone motion-safe:active:scale-95 cursor-pointer"
+            className="press inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-white/15 px-3 font-mono text-[11px] uppercase tracking-wider text-bone/80 hover:border-crimson hover:text-bone motion-safe:active:scale-95 cursor-pointer"
           >
-            {copied === "email" ? <Check aria-hidden="true" className="h-4 w-4 text-emerald-400" /> : <Copy aria-hidden="true" className="h-4 w-4" />}
+            {copied === "email" ? (
+              <>
+                <Check aria-hidden="true" className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="text-emerald-400">Copiado</span>
+              </>
+            ) : (
+              <>
+                <Copy aria-hidden="true" className="h-3.5 w-3.5" />
+                <span>Copiar</span>
+              </>
+            )}
           </button>
         </div>
 
@@ -91,9 +101,19 @@ export function ContactCard() {
             type="button"
             onClick={() => copyContact(profile.phoneE164, "phone")}
             aria-label={copied === "phone" ? "Telefone copiado" : "Copiar telefone"}
-            className="press flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 text-ash hover:border-crimson hover:text-bone motion-safe:active:scale-95 cursor-pointer"
+            className="press inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-white/15 px-3 font-mono text-[11px] uppercase tracking-wider text-bone/80 hover:border-crimson hover:text-bone motion-safe:active:scale-95 cursor-pointer"
           >
-            {copied === "phone" ? <Check aria-hidden="true" className="h-4 w-4 text-emerald-400" /> : <Copy aria-hidden="true" className="h-4 w-4" />}
+            {copied === "phone" ? (
+              <>
+                <Check aria-hidden="true" className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="text-emerald-400">Copiado</span>
+              </>
+            ) : (
+              <>
+                <Copy aria-hidden="true" className="h-3.5 w-3.5" />
+                <span>Copiar</span>
+              </>
+            )}
           </button>
         </div>
       </div>
