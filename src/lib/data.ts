@@ -84,7 +84,7 @@ export const projects: Project[] = [
     period: "2025 — Presente",
     category: "Full-Stack · IA · Multi-Tenant",
     image: "/work/agendra.jpg",
-    imageAlt: "Interface do Agendra exibindo dashboard escuro, caixa de entrada omnichannel e calendário sincronizado",
+    imageAlt: "Interface do Agendra exibindo página inicial, conversa no WhatsApp com IA e agenda sincronizada",
     punchline:
       "Plataforma multi-tenant de atendimento e agendamento por WhatsApp e Instagram Direct com IA e busca semântica.",
     audience:
@@ -187,14 +187,14 @@ export const projects: Project[] = [
   {
     slug: "bonds",
     index: "02",
-    shortTitle: "BONDS AGENCE V4",
-    title: "BONDS AGENCE V4 — E-Commerce Full-Stack & Edge Security",
+    shortTitle: "BONDS AGENCE",
+    title: "BONDS AGENCE — E-Commerce Full-Stack & Edge Security",
     domain: "bonds-agence.vercel.app",
     role: "Desenvolvimento Full-Stack e Arquitetura",
     period: "2025",
     category: "E-Commerce · Realtime · Edge Security",
     image: "/work/bonds.jpg",
-    imageAlt: "Interface da loja virtual BONDS AGENCE V4 com catálogo escuro e estética streetwear",
+    imageAlt: "Interface da loja virtual BONDS AGENCE com destaque Sportlife e chamada para explorar coleção",
     punchline:
       "E-commerce com sincronização de estoque em tempo real via WebSockets, baixa atômica no PostgreSQL e rate limiting na Edge.",
     audience:
@@ -308,7 +308,7 @@ export const capabilities: Capability[] = [
     title: "Front-End",
     whatIBuild:
       "Interfaces responsivas com App Router, formulários validados, dashboards e componentes acessíveis.",
-    appliedIn: "Agendra, BONDS AGENCE V4 e este portfólio",
+    appliedIn: "Agendra, BONDS AGENCE e este portfólio",
     items: [
       "Next.js 15 (App Router & Server Actions)",
       "React 19",
@@ -323,7 +323,7 @@ export const capabilities: Capability[] = [
     title: "Back-End e Dados",
     whatIBuild:
       "Modelagem relacional, isolamento multi-tenant com RLS, transações atômicas, canais realtime e rate limiting na Edge.",
-    appliedIn: "Agendra e BONDS AGENCE V4",
+    appliedIn: "Agendra e BONDS AGENCE",
     items: [
       "PostgreSQL",
       "Row Level Security (RLS)",

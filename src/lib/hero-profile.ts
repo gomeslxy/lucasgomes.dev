@@ -22,7 +22,7 @@ export const heroProfile = {
     },
     {
       id: "bonds",
-      label: "BONDS AGENCE V4",
+      label: "BONDS AGENCE",
       detail: "E-commerce realtime · Baixa atômica SQL · Rate limit na Edge",
       href: "#case-bonds",
       tag: "Em produção",

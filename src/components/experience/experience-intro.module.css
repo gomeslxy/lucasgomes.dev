@@ -1,4 +1,4 @@
-/* Base Content Transition Orchestration */
+/* Base Content Shell */
 .content {
   position: relative;
   width: 100%;
@@ -10,10 +10,7 @@
   pointer-events: none;
 }
 
-:global(html[data-intro-phase="revealing"]) .content {
-  pointer-events: auto;
-}
-
+:global(html[data-intro-phase="revealing"]) .content,
 :global(html[data-intro-phase="ready"]) .content {
   opacity: 1;
   transform: none;
@@ -21,7 +18,7 @@
   will-change: auto;
 }
 
-/* Base Fullscreen Intro Shell */
+/* Fullscreen Architectural Curtain Shell (fail-open without bootstrap script) */
 .intro {
   display: none;
   position: fixed;
@@ -30,7 +27,7 @@
   overflow: hidden;
   color: #eaeaea;
   background: transparent;
-  animation: fail-open calc(var(--intro-max-ms, 2400ms) + var(--intro-exit-ms, 720ms) + 300ms) step-end both;
+  outline: none;
 }
 
 :global(html[data-intro-phase="loading"]) .intro,
@@ -38,526 +35,313 @@
   display: block;
 }
 
+:global(html[data-intro-phase="revealing"]) .intro {
+  pointer-events: none;
+}
+
 :global(html[data-intro-phase="ready"]) .intro {
   display: none;
 }
 
 /* ==========================================================================
-   Architectural Split Shutters (Top & Bottom Blades)
+   Two-plane Editorial Curtain
    ========================================================================== */
-.shutterTop,
-.shutterBottom {
+.curtainUnderlay,
+.curtainPrimary {
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 50%;
-  background: #080808;
-  z-index: 1;
+  inset: 0;
   will-change: transform;
-  transition: transform var(--intro-exit-ms, 720ms) cubic-bezier(0.85, 0, 0.15, 1);
 }
 
-.shutterTop {
-  top: 0;
-  border-bottom: 1px solid rgba(225, 29, 42, 0.4);
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.95);
+.curtainUnderlay {
+  z-index: 1;
+  background: #0d0d0d;
+  border-bottom: 1px solid rgba(225, 29, 42, 0.28);
+  transition: transform var(--intro-exit-ms, 560ms) var(--ease-quart) 55ms;
 }
 
-.shutterBottom {
-  bottom: 0;
-  border-top: 1px solid rgba(225, 29, 42, 0.4);
-  box-shadow: 0 -15px 50px rgba(0, 0, 0, 0.95);
-}
-
-.intro[data-phase="revealing"] .shutterTop {
-  transform: translateY(-100%);
-}
-
-.intro[data-phase="revealing"] .shutterBottom {
-  transform: translateY(100%);
-}
-
-/* Center Laser Seam Line */
-.seamGlow {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(225, 29, 42, 0.7) 18%, rgba(234, 234, 234, 0.85) 50%, rgba(225, 29, 42, 0.7) 82%, transparent);
-  transform: translateY(-50%);
+.curtainPrimary {
   z-index: 2;
-  pointer-events: none;
-  transition: opacity 280ms cubic-bezier(.16, 1, .3, 1), transform 280ms cubic-bezier(.16, 1, .3, 1);
+  background: #080808;
+  transition: transform var(--intro-exit-ms, 560ms) var(--ease-quart);
 }
 
-.intro[data-phase="revealing"] .seamGlow {
+.intro[data-phase="revealing"] .curtainPrimary,
+.intro[data-phase="revealing"] .curtainUnderlay {
+  transform: translate3d(0, -100%, 0);
+}
+
+/* Architectural Vertical Guides matching Hero */
+.guide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.045);
+  pointer-events: none;
+}
+
+.guideLeft {
+  left: max(36px, calc(50% - 544px));
+}
+
+.guideRight {
+  right: max(36px, calc(50% - 544px));
+}
+
+/* ==========================================================================
+   3-Row Swiss Grid Stage
+   ========================================================================== */
+.stage {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: min(100%, 960px);
+  height: 100%;
+  margin: 0 auto;
+  padding: clamp(1.25rem, 3.2vw, 2.25rem) clamp(1rem, 3vw, 1.5rem);
+  transition: opacity 220ms var(--ease-expo), transform 260ms var(--ease-expo);
+}
+
+.intro[data-phase="revealing"] .stage {
   opacity: 0;
-  transform: translateY(-50%) scaleY(4);
+  transform: translate3d(0, -14px, 0);
 }
 
-/* ==========================================================================
-   Atmospheric Backdrop: Grid, Core Glow, Scanlines
-   ========================================================================== */
-.backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  transition: opacity 360ms cubic-bezier(.16, 1, .3, 1);
-}
-
-.intro[data-phase="revealing"] .backdrop { opacity: 0; }
-
-.gridLines {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 64px 64px;
-}
-
-.ambientCore {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(225, 29, 42, 0.16), rgba(8, 8, 8, 0.9) 70%);
-}
-
-.scanline {
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 2px,
-    rgba(0, 0, 0, 0.18) 3px
-  );
-  opacity: 0.6;
-}
-
-/* ==========================================================================
-   4 Corner Precision Reticles & HUD Data
-   ========================================================================== */
-.hudCornerTL,
-.hudCornerTR,
-.hudCornerBL,
-.hudCornerBR {
-  position: absolute;
-  z-index: 12;
+/* Top Chapter Bar */
+.topBar {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-family: var(--font-mono, monospace);
-  font-size: 10px;
-  letter-spacing: 0.16em;
+  gap: 1rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #8a8a8a;
   user-select: none;
-  transition: opacity 240ms cubic-bezier(.16, 1, .3, 1), transform 240ms cubic-bezier(.16, 1, .3, 1);
 }
 
-.hudCornerTL {
-  top: clamp(1.25rem, 3vw, 2.5rem);
-  left: clamp(1.25rem, 3vw, 2.5rem);
-}
-
-.hudCornerTR {
-  top: clamp(1.25rem, 3vw, 2.5rem);
-  right: clamp(1.25rem, 3vw, 2.5rem);
-  text-align: right;
-}
-
-.hudCornerBL {
-  bottom: clamp(1.25rem, 3vw, 2.5rem);
-  left: clamp(1.25rem, 3vw, 2.5rem);
-}
-
-.hudCornerBR {
-  bottom: clamp(1.25rem, 3vw, 2.5rem);
-  right: clamp(1.25rem, 3vw, 2.5rem);
-  text-align: right;
-}
-
-.intro[data-phase="revealing"] .hudCornerTL,
-.intro[data-phase="revealing"] .hudCornerTR,
-.intro[data-phase="revealing"] .hudCornerBL,
-.intro[data-phase="revealing"] .hudCornerBR {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.crosshair {
+.topIndex {
   color: #e11d2a;
-  font-weight: 700;
-  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
-.cornerMeta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.cornerMeta span:first-child {
+.topName {
   color: #eaeaea;
 }
 
-/* High-tech Skip Button */
+.topDots {
+  flex: 1;
+  min-width: 16px;
+  height: 1px;
+  background-image: linear-gradient(to right, currentColor 1px, transparent 1px);
+  background-size: 6px 1px;
+  background-repeat: repeat-x;
+  color: #eaeaea;
+  opacity: 0.25;
+}
+
+.topLocation {
+  color: #8a8a8a;
+  white-space: nowrap;
+}
+
+/* Center Wordmark + Baseline Progress */
+.centerStage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.25rem, 3vw, 2rem);
+  width: 100%;
+  min-width: 0;
+}
+
+.wordmarkRow {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  max-width: 100%;
+  user-select: none;
+}
+
+.wordmark {
+  position: relative;
+  display: inline-block;
+  padding-inline: 0.03em;
+  font-family: var(--font-display), "Impact", "Arial Narrow", sans-serif;
+  font-size: clamp(4.25rem, 17vw, 13.5rem);
+  font-weight: 400;
+  line-height: 0.86;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+
+.wordmarkOutline {
+  display: block;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(234, 234, 234, 0.16);
+}
+
+.wordmarkMask {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  padding-inline: 0.03em;
+  pointer-events: none;
+}
+
+.wordmarkFill {
+  display: block;
+  color: #eaeaea;
+}
+
+.period {
+  display: inline-block;
+  margin-left: 0.02em;
+  font-family: var(--font-display), "Impact", "Arial Narrow", sans-serif;
+  font-size: clamp(4.25rem, 17vw, 13.5rem);
+  font-weight: 400;
+  line-height: 0.86;
+  color: #e11d2a;
+  transform-origin: 50% 82%;
+  transition: opacity 220ms var(--ease-expo), transform 260ms var(--ease-expo);
+}
+
+.progressBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: min(100%, 560px);
+}
+
+.progressRail {
+  position: relative;
+  width: 100%;
+  height: 1px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.progressFill {
+  width: 100%;
+  height: 100%;
+  background: #e11d2a;
+  transform-origin: left center;
+}
+
+.baselineRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
+.roleSubtitle {
+  font-family: var(--font-serif), "Times New Roman", serif;
+  font-style: italic;
+  font-size: clamp(1rem, 2vw, 1.375rem);
+  line-height: 1.2;
+  color: #8a8a8a;
+}
+
+.counter {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.15rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: clamp(0.75rem, 1.4vw, 0.875rem);
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  color: #eaeaea;
+}
+
+.percentDigits {
+  display: inline-block;
+  min-width: 3ch;
+  text-align: right;
+}
+
+.percentSign {
+  color: #e11d2a;
+}
+
+/* Bottom Folio Metadata + Skip Control */
+.bottomBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
+.folioYear {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #5a5a5a;
+  user-select: none;
+}
+
 .skipBtn {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.55rem;
   min-height: 44px;
-  padding: 0 1.15rem;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.03);
-  font-family: var(--font-mono, monospace);
-  font-size: 9px;
+  padding: 0 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.02);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.625rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #eaeaea;
   cursor: pointer;
   outline: none;
-  transition: transform 200ms cubic-bezier(.16, 1, .3, 1);
+  transition: transform 200ms var(--ease-expo);
 }
 
-.skipBtn:hover,
-.skipBtn:focus-visible {
-  border-color: #e11d2a;
-  background: rgba(225, 29, 42, 0.14);
+.skipBtn:hover {
+  border-color: rgba(225, 29, 42, 0.6);
+  background: rgba(225, 29, 42, 0.08);
   transform: translateY(-1px);
 }
 
 .skipBtn:focus-visible {
-  outline: 2px solid #e11d2a;
-  outline-offset: 3px;
+  outline: 1px solid #e11d2a;
+  outline-offset: 4px;
+  border-color: #e11d2a;
 }
 
 .skipKey {
-  font-size: 8px;
+  font-size: 0.5625rem;
   color: #8a8a8a;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 1px 4px;
-  border-radius: 4px;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+  padding-left: 0.5rem;
 }
 
-/* ==========================================================================
-   Center Stage: Counter, Status, Equalizer, Progress Rails
-   ========================================================================== */
-.wrapper {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
-  max-width: 860px;
-  margin: 0 auto;
-  padding: clamp(1.5rem, 4vw, 3rem);
-  text-align: center;
-  transition: transform calc(var(--intro-exit-ms, 720ms) * 0.55) cubic-bezier(0.16, 1, 0.3, 1),
-              opacity calc(var(--intro-exit-ms, 720ms) * 0.45) cubic-bezier(.16, 1, .3, 1);
-}
-
-.intro[data-phase="revealing"] .wrapper {
-  transform: scale(0.95);
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Top System Micro-Capsule */
-.systemCapsule {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.35rem 0.9rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03);
-  font-family: var(--font-mono, monospace);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #eaeaea;
-  margin-bottom: 1.25rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-.pulseDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #e11d2a;
-  animation: pulse-dot 1.4s infinite;
-}
-
-/* Monumental Counter */
-.counterRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 0.5rem;
-}
-
-.counterWrap {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 0.25rem;
-  line-height: 0.82;
-  user-select: none;
-}
-
-.counter {
-  display: inline-flex;
-  font-family: var(--font-display, "Impact", sans-serif);
-  font-size: clamp(6.5rem, 20vw, 15rem);
-  letter-spacing: -0.05em;
-  color: #eaeaea;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 12px 32px rgba(0, 0, 0, 0.75);
-}
-
-.digitWindow { display: block; width: 1ch; height: .88em; overflow: clip; }
-.digitStack { display: block; }
-.digitStack > span { display: block; height: .88em; line-height: .88em; }
-
-.percent {
-  font-family: var(--font-serif, "Instrument Serif", serif);
-  font-size: clamp(2.5rem, 7vw, 5rem);
-  font-style: italic;
-  color: #e11d2a;
-  line-height: 1;
-}
-
-/* Telemetry Equalizer + Status Message */
-.statusRow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.85rem;
-  margin-top: 1rem;
-  width: 100%;
-  min-height: 3.5rem;
-}
-
-.equalizer {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  height: 14px;
-}
-
-.equalizer span {
-  width: 3px;
-  height: 100%;
-  border-radius: 1px;
-  background: #e11d2a;
-  animation: eq-bounce 0.8s ease-in-out infinite alternate;
-  animation-delay: var(--eq-delay, 0ms);
-  transform-origin: bottom;
-}
-
-@keyframes eq-bounce {
-  0% { transform: scaleY(0.25); opacity: 0.4; }
-  100% { transform: scaleY(1); opacity: 1; }
-}
-
-.statusMessage {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: min(65ch, calc(100% - 40px));
-  font-family: var(--font-mono, monospace);
-  font-size: clamp(10px, 1.25vw, 12px);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(234, 234, 234, 0.9);
-  min-height: 3.4em;
-  line-height: 1.5;
-}
-
-/* ==========================================================================
-   Dual Rail Progress Track
-   ========================================================================== */
-.progressContainer {
-  width: min(520px, 100%);
-  margin-top: 1.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-/* Upper Segmented Metric Rail (20 discrete cells) */
-.segmentRail {
-  display: grid;
-  grid-template-columns: repeat(20, 1fr);
-  gap: 4px;
-  width: 100%;
-  height: 5px;
-}
-
-.segmentCell {
-  position: relative;
-  height: 100%;
-  border-radius: 1px;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.segmentCell > span {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: #eaeaea;
-  opacity: 0;
-  transition: opacity 150ms cubic-bezier(.16, 1, .3, 1);
-}
-
-.segmentCell[data-active="true"] > span { opacity: 1; }
-
-.segmentCell:nth-child(5n) > span {
-  background: #e11d2a;
-}
-
-/* Lower Continuous Laser Hairline Track */
-.laserTrack {
-  position: relative;
-  width: 100%;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-  overflow: visible;
-}
-
-.laserBar {
-  position: absolute;
-  inset-block: 0;
-  left: 0;
-  width: 100%;
-  background: linear-gradient(90deg, rgba(225, 29, 42, 0.35), #e11d2a 75%, #eaeaea);
-  transform-origin: left;
-}
-
-.laserHead {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.laserHead::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #eaeaea;
-  box-shadow: 0 0 6px rgba(225, 29, 42, 0.55);
-}
-
-/* ==========================================================================
-   Sub-Diagnostics Badges
-   ========================================================================== */
-.diagnostics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  width: min(640px, 100%);
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  list-style: none;
-  margin-top: 2rem;
-  padding: 0;
-}
-
-.diagnosticItem {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  font-family: var(--font-mono, monospace);
-  font-size: clamp(7px, 1.1vw, 10px);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #8a8a8a;
-}
-
-.diagnosticDot {
-  flex-shrink: 0;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.diagnosticItem[data-ready="true"] {
-  color: #eaeaea;
-}
-
-.diagnosticItem[data-ready="true"] .diagnosticDot {
-  background: #e11d2a;
-}
-
-/* ==========================================================================
-   Keyframes & Utilities
-   ========================================================================== */
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(1.35); }
-}
-
-@keyframes fail-open {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-/* ==========================================================================
-   Responsive Viewport Adaptations
-   ========================================================================== */
-@media (max-width: 640px) {
-  .hudCornerTL, .hudCornerTR, .hudCornerBL, .hudCornerBR {
-    font-size: 8px;
-    gap: 0.5rem;
+@media (max-width: 700px) {
+  .guideLeft {
+    left: 9px;
   }
-  .hudCornerTR, .hudCornerBL {
-    display: none; /* Keep top-left coordinates and bottom-right skip button for clean mobile hierarchy */
+
+  .guideRight {
+    right: 9px;
   }
-  .systemCapsule {
-    font-size: 8px;
-    padding: 0.25rem 0.75rem;
-    margin-bottom: 0.75rem;
+
+  .topBar {
+    font-size: 0.625rem;
+    letter-spacing: 0.16em;
+    gap: 0.65rem;
   }
-  .counter {
-    font-size: clamp(5.5rem, 24vw, 8.5rem);
-  }
-  .statusRow {
-    gap: 0.5rem;
-  }
-  .statusMessage {
-    font-size: 9px;
-  }
-  .progressContainer {
-    margin-top: 1.25rem;
-  }
-  .segmentRail {
-    height: 4px;
-    gap: 2px;
-  }
-  .diagnostics {
-    gap: 0.75rem;
-    font-size: 8px;
-    margin-top: 1.25rem;
-  }
-  .skipBtn {
-    min-height: 44px;
-    padding: 0 0.9rem;
-    font-size: 8px;
+}
+
+@media (max-width: 420px) {
+  .topLocation {
+    display: none;
   }
 }
 
@@ -565,6 +349,7 @@
   .intro {
     display: none !important;
   }
+
   .content {
     opacity: 1 !important;
     transform: none !important;

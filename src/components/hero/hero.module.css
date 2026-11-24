@@ -577,11 +577,11 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .entranceRig {
-    animation: camera-arrive 1100ms var(--ease-expo) both;
+    animation: camera-arrive 1050ms var(--ease-expo) var(--intro-handoff-delay, 0ms) both;
   }
 
   .stageMeta {
-    animation: metadata-arrive 900ms var(--ease-expo) both;
+    animation: metadata-arrive 850ms var(--ease-expo) calc(var(--intro-handoff-delay, 0ms) + 60ms) both;
   }
 
   .scrollIcon svg {
@@ -833,20 +833,20 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .assemblyFrame {
-    animation: frame-assemble 1050ms var(--ease-expo) both;
+    animation: frame-assemble 1000ms var(--ease-expo) var(--intro-handoff-delay, 0ms) both;
   }
 
   .assemblyLight {
-    animation: light-sweep 1200ms var(--ease-expo) both;
+    animation: light-sweep 1150ms var(--ease-expo) calc(var(--intro-handoff-delay, 0ms) + 40ms) both;
   }
 
   .nameLetter {
     animation: name-assemble 850ms var(--ease-expo) both;
-    animation-delay: calc(80ms + var(--letter) * 35ms);
+    animation-delay: calc(var(--intro-handoff-delay, 0ms) + 80ms + var(--letter) * 35ms);
   }
 
   .avatarWrap {
-    animation: avatar-arrive 1000ms var(--ease-expo) both;
+    animation: avatar-arrive 950ms var(--ease-expo) calc(var(--intro-handoff-delay, 0ms) + 40ms) both;
   }
 }
 
@@ -936,7 +936,7 @@
   }
 }
 
-/* The intro releases the camera and typography as its curtains open. */
+/* The intro releases the camera and typography as its curtain lifts. */
 :global(html[data-intro-phase="loading"]) .entranceRig,
 :global(html[data-intro-phase="loading"]) .stageMeta,
 :global(html[data-intro-phase="loading"]) .assemblyFrame,
@@ -948,24 +948,44 @@
 
 :global(html[data-intro-phase="loading"]) .backgroundWord {
   opacity: 0;
-  transform: translate(-50%, -50%) scale(0.92);
+  transform: translate(-50%, -52%) scale(0.95);
 }
 
-:global(html[data-intro-phase="revealing"]) .backgroundWord {
-  opacity: 1;
-  transform: translate(-50%, -56%) scale(1);
-  transition: opacity 1200ms var(--ease-expo) 120ms, transform 1200ms var(--ease-expo) 120ms;
+:global(html[data-intro-handoff="true"]) .backgroundWord {
+  animation: background-word-arrive 1100ms var(--ease-expo) calc(var(--intro-handoff-delay, 0ms) + 40ms) both;
 }
 
-:global(html[data-intro-phase="loading"]) .stageFooter {
+@keyframes background-word-arrive {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -52%) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -56%) scale(1);
+  }
+}
+
+:global(html[data-intro-phase="loading"]) .stageFooter > * {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translate3d(0, 12px, 0);
 }
 
-:global(html[data-intro-phase="revealing"]) .stageFooter {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 800ms var(--ease-expo) 260ms, transform 800ms var(--ease-expo) 260ms;
+:global(html[data-intro-handoff="true"]) .stageFooter > * {
+  animation: footer-item-arrive 760ms var(--ease-expo) calc(var(--intro-handoff-delay, 0ms) + 180ms) both;
+}
+
+@keyframes footer-item-arrive {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 .card::before,
@@ -1036,7 +1056,9 @@
   .assemblyFrame,
   .assemblyLight,
   .nameLetter,
-  .avatarWrap {
+  .avatarWrap,
+  .backgroundWord,
+  .stageFooter > * {
     animation: none !important;
   }
 }
