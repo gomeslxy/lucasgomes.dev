@@ -11,7 +11,7 @@ const activityIcons = { terminal: Terminal, layers: Layers3, cpu: Cpu };
 export function RichPresence() {
   const [activeIndex, setActiveIndex] = useState(0);
   const contentId = useId();
-  const activity = heroProfile.activities[activeIndex]!;
+  const activity = heroProfile.activities[activeIndex] ?? heroProfile.activities[0];
   const Icon = activityIcons[activity.icon];
 
   return (

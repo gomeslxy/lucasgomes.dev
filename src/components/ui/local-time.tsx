@@ -13,10 +13,27 @@ export function LocalTime({ className }: { className?: string }) {
   const [time, setTime] = useState<string | null>(null);
 
   useEffect(() => {
+    let intervalId: number | undefined;
+
     const update = () => setTime(FORMAT.format(new Date()));
-    update();
-    const id = window.setInterval(update, 20_000);
-    return () => window.clearInterval(id);
+
+    const sync = () => {
+      if (intervalId !== undefined) {
+        window.clearInterval(intervalId);
+        intervalId = undefined;
+      }
+      if (!document.hidden) {
+        update();
+        intervalId = window.setInterval(update, 20_000);
+      }
+    };
+
+    sync();
+    document.addEventListener("visibilitychange", sync);
+    return () => {
+      if (intervalId !== undefined) window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", sync);
+    };
   }, []);
 
   return <span className={className}>{time ?? "--:--"}</span>;

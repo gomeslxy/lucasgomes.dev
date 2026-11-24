@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Anton, Instrument_Serif, Inter_Tight, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { profile } from "@/lib/data";
+import { getIntroBootstrapScript } from "@/lib/intro-bootstrap";
 
 const anton = Anton({
   subsets: ["latin"],
@@ -31,9 +32,13 @@ const jetbrains = JetBrains_Mono({
 });
 
 const siteUrl = "https://github.com/gomeslxy";
+const introBootstrapScript = getIntroBootstrapScript();
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://lucasgomes.dev"),
+  alternates: {
+    canonical: "/",
+  },
   title: "Lucas — Desenvolvedor Full-Stack & IA | Indaiatuba, SP",
   description:
     "Lucas, desenvolvedor Full-Stack com foco em interfaces modernas, performance e IA aplicada. Conheça o Agendra, um case de engenharia multi-tenant construído de ponta a ponta, e meus projetos web.",
@@ -56,6 +61,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "profile",
     locale: "pt_BR",
+    url: "/",
     title: "Lucas — Desenvolvedor Full-Stack & IA",
     description:
       "Interfaces modernas, aplicações com IA e engenharia de ponta a ponta. Explore projetos, decisões técnicas e o Agendra, meu case de estudo em arquitetura multi-tenant.",
@@ -85,7 +91,7 @@ const jsonLd = {
   alternateName: profile.signature,
   jobTitle: profile.role,
   email: `mailto:${profile.email}`,
-  telephone: "+5511989940080",
+  telephone: profile.phoneE164,
   url: siteUrl,
   address: {
     "@type": "PostalAddress",
@@ -109,6 +115,8 @@ const jsonLd = {
   knowsLanguage: ["pt-BR", "en"],
 };
 
+const serializedJsonLd = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
@@ -116,10 +124,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       suppressHydrationWarning
       className={`${anton.variable} ${instrument.variable} ${interTight.variable} ${jetbrains.variable}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: introBootstrapScript }} />
+      </head>
       <body>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializedJsonLd }}
         />
         {children}
       </body>

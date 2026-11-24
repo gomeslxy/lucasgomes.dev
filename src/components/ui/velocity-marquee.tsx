@@ -2,6 +2,7 @@
 
 import { Asterisk } from "lucide-react";
 import { Fragment, useEffect, useRef, type CSSProperties } from "react";
+import { useEnhancedMotion } from "@/lib/use-animation-policy";
 import { cn } from "@/lib/utils";
 
 type VelocityMarqueeProps = {
@@ -14,16 +15,21 @@ type VelocityMarqueeProps = {
 export function VelocityMarquee({ items, baseVelocity = -2, className, itemClassName }: VelocityMarqueeProps) {
   const ref = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const enhanced = useEnhancedMotion();
 
   useEffect(() => {
     const root = ref.current;
     const track = trackRef.current;
-    if (!root || !track || baseVelocity === 0) return;
+    if (!root || !track) return;
+
+    if (!enhanced || baseVelocity === 0) {
+      track.style.animationPlayState = "paused";
+      return;
+    }
 
     let visible = false;
-    const motionPolicy = window.matchMedia("(min-width: 768px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)");
     const update = () => {
-      track.style.animationPlayState = visible && !document.hidden && motionPolicy.matches ? "running" : "paused";
+      track.style.animationPlayState = visible && !document.hidden ? "running" : "paused";
     };
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry?.isIntersecting ?? false;
@@ -31,15 +37,13 @@ export function VelocityMarquee({ items, baseVelocity = -2, className, itemClass
     });
     observer.observe(root);
     document.addEventListener("visibilitychange", update);
-    motionPolicy.addEventListener("change", update);
 
     return () => {
       track.style.animationPlayState = "paused";
       observer.disconnect();
       document.removeEventListener("visibilitychange", update);
-      motionPolicy.removeEventListener("change", update);
     };
-  }, [baseVelocity]);
+  }, [baseVelocity, enhanced]);
 
   return (
     <div ref={ref} className={cn("flex overflow-hidden whitespace-nowrap select-none", className)}>

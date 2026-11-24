@@ -38,7 +38,22 @@ export function AmbientEnvironment() {
       <span className={`${styles.halo} ${styles.haloRight}`} />
       <div className={styles.lattice}><span /></div>
       <div className={styles.motes}>
-        {MOTES.map((mote, index) => <i key={index} className={styles.mote} data-mote-index={index} data-mobile-hidden={index >= experienceConfig.atmosphere.mobileParticleCount || undefined} style={{ [mote.side]: `${mote.edge}%`, top: `${mote.top}%`, "--mote-duration": `${mote.duration}s`, "--mote-delay": `${mote.delay}s`, "--mote-drift": `${mote.drift}px` } as CSSProperties} />)}
+        {MOTES.map((mote, index) => (
+          <i
+            key={index}
+            className={styles.mote}
+            data-mote-index={index}
+            data-side={mote.side}
+            data-mobile-hidden={index >= experienceConfig.atmosphere.mobileParticleCount || undefined}
+            style={{
+              "--mote-edge": `${mote.edge}%`,
+              top: `${mote.top}%`,
+              "--mote-duration": `${mote.duration}s`,
+              "--mote-delay": `${mote.delay}s`,
+              "--mote-drift": `${mote.drift}px`,
+            } as CSSProperties}
+          />
+        ))}
       </div>
       <span className={`${styles.rail} ${styles.railLeft}`} />
       <span className={`${styles.rail} ${styles.railRight}`} />

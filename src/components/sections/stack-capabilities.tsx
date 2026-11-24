@@ -6,7 +6,7 @@ import { Reveal } from "@/components/motion/reveal";
 
 export function StackCapabilities() {
   return (
-    <section id="stack" className="relative bg-ink text-bone border-t border-white/10 py-[clamp(6rem,11vw,10rem)]">
+    <section id="stack" aria-labelledby="stack-title" className="relative bg-ink text-bone border-t border-white/10 py-[clamp(6rem,11vw,10rem)]">
       <div className="gutter">
         <SectionLabel index="03" title="Stack & Competências" aside="Engenharia de Ponta a Ponta" tone="dark" />
 
@@ -14,12 +14,12 @@ export function StackCapabilities() {
           {/* Header & Subtitle */}
           <div className="lg:col-span-5 flex flex-col justify-between">
             <div>
-              <h2 className="display text-[clamp(2.6rem,7vw,6rem)] leading-[0.85]">
+              <h2 id="stack-title" className="display text-[clamp(2.6rem,7vw,6rem)] leading-[0.85]">
                 <Reveal as="span" pattern="heading">Tecnologias</Reveal>
                 <Reveal as="span" pattern="heading" delay={.08}><span className="font-serif italic text-crimson text-[0.85em] normal-case tracking-normal">em</span></Reveal>
                 <Reveal as="span" pattern="heading" delay={.16}>prática.</Reveal>
               </h2>
-              <Reveal pattern="body" delay={.1} className="mt-8 max-w-md"><p className="text-base text-bone/70 leading-relaxed">
+              <Reveal pattern="body" delay={.1} className="mt-8 max-w-md"><p className="text-base text-bone/75 leading-relaxed">
                 Minha stack conecta interfaces, APIs e dados. Uso os projetos para aprofundar decisões de arquitetura, testar integrações e entender os limites de cada ferramenta.
               </p></Reveal>
             </div>
@@ -28,10 +28,10 @@ export function StackCapabilities() {
             <div className="mt-12 pt-8 border-t border-white/10">
               <span className="label text-ash text-xs">Interesses</span>
               <div className="mt-4 flex flex-wrap gap-2">
-                {interests.map((item) => (
-                  <Reveal as="span" pattern="meta" delay={interests.indexOf(item) * .035}
+                {interests.map((item, index) => (
+                  <Reveal as="span" pattern="meta" delay={index * .035}
                     key={item}
-                    className="label rounded-full border border-white/15 px-3 py-1.5 text-[0.62rem] text-bone/70 hover:border-crimson hover:text-bone select-none"
+                    className="label rounded-full border border-white/15 px-3 py-1.5 text-[0.65rem] text-bone/80 hover:border-crimson hover:text-bone select-none"
                   >
                     {item}
                   </Reveal>

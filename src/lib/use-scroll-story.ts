@@ -2,33 +2,9 @@
 
 import { useLenis } from "lenis/react";
 import { cancelFrame, frame, useMotionValue } from "motion/react";
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { clamp, getActiveChapter, getSettledChapter, smootherstep, STORY_SETTINGS } from "@/lib/scrollytelling";
-
-const QUERY = "(min-width: 768px) and (min-height: 640px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)";
-const subscribers = new Set<() => void>();
-let media: MediaQueryList | undefined;
-
-function getMedia() {
-  return (media ??= window.matchMedia(QUERY));
-}
-
-function notify() {
-  subscribers.forEach((subscriber) => subscriber());
-}
-
-function subscribe(subscriber: () => void) {
-  const query = getMedia();
-  if (!subscribers.size) query.addEventListener("change", notify);
-  subscribers.add(subscriber);
-  return () => {
-    subscribers.delete(subscriber);
-    if (!subscribers.size) query.removeEventListener("change", notify);
-  };
-}
-
-const getSnapshot = () => getMedia().matches;
-const getServerSnapshot = () => false;
+import { useScrollStoryPolicy } from "@/lib/use-animation-policy";
 
 type ScrollStoryOptions = { count: number; stepPx?: number };
 
@@ -43,7 +19,7 @@ export function useScrollStory({ count, stepPx = STORY_SETTINGS.stepPx }: Scroll
   const [activeChapter, setActiveChapter] = useState(0);
   const activeRef = useRef(0);
   const cancelSettleRef = useRef<() => void>(() => {});
-  const enhanced = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const enhanced = useScrollStoryPolicy();
   const lenis = useLenis();
   const chapterCount = Number.isFinite(count) ? Math.max(1, Math.floor(count)) : 1;
   const distance = (Number.isFinite(stepPx) && stepPx > 0 ? stepPx : STORY_SETTINGS.stepPx) * (chapterCount - 1);
@@ -109,9 +85,10 @@ export function useScrollStory({ count, stepPx = STORY_SETTINGS.stepPx }: Scroll
         (focused instanceof Element && !!focused.closest("input, textarea, select, [contenteditable='true'], [role='dialog']"))
       ) return;
 
-      const chapter = getSettledChapter(progress.get(), wheelStartPosition / (chapterCount - 1), chapterCount);
+      const startProgress = chapterCount > 1 ? wheelStartPosition / (chapterCount - 1) : 0;
+      const chapter = getSettledChapter(progress.get(), startProgress, chapterCount);
       if (chapter === null) return;
-      const destination = bounds.top + chapter / (chapterCount - 1) * bounds.range;
+      const destination = bounds.top + chapter / Math.max(1, chapterCount - 1) * bounds.range;
       if (Math.abs(destination - y) < 1) return;
       // Finish the reading state; new wheel input interrupts Lenis naturally.
       lenis.scrollTo(destination, {

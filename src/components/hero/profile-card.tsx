@@ -37,7 +37,7 @@ export function ProfileCard() {
               {Array.from(heroProfile.displayName).map((letter, index) => <span key={`${letter}-${index}`} aria-hidden="true" className={styles.nameLetter} style={{ "--letter": index } as CSSProperties}>{letter}</span>)}
               <span aria-hidden="true" className={styles.namePeriod}>.</span>
             </h1>
-            <ShieldCheck size={21} className={styles.nameBadge} aria-label="Perfil do desenvolvedor" />
+            <ShieldCheck size={21} role="img" className={styles.nameBadge} aria-label="Perfil do desenvolvedor" />
           </div>
           <p className={styles.handle}>{heroProfile.handle}</p>
           <p className={styles.role}><Braces size={14} aria-hidden="true" /> {heroProfile.role}</p>
