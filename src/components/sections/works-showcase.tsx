@@ -58,7 +58,7 @@ function FlagshipCase({ project }: { project: Project }) {
         <Reveal pattern="meta" className="font-mono text-[10px] uppercase tracking-[0.16em]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="inline-flex flex-wrap items-center gap-2.5 text-bone/75">
-              <span className="font-bold text-crimson">[{project.index} · DESTAQUE]</span>
+              <span className="font-bold text-crimson-bright">[{project.index} · DESTAQUE]</span>
               <span>{project.period}</span>
               <span aria-hidden="true" className="h-px w-5 bg-white/15" />
               {project.statusTone === "completed" ? (
@@ -94,11 +94,11 @@ function FlagshipCase({ project }: { project: Project }) {
           </div>
 
           {project.metrics && (
-            <dl className="grid grid-cols-3 gap-5 border-t border-white/10 pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8 shrink-0">
+            <dl className="grid grid-cols-3 gap-3 sm:gap-5 border-t border-white/10 pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8 shrink-0">
               {project.metrics.map((m) => (
                 <div key={m.label}>
                   <dt className="font-mono text-[10px] uppercase tracking-[0.12em] text-ash">{m.label}</dt>
-                  <dd className="display mt-1 text-2xl sm:text-3xl text-crimson">{m.value}</dd>
+                  <dd className="display mt-1 text-xl sm:text-3xl text-crimson">{m.value}</dd>
                 </div>
               ))}
             </dl>
@@ -123,7 +123,7 @@ function FlagshipCase({ project }: { project: Project }) {
         <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between gap-6">
           <div className="space-y-6">
             <div>
-              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-crimson block mb-2 font-semibold">
+              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-crimson-bright block mb-2 font-semibold">
                 Problema
               </span>
               <p className="text-xs sm:text-sm leading-relaxed text-bone/85">{project.problem}</p>
@@ -216,7 +216,7 @@ function ProductionSplitCase({ project }: { project: Project }) {
             <Reveal pattern="meta" className="font-mono text-[10px] uppercase tracking-[0.16em]">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="inline-flex flex-wrap items-center gap-2.5 text-bone/75">
-                  <span className="font-bold text-crimson">[{project.index}]</span>
+                  <span className="font-bold text-crimson-bright">[{project.index}]</span>
                   <span>{project.period}</span>
                   <span aria-hidden="true" className="h-px w-5 bg-white/15" />
                   {project.statusTone === "completed" ? (
@@ -254,7 +254,7 @@ function ProductionSplitCase({ project }: { project: Project }) {
 
             <div className="mt-6 grid gap-5 sm:grid-cols-2 border-t border-white/10 pt-5">
               <div>
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-crimson block mb-2 font-semibold">
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-crimson-bright block mb-2 font-semibold">
                   Problema
                 </span>
                 <p className="text-xs sm:text-sm leading-relaxed text-bone/80">{project.problem}</p>
@@ -328,8 +328,9 @@ function ProjectPreview({
           src={project.image}
           alt={project.imageAlt}
           fill
+          loading="lazy"
           sizes={imageSizes}
-          quality={90}
+          quality={85}
           className="object-cover object-top motion-safe:transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-safe:group-hover/media:scale-[1.02]"
         />
       </div>
@@ -353,7 +354,7 @@ function FlowStrip({ steps }: { steps: string[] }) {
         <li key={step} className="inline-flex items-center gap-2">
           <span>{step}</span>
           {index < steps.length - 1 && (
-            <span aria-hidden="true" className="text-crimson font-bold">
+            <span aria-hidden="true" className="text-crimson-bright font-bold">
               →
             </span>
           )}
@@ -417,7 +418,7 @@ function CaseActionBar({
         projectSlug={projectSlug}
         className="press inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/[0.03] px-4 text-xs font-mono text-bone/85 hover:border-crimson/50 hover:text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson cursor-pointer"
       >
-        <Terminal size={13} className="text-crimson" aria-hidden="true" />
+        <Terminal size={13} className="text-crimson-bright" aria-hidden="true" />
         Detalhes técnicos
       </ProjectModalTrigger>
     </div>

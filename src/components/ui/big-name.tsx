@@ -86,7 +86,7 @@ export function BigName() {
       onPointerLeave={enhanced ? reset : undefined}
       onPointerCancel={enhanced ? reset : undefined}
     >
-      <div className="relative inline-block select-none font-display text-[clamp(5.5rem,30vw,30rem)] leading-[0.88] tracking-[-0.04em]">
+      <div className="relative inline-block select-none font-display text-[clamp(4.5rem,28vw,28rem)] leading-[0.88] tracking-[-0.04em]">
         {/* Layer 1: Base Outline Text */}
         <span
           aria-hidden="true"

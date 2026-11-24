@@ -17,7 +17,7 @@ export function SectionLabel({ index, title, aside, className, tone = "dark" }: 
         tone === "dark" ? "text-bone" : "text-ink",
       )}
     >
-      <span className="label tabular-nums text-crimson">[{index}]</span>
+      <span className={cn("label tabular-nums", tone === "dark" ? "text-crimson-bright" : "text-crimson-deep")}>[{index}]</span>
       <span className="label">{title}</span>
       <span aria-hidden="true" className="hairline-dots flex-1" />
       {aside && <span className={cn("label", tone === "dark" ? "text-ash" : "text-smoke")}>{aside}</span>}

@@ -8,11 +8,23 @@ export const ENHANCED_MOTION_QUERY =
 export const SPATIAL_HERO_QUERY =
   "(min-width: 900px) and (min-height: 880px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)";
 
+type NetworkInformationLike = {
+  saveData?: boolean;
+  effectiveType?: string;
+};
+
+function isConstrainedNetwork(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const conn = (navigator as Navigator & { connection?: NetworkInformationLike }).connection;
+  return Boolean(conn && (conn.saveData || /^(slow-)?2g$/.test(conn.effectiveType ?? "")));
+}
+
 const getServerSnapshot = () => false;
 
 /**
  * Factory returning a hook backed by one shared MediaQueryList subscription.
- * Server and initial hydration render remain static (`false`).
+ * Server and initial hydration render remain static (`false`), and constrained
+ * networks automatically fall back to light static presentation.
  */
 export function createMediaQueryHook(query: string) {
   const subscribers = new Set<() => void>();
@@ -33,7 +45,7 @@ export function createMediaQueryHook(query: string) {
     };
   }
 
-  const getSnapshot = () => getMedia().matches;
+  const getSnapshot = () => getMedia().matches && !isConstrainedNetwork();
 
   return function useMediaQueryPolicy(): boolean {
     return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);

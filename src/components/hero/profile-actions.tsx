@@ -31,7 +31,12 @@ export function ProfileActions() {
           event.preventDefault();
           scrollTo("#work");
         }}><span>Ver projetos</span><ArrowDownRight size={17} aria-hidden="true" /></a>
-        <button type="button" onClick={copyEmail} className={`${styles.copyAction} press`}>
+        <button
+          type="button"
+          onClick={copyEmail}
+          data-copied={copyState === "copied" || undefined}
+          className={`${styles.copyAction} press`}
+        >
           {copyState === "copied" ? <Check size={15} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
           <span>{copyState === "copied" ? "E-mail copiado!" : "Copiar e-mail"}</span>
         </button>

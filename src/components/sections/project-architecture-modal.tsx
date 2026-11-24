@@ -86,7 +86,7 @@ export function ProjectArchitectureModal({
         {/* Modal Top Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-[#121214] px-5 py-3.5 sm:px-8">
           <div className="flex items-center gap-3">
-            <span className="font-mono text-crimson font-bold text-xs">[{project.index}]</span>
+            <span className="font-mono text-crimson-bright font-bold text-xs">[{project.index}]</span>
             <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-ash">
               ARQUITETURA · {project.domain}
             </span>
@@ -141,6 +141,21 @@ export function ProjectArchitectureModal({
           <p className="mt-3 max-w-3xl text-sm sm:text-base leading-relaxed text-bone/80 font-sans">
             {project.technicalDescription}
           </p>
+
+          <div className="mt-4 flex flex-wrap gap-2 sm:hidden">
+            {project.links.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="press inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.03] px-3.5 py-1 font-mono text-[10px] uppercase text-bone/85 hover:border-crimson hover:text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson"
+              >
+                {link.label}
+                <ArrowUpRight size={12} className="text-crimson-bright" aria-hidden="true" />
+              </a>
+            ))}
+          </div>
 
           {/* Accessible Navigation Tabs */}
           <LayoutGroup id={`blueprint-tabs-${idBase}`}>
@@ -210,7 +225,7 @@ export function ProjectArchitectureModal({
               {activeTab === "decisions" && (
                 <div className="space-y-8">
                   <div className="rounded-xl border border-white/10 bg-white/2 p-5 sm:p-6">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-crimson font-bold flex items-center gap-2 mb-3">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-crimson-bright font-bold flex items-center gap-2 mb-3">
                       <Terminal size={14} aria-hidden="true" />
                       Problema
                     </span>
@@ -218,7 +233,7 @@ export function ProjectArchitectureModal({
                       {project.challenge}
                     </p>
                     <div className="mt-4 rounded-lg border border-white/10 bg-black/40 p-3.5 font-mono text-xs text-bone/75">
-                      <span className="text-crimson font-bold">Trade-off: </span>
+                      <span className="text-crimson-bright font-bold">Trade-off: </span>
                       {project.consideration}
                     </div>
                   </div>
@@ -236,7 +251,7 @@ export function ProjectArchitectureModal({
                         >
                           <div>
                             <div className="flex items-center justify-between gap-2 mb-2 font-mono text-[10px]">
-                              <span className="text-crimson font-bold">DECISÃO [0{i + 1}]</span>
+                              <span className="text-crimson-bright font-bold">DECISÃO [0{i + 1}]</span>
                               <span className="text-ash uppercase">Trade-off</span>
                             </div>
                             <h5 className="text-sm font-semibold text-bone flex items-start gap-2">
@@ -263,7 +278,7 @@ export function ProjectArchitectureModal({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between font-mono text-[10px] uppercase text-ash tracking-widest">
                     <span>Fluxo de execução</span>
-                    <span className="text-crimson font-bold">ARQUITETURA</span>
+                    <span className="text-crimson-bright font-bold">ARQUITETURA</span>
                   </div>
 
                   {project.slug === "agendra" && <AgendraPipeline />}

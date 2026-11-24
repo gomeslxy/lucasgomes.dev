@@ -12,6 +12,7 @@ export type IntroPhase = "loading" | "revealing" | "ready";
 
 type NetworkInformationLike = {
   saveData?: boolean;
+  effectiveType?: string;
 };
 
 declare global {
@@ -171,7 +172,10 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
       | undefined;
     const isReload = navigation?.type === "reload";
     const connection = (navigator as Navigator & { connection?: NetworkInformationLike }).connection;
-    const saveData = Boolean(connection?.saveData);
+    const slowConnection = Boolean(
+      connection &&
+        (connection.saveData || /^(slow-)?2g|3g$/.test(connection.effectiveType ?? "")),
+    );
     const scrollRestored = window.scrollY > 40;
 
     const shouldSkip =
@@ -179,7 +183,7 @@ export function ExperienceIntro({ children }: { children: ReactNode }) {
       reduced.matches ||
       !!location.hash ||
       document.hidden ||
-      saveData ||
+      slowConnection ||
       scrollRestored ||
       (seen && !isReload) ||
       navigation?.type === "back_forward";

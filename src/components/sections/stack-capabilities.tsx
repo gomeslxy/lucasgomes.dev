@@ -27,7 +27,7 @@ export function StackCapabilities() {
             <Reveal key={cap.index} pattern="row" delay={index * 0.04}>
               <div className="py-8 md:py-10 grid gap-6 lg:grid-cols-12 items-start">
                 <div className="lg:col-span-4">
-                  <span className="font-mono text-xs font-bold text-crimson tabular-nums">[{cap.index}]</span>
+                  <span className="font-mono text-xs font-bold text-crimson-bright tabular-nums">[{cap.index}]</span>
                   <h3 className="display mt-2 text-[clamp(1.6rem,2.8vw,2.3rem)] tracking-tight text-bone">
                     {cap.title}
                   </h3>

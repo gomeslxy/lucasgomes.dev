@@ -14,7 +14,7 @@ export function ContactFooter() {
         <Reveal pattern="meta">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5 font-mono text-[0.6875rem] uppercase tracking-widest">
             <span className="flex items-center gap-3">
-              <span className="text-crimson font-bold">[04]</span>
+              <span className="text-crimson-bright font-bold">[04]</span>
               <span>CONTATO</span>
             </span>
             <span className="inline-flex items-center gap-2 text-bone/80">
@@ -58,7 +58,7 @@ export function ContactFooter() {
               </div>
               <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-xs text-ash">
                 <span className="inline-flex items-center gap-1.5">
-                  <MapPin className="h-3.5 w-3.5 text-crimson shrink-0" aria-hidden="true" />
+                  <MapPin className="h-3.5 w-3.5 text-crimson-bright shrink-0" aria-hidden="true" />
                   <span>{profile.city} · {profile.region}</span>
                 </span>
               </div>

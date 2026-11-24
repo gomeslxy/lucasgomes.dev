@@ -250,7 +250,7 @@ export function Nav() {
               >
                 {profile.email}
               </a>
-              <span className="flex items-center gap-2 text-crimson font-semibold">
+              <span className="flex items-center gap-2 text-crimson-bright font-semibold">
                 <span className="h-2 w-2 rounded-full bg-crimson animate-pulse-dot" />
                 Disponível
               </span>

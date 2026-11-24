@@ -1,25 +1,25 @@
 /** Shared art direction. Durations are milliseconds; pointer angles are degrees. */
 export const experienceConfig = {
   intro: {
-    minimumMs: 260,
-    mobileMinimumMs: 180,
-    maximumMs: 1600,
-    mobileMaximumMs: 1000,
-    exitMs: 560,
-    mobileExitMs: 360,
-    handoffDelayMs: 110,
-    mobileHandoffDelayMs: 60,
+    minimumMs: 220,
+    mobileMinimumMs: 140,
+    maximumMs: 900,
+    mobileMaximumMs: 600,
+    exitMs: 440,
+    mobileExitMs: 280,
+    handoffDelayMs: 70,
+    mobileHandoffDelayMs: 35,
   },
   pointer: {
-    maxTiltX: .6,
-    maxTiltY: .8,
-    lightOpacity: .28,
+    maxTiltX: 0.6,
+    maxTiltY: 0.8,
+    lightOpacity: 0.28,
   },
-  spring: { stiffness: 110, damping: 28, mass: .65 },
+  spring: { stiffness: 110, damping: 28, mass: 0.65 },
   atmosphere: {
     particleCount: 12,
     mobileParticleCount: 4,
     cycleSeconds: 22,
-    glowOpacity: .36,
+    glowOpacity: 0.36,
   },
 } as const;

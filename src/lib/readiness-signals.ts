@@ -1,36 +1,5 @@
 "use client";
 
-import { ENHANCED_MOTION_QUERY } from "@/lib/use-animation-policy";
-
-let webglReady = false;
-const webglListeners = new Set<() => void>();
-
-/** Signals that the Hero WebGL lattice compiled and painted its first frame. */
-export function markWebGLFieldReady(): void {
-  if (webglReady) return;
-  webglReady = true;
-  const pending = Array.from(webglListeners);
-  webglListeners.clear();
-  for (const listener of pending) {
-    listener();
-  }
-}
-
-export function isWebGLFieldReady(): boolean {
-  return webglReady;
-}
-
-export function subscribeWebGLFieldReady(listener: () => void): () => void {
-  if (webglReady) {
-    listener();
-    return () => {};
-  }
-  webglListeners.add(listener);
-  return () => {
-    webglListeners.delete(listener);
-  };
-}
-
 export type ReadinessSnapshot = {
   progress: number;
   ready: boolean;
@@ -43,8 +12,8 @@ type ObserveReadinessOptions = {
 };
 
 /**
- * Observes real browser, typography, priority hero image, WebGL warm-up,
- * and compositor paint readiness without artificial milestone delays.
+ * Observes DOM, typography, priority hero image decoding, and compositor paint
+ * readiness without waiting on decorative below-fold or WebGL chunks.
  */
 export function observePageReadiness({
   container,
@@ -53,15 +22,11 @@ export function observePageReadiness({
 }: ObserveReadinessOptions): void {
   if (signal.aborted) return;
 
-  const expectsWebGL = window.matchMedia(ENHANCED_MOTION_QUERY).matches;
-  const weights = expectsWebGL
-    ? { dom: 0.15, fonts: 0.35, images: 0.3, webgl: 0.15, paint: 0.05 }
-    : { dom: 0.2, fonts: 0.4, images: 0.35, webgl: 0, paint: 0.05 };
+  const weights = { dom: 0.2, fonts: 0.4, images: 0.35, paint: 0.05 };
 
   let domScore = 0;
   let fontsScore = 0;
   let imagesScore = 0;
-  let webglScore = 0;
   let paintScore = 0;
 
   let lastProgress = 0;
@@ -69,7 +34,6 @@ export function observePageReadiness({
   let paintSettled = false;
   let rafOne = 0;
   let rafTwo = 0;
-  let unsubscribeWebGL: (() => void) | undefined;
 
   const cleanup = () => {
     if (rafOne) {
@@ -80,8 +44,6 @@ export function observePageReadiness({
       cancelAnimationFrame(rafTwo);
       rafTwo = 0;
     }
-    unsubscribeWebGL?.();
-    unsubscribeWebGL = undefined;
   };
 
   signal.addEventListener("abort", cleanup, { once: true });
@@ -93,13 +55,11 @@ export function observePageReadiness({
       domScore * weights.dom +
       fontsScore * weights.fonts +
       imagesScore * weights.images +
-      webglScore * weights.webgl +
       paintScore * weights.paint;
 
     lastProgress = Math.min(1, Math.max(lastProgress, weighted));
 
-    const prereqsSettled =
-      domScore >= 1 && fontsScore >= 1 && imagesScore >= 1 && webglScore >= 1;
+    const prereqsSettled = domScore >= 1 && fontsScore >= 1 && imagesScore >= 1;
 
     if (prereqsSettled && !paintScheduled && !paintSettled) {
       paintScheduled = true;
@@ -122,7 +82,6 @@ export function observePageReadiness({
     });
   };
 
-  // 1. DOM readiness
   if (document.readyState !== "loading") {
     domScore = 1;
   } else {
@@ -136,7 +95,6 @@ export function observePageReadiness({
     );
   }
 
-  // 2. Typography readiness (failures resolve too so loading never stalls)
   if (document.fonts?.ready) {
     document.fonts.ready.then(
       () => {
@@ -152,7 +110,6 @@ export function observePageReadiness({
     fontsScore = 1;
   }
 
-  // 3. Priority Hero images (ignore lazy-loaded offscreen assets)
   const priorityImages = Array.from(
     container?.querySelectorAll<HTMLImageElement>("#hero img") ?? [],
   ).filter((img) => img.loading !== "lazy");
@@ -200,16 +157,6 @@ export function observePageReadiness({
         });
       }
     }
-  }
-
-  // 4. Hero WebGL lattice shader warm-up & first frame
-  if (!expectsWebGL || isWebGLFieldReady()) {
-    webglScore = 1;
-  } else {
-    unsubscribeWebGL = subscribeWebGLFieldReady(() => {
-      webglScore = 1;
-      emit();
-    });
   }
 
   emit();
